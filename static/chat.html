@@ -142,23 +142,34 @@
       const messageInput = document.getElementById('message-input');
       const sendButton = document.getElementById('send-button');
 
+      let peerMessageBubble;
+      let peerTotalContent = '';
+
       socket.addEventListener('open', () => {
         console.log('WebSocket connection established');
       });
 
       socket.addEventListener('message', (event) => {
         const message = event.data;
-        appendMessage(message, false);
-        sendButton.disabled = false;
-        sendButton.innerHTML = '<i class="fa fa-arrow-right"></i>';
+        if (message == "END") {
+          sendButton.disabled = false;
+          resetButton.disabled = false;
+          sendButton.innerHTML = '<i class="fa fa-arrow-right"></i>';
+          peerMessageBubble = undefined;
+          peerTotalContent = "";
+          return;
+        }
+        appendMessagePeer(message);
       });
 
       socket.addEventListener('error', (event) => {
         console.error('WebSocket error:', event);
+        alert("Error de conexion");
       });
 
       socket.addEventListener('close', (event) => {
         console.log('WebSocket connection closed:', event);
+        alert("Se cerro la conexion");
       });
 
       function resetHistory() {
@@ -179,25 +190,40 @@
         const message = messageInput.value.trim();
         if (message) {
           sendButton.disabled = true;
+          resetButton.disabled = true;
           sendButton.innerHTML = '<span class="spinner"></span>';
           socket.send(JSON.stringify({
             msg: message,
             code: code 
           }));
-          appendMessage(message, true);
+          appendMessageUser(message);
           messageInput.value = '';
         }
       }
 
       sendButton.addEventListener('click', sendMessage);
 
-      function appendMessage(message, isUser) {
+      function appendMessagePeer(message) {
+        if (!peerMessageBubble) {
+          peerMessageBubble = document.createElement('div');
+          chatMessages.appendChild(peerMessageBubble);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        const appendContent = (content) => {
+          peerTotalContent += content;
+          peerMessageBubble.textContent = peerTotalContent;
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        };
+        appendContent(message);
+        peerMessageBubble.classList.add('message-bubble');
+        peerMessageBubble.classList.toggle('peer-message', true);
+      }
+
+      function appendMessageUser(message) {
         const messageBubble = document.createElement('div');
         messageBubble.textContent = message;
         messageBubble.classList.add('message-bubble');
-        messageBubble.classList.toggle('user-message', isUser);
-        messageBubble.classList.toggle('peer-message', !isUser);
-
+        messageBubble.classList.toggle('user-message', true);
         chatMessages.appendChild(messageBubble);
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }

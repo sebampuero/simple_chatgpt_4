@@ -4,7 +4,7 @@ from jinja2 import Template
 from components.login.Login import Login
 from components.gpt_4.GPT4 import GPT4
 from components.chat_code_repository.CodeUseSupport import CodeUseSupport
-import logging, os, json, websockets, asyncio
+import logging, os, json, openai
 
 logger = logging.getLogger(__name__)
 # Register routes
@@ -70,10 +70,6 @@ async def chat(request: Request, ws: Websocket):
         code_use_support = CodeUseSupport.getInstance()
         try:
             input_raw = await ws.recv()
-        except websockets.exceptions.ConnectionClosedError:
-            logger.debug("Connection closed unexpectedly")
-            gpt4.remove_socket_id(socket_id)
-            break
         except:
             logger.error(f"Unexpected exception, most probably {client_ip} closed the websocket connection",exc_info=True)
             gpt4.remove_socket_id(socket_id)
@@ -95,12 +91,34 @@ async def chat(request: Request, ws: Websocket):
         if input["msg"] == "RESET":
             gpt4.reset_history(socket_id)
             await ws.send("Historial de mensajes vaciado")
+            await ws.send("END")
             continue
         code_use_support.update_chat_code_date_if_needed(input["code"])
         if code_use_support.max_use_reached(input["code"]):
             await ws.send("Uso maximo por hoy alcanzado")
+            await ws.send("END")
             continue
         code_use_support.incr_code_use_count(input["code"])
-        loop = asyncio.get_event_loop()
-        response = await loop.run_in_executor(None, gpt4.prompt, socket_id, input["msg"]) # Do not block main thread
-        await ws.send(response)
+        response_generator = await gpt4.prompt(socket_id, input["msg"])
+        assistant_msg = ""
+        try:
+            async for response_chunk in response_generator:
+                delta = response_chunk["choices"][0]["delta"]
+                if "content" in delta:
+                    await ws.send(delta["content"])
+                    assistant_msg += delta["content"]
+            gpt4.append_to_msg_history_as_assistant(socket_id, assistant_msg)
+        except openai.error.RateLimitError:
+            logger.error(f"Rate limit exceeded", exc_info=True)
+            await ws.send("Se alcanzo el limite de $8 mensuales para uso de GPT-4")
+        except openai.error.APIError:
+            logger.error(exc_info=True)
+            await ws.send("Hubo un error con al API de GPT4")
+        except openai.error.APIConnectionError:
+            logger.error(exc_info=True)
+            await ws.send("No se pudo conectar con GPT4, vuelve a intentar mas tarde")
+        except:
+            logger.error(exc_info=True)
+            await  ws.send("Error, vuelve a intentar mas tarde")
+        finally:
+            await ws.send("END")
