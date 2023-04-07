@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://kit.fontawesome.com/d0fcffc739.js" crossorigin="anonymous"></script>
+  <style>
+    /* Styles for chat container */
+#chat-container {
+  height: 100vh;
+  padding: 10px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  overflow: hidden;
+}
+
+/* Styles for chat messages */
+#chat-messages {
+  overflow-y: scroll;
+  max-height: 70vh;
+}
+
+.message-bubble {
+  display: inline-block;
+  max-width: 80%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 15px;
+}
+
+.user-message {
+  background-color: green;
+  color: white;
+  align-self: flex-end;
+  float: right;
+  clear: both;
+}
+
+.peer-message {
+  background-color: blue;
+  color: white;
+  align-self: flex-start;
+  float: left;
+  clear: both;
+}
+
+/* Styles for chat input */
+#chat-input {
+  display: flex;
+  align-items: center;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  padding: 5px;
+  border-top: 1px solid #ccc;
+}
+
+#message-input {
+  flex: 1;
+  padding: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+#send-button {
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+
+#send-button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #4CAF50;
+  animation: spin 1s linear infinite;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#reset-button {
+  padding: 10px;
+  background-color: #0400ff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#reset-button:hover {
+  background-color: #d32f2f;
+}
+
+#reset-button:active {
+  background-color: #b71c1c;
+}
+
+  </style>
+</head>
+<body>
+    <div id="chat-container">
+      <div id="chat-messages"></div>
+      <div id="chat-input">
+        <input type="text" id="message-input">
+        <button id="send-button">
+          <i class="fa fa-arrow-right"></i>
+        </button>        
+        <button id="reset-button"><i class="fas fa-undo"></i></button>
+      </div>
+    </div>
+
+    <script>
+      const code = "{{ connection_code }}"
+      const socket = new WebSocket('{{ ws_connection }}');
+      const resetButton = document.getElementById('reset-button');
+
+      const chatMessages = document.getElementById('chat-messages');
+      const messageInput = document.getElementById('message-input');
+      const sendButton = document.getElementById('send-button');
+
+      socket.addEventListener('open', () => {
+        console.log('WebSocket connection established');
+      });
+
+      socket.addEventListener('message', (event) => {
+        const message = event.data;
+        appendMessage(message, false);
+        sendButton.disabled = false;
+        sendButton.innerHTML = '<i class="fa fa-arrow-right"></i>';
+      });
+
+      socket.addEventListener('error', (event) => {
+        console.error('WebSocket error:', event);
+      });
+
+      socket.addEventListener('close', (event) => {
+        console.log('WebSocket connection closed:', event);
+      });
+
+      function resetHistory() {
+        sendButton.disabled = true;
+        sendButton.innerHTML = '<span class="spinner"></span>';
+        socket.send(JSON.stringify({
+          msg: 'RESET',
+          code: code 
+        }));
+        chatMessages.innerHTML = '';
+        sendButton.disabled = false;
+        sendButton.innerHTML = '<i class="fa fa-arrow-right"></i>';
+      }
+
+      resetButton.addEventListener('click', resetHistory);
+
+      function sendMessage() {
+        const message = messageInput.value.trim();
+        if (message) {
+          sendButton.disabled = true;
+          sendButton.innerHTML = '<span class="spinner"></span>';
+          socket.send(JSON.stringify({
+            msg: message,
+            code: code 
+          }));
+          appendMessage(message, true);
+          messageInput.value = '';
+        }
+      }
+
+      sendButton.addEventListener('click', sendMessage);
+
+      function appendMessage(message, isUser) {
+        const messageBubble = document.createElement('div');
+        messageBubble.textContent = message;
+        messageBubble.classList.add('message-bubble');
+        messageBubble.classList.toggle('user-message', isUser);
+        messageBubble.classList.toggle('peer-message', !isUser);
+
+        chatMessages.appendChild(messageBubble);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    </script>
+  </body>
+</html>

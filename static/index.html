@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Password Code</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <form id="password-form" action="{{ subdirectory }}/password-code" method="POST">
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12 col-sm-6 col-sm-offset-3 col-md-4 col-md-offset-4">
+          <h2 class="text-center">Código de acceso</h2>
+          <div class="form-group">
+            <input type="password" class="form-control" id="password-code" name="password-code" placeholder="Código" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Enviar</button>
+        </div>
+      </div>
+    </div>
+  </form>  
+  {% if error == 'Yes' %}
+    <script>
+      window.alert("Código inválido");
+    </script>
+  {% endif %}
+</body>
+</html>
