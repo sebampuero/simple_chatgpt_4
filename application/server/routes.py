@@ -35,7 +35,7 @@ async def passwd_code(request: Request):
     login_supp = Login()
     if login_supp.check_code_is_correct(code):
         return redirect(app.url_for("chat_page", code=code))
-    logger.info(f"Bad code entered by {request.conn_info.client_ip}: {code}")
+    logger.info(f"Bad code entered by {request.headers.get('X-Forwarded-For', '').split(',')[0].strip()}: {code}")
     url = app.url_for("index", error="Yes")
     return redirect(url)
 
