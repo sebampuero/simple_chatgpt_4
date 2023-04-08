@@ -2,9 +2,15 @@
 
 ## Setup
 
+First spin up the Postgres docker container
+´docker compose up -d´
+
 To get started, execute the following command to run the Flyway migration:
 ´docker run --rm -v /home/pi/gpt-4chat/sql:/flyway/sql -v /home/pi/gpt-4chat/conf:/flyway/conf flyway/flyway migrate´
 Make sure the database name is correct
+
+Connect to the database and insert a code
+´docker exec -it pg psql -U pguser "INSERT INTO chat_codes(code,date,count,max_uses) VALUES('yourcode','YYYY-mm-dd',0,1000)"´
 
 Activate the virtual environment
 ´source venv/bin/activate´
