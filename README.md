@@ -1,5 +1,8 @@
 # Basic ChatGPT using GPT-4 OpenAPI API
 
+## Features
+Simple chatGPT clone that uses the OpenAI GPT-4 model API. Works with access codes and maintains history for every opened Websocket connection. Access codes can be limited by number of prompts per day.
+
 ## Setup
 
 First spin up the Postgres docker container
