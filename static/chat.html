@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <script src="https://kit.fontawesome.com/d0fcffc739.js" crossorigin="anonymous"></script>
   <style>
-    /* Styles for chat container */
 #chat-container {
   height: 100vh;
   padding: 10px;
@@ -15,13 +14,18 @@
   grid-template-rows: 1fr auto;
   overflow: hidden;
 }
-
-/* Styles for chat messages */
 #chat-messages {
   overflow-y: scroll;
-  max-height: 70vh;
+  max-height: 90vh;
 }
-
+.code-style {
+  background-color: black;
+  border-radius: 15px;
+}
+.code-snippet {
+  color: #ffffff;
+  background-color: black;
+}
 .message-bubble {
   display: inline-block;
   max-width: 80%;
@@ -29,24 +33,21 @@
   margin-bottom: 10px;
   border-radius: 15px;
 }
-
 .user-message {
-  background-color: green;
+  background-color: blue;
   color: white;
   align-self: flex-end;
   float: right;
   clear: both;
 }
-
 .peer-message {
-  background-color: blue;
+  background-color: green;
   color: white;
   align-self: flex-start;
   float: left;
   clear: both;
+  white-space: pre-wrap;
 }
-
-/* Styles for chat input */
 #chat-input {
   display: flex;
   align-items: center;
@@ -58,7 +59,6 @@
   padding: 5px;
   border-top: 1px solid #ccc;
 }
-
 #message-input {
   flex: 1;
   padding: 10px;
@@ -67,7 +67,6 @@
   font-size: 16px;
   word-wrap: break-word;
 }
-
 #send-button {
   padding: 10px;
   background-color: #4CAF50;
@@ -78,13 +77,10 @@
   cursor: pointer;
   margin-right: 5px;
 }
-
-
 #send-button[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
 }
-
 .spinner {
   border: 4px solid rgba(0, 0, 0, 0.1);
   border-left-color: #4CAF50;
@@ -95,49 +91,77 @@
   display: inline-block;
   margin-right: 5px;
 }
-
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
-
 #reset-button {
   padding: 10px;
-  background-color: #0400ff;
-  color: white;
-  border: none;
+  background-color: rgb(190, 190, 190);
+  border: black;
   border-radius: 5px;
   font-size: 16px;
   cursor: pointer;
+  margin-right: 5px;
 }
-
-#reset-button:hover {
-  background-color: #d32f2f;
+#reset-button i {
+  font-size: 1.2em;
 }
-
-#reset-button:active {
-  background-color: #b71c1c;
+#options-container {
+  position: absolute;
+  top: 75vh;
+  right: 10px;
+  width: 20vh;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  z-index: 1;
 }
-
+#options-header {
+  font-weight: bold;
+  font-size: 14px;
+  border-bottom: 1px solid black;
+  margin-bottom: 5px;
+  padding: 5px;
+}
+.hidden {
+  display: none;
+}
+.show {
+  display: block;
+}
+.option {
+  cursor: pointer;
+  padding: 5px;
+}
   </style>
 </head>
 <body>
     <div id="chat-container">
       <div id="chat-messages"></div>
       <div id="chat-input">
-        <textarea id="message-input"></textarea>
+        <textarea id="message-input" rows="1" style="resize: none;"></textarea>
         <button id="send-button">
           <i class="fa fa-arrow-right"></i>
         </button>        
-        <button id="reset-button"><i class="fas fa-undo"></i></button>
+        <button id="reset-button">
+          <i class="fas fa-bars"></i>
+        </button>
       </div>
     </div>
+
+    <div id="options-container" class="hidden">
+      <div id="options-header">Opciones</div>
+      <div id="reset-history" class="option">Vaciar historial de conversacion</div>
+    </div>
+  
 
     <script>
       const code = "{{ connection_code }}"
       const socket = new WebSocket('{{ ws_connection }}');
-      const resetButton = document.getElementById('reset-button');
+      const optionsButton = document.getElementById("reset-button");
+      const optionsContainer = document.getElementById("options-container");
 
       const chatMessages = document.getElementById('chat-messages');
       const messageInput = document.getElementById('message-input');
@@ -146,15 +170,12 @@
       let peerMessageBubble;
       let peerTotalContent = '';
 
-      socket.addEventListener('open', () => {
-        console.log('WebSocket connection established');
-      });
-
       socket.addEventListener('message', (event) => {
         const message = event.data;
         if (message == "END") {
+          formatExistingCode()
           sendButton.disabled = false;
-          resetButton.disabled = false;
+          optionsButton.disabled = false;
           sendButton.innerHTML = '<i class="fa fa-arrow-right"></i>';
           peerMessageBubble = undefined;
           peerTotalContent = "";
@@ -173,6 +194,13 @@
         alert("Se cerro la conexion");
       });
 
+      function formatExistingCode() {
+        const regex = /```([\s\S]*?)```/g;
+        let peerMsg = peerMessageBubble.textContent;
+        peerMsg = peerMsg.replace(regex, '<div class="code-style"><code class="code-snippet">$1</code></div>');
+        peerMessageBubble.innerHTML = peerMsg
+      }
+
       function resetHistory() {
         sendButton.disabled = true;
         sendButton.innerHTML = '<span class="spinner"></span>';
@@ -185,13 +213,22 @@
         sendButton.innerHTML = '<i class="fa fa-arrow-right"></i>';
       }
 
-      resetButton.addEventListener('click', resetHistory);
+      optionsButton.addEventListener("click", function() {
+        optionsContainer.classList.toggle("hidden");
+      });
+
+
+      const resetHistoryOption = document.getElementById("reset-history");
+
+      resetHistoryOption.addEventListener("click", function() {
+        resetHistory();
+      });
 
       function sendMessage() {
         const message = messageInput.value.trim();
         if (message) {
           sendButton.disabled = true;
-          resetButton.disabled = true;
+          optionsButton.disabled = true;
           sendButton.innerHTML = '<span class="spinner"></span>';
           socket.send(JSON.stringify({
             msg: message,
@@ -212,7 +249,7 @@
         }
         const appendContent = (content) => {
           peerTotalContent += content;
-          peerMessageBubble.textContent = peerTotalContent;
+          peerMessageBubble.innerHTML = peerTotalContent;
           chatMessages.scrollTop = chatMessages.scrollHeight;
         };
         appendContent(message);

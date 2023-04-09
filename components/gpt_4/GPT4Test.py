@@ -32,7 +32,7 @@ class TestGPT4(unittest.TestCase):
         mock_acreate.assert_called_once_with(
             model="gpt-4",
             messages=self.instance.map_messages["1"],
-            max_tokens=500,
+            max_tokens=650,
             temperature=0.3,
             top_p=0,
             frequency_penalty=0,
