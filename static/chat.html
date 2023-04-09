@@ -162,7 +162,7 @@
       const socket = new WebSocket('{{ ws_connection }}');
       const optionsButton = document.getElementById("reset-button");
       const optionsContainer = document.getElementById("options-container");
-
+      const resetHistoryOption = document.getElementById("reset-history");
       const chatMessages = document.getElementById('chat-messages');
       const messageInput = document.getElementById('message-input');
       const sendButton = document.getElementById('send-button');
@@ -196,9 +196,20 @@
 
       function formatExistingCode() {
         const regex = /```([\s\S]*?)```/g;
-        let peerMsg = peerMessageBubble.textContent;
+        let peerMsg = escapeHtmlInPeerMsg(peerMessageBubble.textContent)
         peerMsg = peerMsg.replace(regex, '<div class="code-style"><code class="code-snippet">$1</code></div>');
         peerMessageBubble.innerHTML = peerMsg
+      }
+
+      function escapeHtmlInPeerMsg(html) {
+        const escapedHtml = html
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+        
+       return escapedHtml
       }
 
       function resetHistory() {
@@ -216,9 +227,6 @@
       optionsButton.addEventListener("click", function() {
         optionsContainer.classList.toggle("hidden");
       });
-
-
-      const resetHistoryOption = document.getElementById("reset-history");
 
       resetHistoryOption.addEventListener("click", function() {
         resetHistory();
@@ -249,7 +257,7 @@
         }
         const appendContent = (content) => {
           peerTotalContent += content;
-          peerMessageBubble.innerHTML = peerTotalContent;
+          peerMessageBubble.textContent = peerTotalContent;
           chatMessages.scrollTop = chatMessages.scrollHeight;
         };
         appendContent(message);
