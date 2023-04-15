@@ -40,7 +40,7 @@ class GPT4: #TODO: unit test, somehow
         response = await openai.ChatCompletion.acreate(
                 model="gpt-4",
                 messages=self.map_messages[websocket_id],
-                max_tokens=650,
+                max_tokens=850,
                 temperature=0.3,
                 top_p=0,
                 frequency_penalty=0,

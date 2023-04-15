@@ -39,6 +39,7 @@
   align-self: flex-end;
   float: right;
   clear: both;
+  white-space: pre-wrap;
 }
 .peer-message {
   background-color: green;
@@ -47,6 +48,13 @@
   float: left;
   clear: both;
   white-space: pre-wrap;
+}
+.clipboard-copy {
+  margin-bottom: 10px;
+  font-size: smaller;
+  font-weight: bold;
+  color: rgb(158, 249, 255);
+  cursor: pointer;
 }
 #chat-input {
   display: flex;
@@ -152,8 +160,8 @@
     </div>
 
     <div id="options-container" class="hidden">
-      <div id="options-header">Opciones</div>
-      <div id="reset-history" class="option">Vaciar historial de conversacion</div>
+      <div id="options-header">Options</div>
+      <div id="reset-history" class="option">Delete messages history</div>
     </div>
   
 
@@ -199,6 +207,25 @@
         let peerMsg = escapeHtmlInPeerMsg(peerMessageBubble.textContent)
         peerMsg = peerMsg.replace(regex, '<div class="code-style"><code class="code-snippet">$1</code></div>');
         peerMessageBubble.innerHTML = peerMsg
+        let copy = document.createElement('div');
+        peerMessageBubble.prepend(copy)
+        copy.textContent = "Copy to clipboard"
+        copy.classList.add('clipboard-copy');
+        copy.id = "copy-button"
+        copy.onclick = copyToClipboard
+      }
+
+      function copyToClipboard(event) {
+        const parent = event.target.parentNode;
+        let parentTextContent = '';
+        for (let i = 0; i < parent.childNodes.length; i++) {
+          const child = parent.childNodes[i];
+          if (child.nodeType === Node.TEXT_NODE && child !== event.target) {
+            parentTextContent += child.textContent.trim();
+          }
+        }
+        navigator.clipboard.writeText(parentTextContent);
+        alert("Copied to clipboard");
       }
 
       function escapeHtmlInPeerMsg(html) {
