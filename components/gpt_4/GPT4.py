@@ -38,10 +38,10 @@ class GPT4: #TODO: unit test, somehow
             self.map_messages[websocket_id] = []
         self.map_messages[websocket_id].append({"role": "user", "content": input})
         response = await openai.ChatCompletion.acreate(
-                model="gpt-4",
+                model="gpt-4-0613",
                 messages=self.map_messages[websocket_id],
                 max_tokens=850,
-                temperature=0.3,
+                temperature=0.5,
                 top_p=0,
                 frequency_penalty=0,
                 presence_penalty=1,
