@@ -79,27 +79,28 @@ async def chat(request: Request, ws: Websocket):
             gpt4.remove_socket_id(socket_id)
             break
         try:
-            input = json.loads(input_raw)
+            input_json = json.loads(input_raw)
         except json.JSONDecodeError:
             await ws.send("Error")
             logger.debug(f"Client IP {client_ip} did send bad WS packet {input_raw}")
             await ws.close()
             break
-        if "code" not in input:
+        if "code" not in input_json:
             await ws.close()
             break
-        if input["msg"] == "RESET":
+        if input_json["msg"] == "RESET":
             gpt4.reset_history(socket_id)
             await ws.send("Historial de mensajes vaciado")
             await ws.send("END")
             continue
-        code_use_support.update_chat_code_date_if_needed(input["code"])
-        if code_use_support.max_use_reached(input["code"]):
+        code_use_support.update_chat_code_date_if_needed(input_json["code"])
+        if code_use_support.max_use_reached(input_json["code"]):
             await ws.send("Uso maximo por hoy alcanzado")
             await ws.send("END")
             continue
-        code_use_support.incr_code_use_count(input["code"])
-        response_generator = await gpt4.prompt(socket_id, input["msg"])
+        logger.debug(input_json)
+        code_use_support.incr_code_use_count(input_json["code"])
+        response_generator = await gpt4.prompt(socket_id, input_json)
         assistant_msg = ""
         try:
             async for response_chunk in response_generator:

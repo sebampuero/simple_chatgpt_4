@@ -162,10 +162,14 @@
     <div id="options-container" class="hidden">
       <div id="options-header">Options</div>
       <div id="reset-history" class="option">Delete messages history</div>
+      <div id="image-upload-container">
+        <input type="file" id="image-input" accept="image/*">
+      </div>
     </div>
-  
 
     <script>
+      const MAX_WIDTH = 450;
+      const MAX_HEIGHT = 450;
       const code = "{{ connection_code }}"
       const socket = new WebSocket('{{ ws_connection }}');
       const optionsButton = document.getElementById("reset-button");
@@ -174,9 +178,84 @@
       const chatMessages = document.getElementById('chat-messages');
       const messageInput = document.getElementById('message-input');
       const sendButton = document.getElementById('send-button');
+      const imageInput = document.getElementById('image-input');
 
       let peerMessageBubble;
       let peerTotalContent = '';
+      let imageDataBase64 = '';
+      let imageDataURL;
+
+      imageInput.addEventListener('change', handleImageUpload);
+
+      function handleImageUpload() {
+        sendButton.disabled = true;
+        optionsButton.disabled = true;
+        sendButton.innerHTML = '<span class="spinner"></span>';
+        const file = imageInput.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            resizeImageAndConvertToBase64(e.target.result, MAX_WIDTH, MAX_HEIGHT)
+            .then(base64Data => {
+              imageDataBase64 = base64Data;
+              sendButton.disabled = false;
+              optionsButton.disabled = false;
+              sendButton.innerHTML = '<i class="fa fa-arrow-right"></i>';
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert("Hubo un error subiendo la image");
+              imageDataBase64 = '';
+              sendButton.disabled = false;
+              optionsButton.disabled = false;
+              sendButton.innerHTML = '<i class="fa fa-arrow-right"></i>';
+              imageDataURL = undefined;
+            });
+          };
+          reader.readAsArrayBuffer(file);
+        }
+      }
+
+      function resizeImageAndConvertToBase64(binaryData, maxWidth, maxHeight) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.src = URL.createObjectURL(new Blob([new Uint8Array(binaryData)]));
+          img.onload = function () {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth) {
+              height *= maxWidth / width;
+              width = maxWidth;
+            }
+
+            if (height > maxHeight) {
+              width *= maxHeight / height;
+              height = maxHeight;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob(blob => {
+              imageDataURL = URL.createObjectURL(blob)
+              const reader = new FileReader();
+              reader.onload = function () {
+                resolve(reader.result.split(',')[1]);
+              };
+
+              reader.readAsDataURL(blob);
+            }, 'image/jpeg');
+          };
+
+          img.onerror = reject;
+        });
+      }
 
       socket.addEventListener('message', (event) => {
         const message = event.data;
@@ -187,6 +266,9 @@
           sendButton.innerHTML = '<i class="fa fa-arrow-right"></i>';
           peerMessageBubble = undefined;
           peerTotalContent = "";
+          imageInput.value = '';
+          imageDataBase64 = '';
+          imageDataURL = undefined;
           return;
         }
         appendMessagePeer(message);
@@ -249,6 +331,7 @@
         chatMessages.innerHTML = '';
         sendButton.disabled = false;
         sendButton.innerHTML = '<i class="fa fa-arrow-right"></i>';
+        imageInput.value = '';
       }
 
       optionsButton.addEventListener("click", function() {
@@ -274,7 +357,8 @@
           sendButton.innerHTML = '<span class="spinner"></span>';
           socket.send(JSON.stringify({
             msg: message,
-            code: code 
+            code: code,
+            image: imageDataBase64
           }));
           appendMessageUser(message);
           messageInput.value = '';
@@ -304,6 +388,11 @@
         messageBubble.textContent = message;
         messageBubble.classList.add('message-bubble');
         messageBubble.classList.toggle('user-message', true);
+        if (imageDataURL != undefined) {
+          const imageElement = document.createElement('img');
+          imageElement.src = imageDataURL;
+          messageBubble.appendChild(imageElement);
+        }
         chatMessages.appendChild(messageBubble);
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }

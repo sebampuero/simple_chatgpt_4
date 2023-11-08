@@ -33,12 +33,24 @@ class GPT4: #TODO: unit test, somehow
     def append_to_msg_history_as_assistant(self, websocket_id: str, message: str):
         self.map_messages[websocket_id].append({"role": "assistant", "content": message})
 
-    async def prompt(self, websocket_id: str, input: str):
+    async def prompt(self, websocket_id: str, input: dict):
         if websocket_id not in self.map_messages:
             self.map_messages[websocket_id] = []
-        self.map_messages[websocket_id].append({"role": "user", "content": input})
+        content = input['msg'] if input['image'] == '' \
+            else [{
+                "type": "text",
+                "text": input['msg']
+            },
+            {  
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{input['image']}"
+                }
+            }
+        ]
+        self.map_messages[websocket_id].append({"role": "user", "content": content})
         response = await openai.ChatCompletion.acreate(
-                model="gpt-4-0613",
+                model="gpt-4-vision-preview",
                 messages=self.map_messages[websocket_id],
                 max_tokens=850,
                 temperature=0.5,
