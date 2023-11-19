@@ -52,7 +52,7 @@ class GPT4: #TODO: unit test, somehow
         response = await openai.ChatCompletion.acreate(
                 model="gpt-4-vision-preview",
                 messages=self.map_messages[websocket_id],
-                max_tokens=850,
+                max_tokens=2000,
                 temperature=0.5,
                 top_p=0,
                 frequency_penalty=0,
