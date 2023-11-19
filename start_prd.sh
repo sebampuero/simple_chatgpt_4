@@ -5,5 +5,5 @@ export ENV=PROD
 export SUBDIRECTORY=gpt4
 export DOMAIN=sebampuerom.de
 export OPENAI_KEY=$OPENAPI_APIKEY
-export DB=chatgpt4db
+export DB=chatgpt
 python3 /home/pi/gpt-4chat/server.py
