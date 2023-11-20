@@ -1,0 +1,136 @@
+#chat-container {
+    height: 100vh;
+    padding: 10px;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    overflow: hidden;
+  }
+  #chat-messages {
+    overflow-y: scroll;
+    max-height: 90vh;
+  }
+  .code-style {
+    background-color: black;
+    border-radius: 15px;
+  }
+  .code-snippet {
+    color: #ffffff;
+    background-color: black;
+  }
+  .message-bubble {
+    display: inline-block;
+    max-width: 80%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 15px;
+  }
+  .user-message {
+    background-color: blue;
+    color: white;
+    align-self: flex-end;
+    float: right;
+    clear: both;
+    white-space: pre-wrap;
+  }
+  .peer-message {
+    background-color: green;
+    color: white;
+    align-self: flex-start;
+    float: left;
+    clear: both;
+    white-space: pre-wrap;
+  }
+  .clipboard-copy {
+    margin-bottom: 10px;
+    font-size: smaller;
+    font-weight: bold;
+    color: rgb(158, 249, 255);
+    cursor: pointer;
+  }
+  #chat-input {
+    display: flex;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    padding: 5px;
+    border-top: 1px solid #ccc;
+  }
+  #message-input {
+    flex: 1;
+    padding: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    font-size: 16px;
+    word-wrap: break-word;
+  }
+  #send-button {
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+  #send-button[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #4CAF50;
+    animation: spin 1s linear infinite;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    margin-right: 5px;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  #reset-button {
+    padding: 10px;
+    background-color: rgb(190, 190, 190);
+    border: black;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+  #reset-button i {
+    font-size: 1.2em;
+  }
+  #options-container {
+    position: absolute;
+    top: 75vh;
+    right: 10vh;
+    width: 30vh;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    z-index: 1;
+  }
+  #options-header {
+    font-weight: bold;
+    font-size: 14px;
+    border-bottom: 1px solid black;
+    margin-bottom: 5px;
+    padding: 5px;
+  }
+  .hidden {
+    display: none;
+  }
+  .show {
+    display: block;
+  }
+  .option {
+    cursor: pointer;
+    padding: 5px;
+  }
