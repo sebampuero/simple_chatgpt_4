@@ -6,10 +6,32 @@ import ChatPage from './components/ChatPage';
 function App() {
   const [isPasswordCorrect, setIsPasswordCorrect] = useState(false);
 
-  const handlePasswordSubmit = () => {
-    // Your password validation logic goes here
-    // For example, check the password, and if correct, set isPasswordCorrect to true
-    setIsPasswordCorrect(true);
+  const handlePasswordSubmit = (code) => {
+    const requestBody = {
+      code: code,
+    };
+    fetch("/code", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    })
+      .then((response) => {
+        if (response.status == 401) {
+          setIsPasswordCorrect(false);
+          alert("Invalid code.")
+        }else if(response.status == 200){
+          setIsPasswordCorrect(true);
+        }else{
+          alert("Unexpected error, please try again later.")
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        setIsPasswordCorrect(false);
+        alert("Unexpected error, please try again later.")
+      });
   };
 
   return (

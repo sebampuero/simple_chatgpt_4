@@ -1,5 +1,5 @@
 from sanic import redirect, Websocket, Request, Sanic
-from sanic.response import html
+from sanic.response import html, json, HTTPResponse
 from jinja2 import Template
 from components.login.Login import Login
 from components.gpt_4.GPT4 import GPT4
@@ -28,16 +28,18 @@ async def passwd_code(request: Request):
     """
     Checks if password code is correct and redirects to chat page if so
     """
-    # get code, check its valid, and then redirect to chat, if not valid, redirect to index
-    app = Sanic.get_app("chatgpt4")
-    body = request.form
-    code = body.get('password-code')
+    try:
+        # Assuming the request body is in JSON format
+        body = request.json
+        code = body.get('code')
+    except Exception as e:
+        logger.error(f"Error parsing JSON: {e}")
+        return HTTPResponse(status=400)
     login_supp = Login()
     if login_supp.check_code_is_correct(code):
-        return redirect(app.url_for("chat_page", code=code))
+        return HTTPResponse(status=200)
     logger.info(f"Bad code entered by {request.headers.get('X-Forwarded-For', '').split(',')[0].strip()}: {code}")
-    url = app.url_for("index", error="Yes")
-    return redirect(url)
+    return HTTPResponse(status=401)
 
 
 async def chat_page(request: Request, code: str):

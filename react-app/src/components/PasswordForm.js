@@ -4,16 +4,14 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 const PasswordForm = ({ onSubmit }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Your form submission logic goes here
-    // For example, you can check the password and call the onSubmit prop
-    onSubmit();
+    onSubmit(e.target.elements['password-code'].value);
   };
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
       <form
         id="password-form"
-        action="/password-code"
+        action=""
         method="POST"
         onSubmit={handleSubmit}
         className="col-12 col-md-6"
