@@ -15,7 +15,7 @@ const ChatPage = ({ code }) => {
 
   useEffect(() => {
     // Set up WebSocket connection when the component mounts
-    const socketUrl = process.env.REACT_APP_ENV === 'production'
+    const socketUrl = process.env.NODE_ENV === 'production'
       ? process.env.REACT_APP_PROD_WS_URL
       : process.env.REACT_APP_WS_URL;
     const socket = new WebSocket(socketUrl); // Replace with your WebSocket URL
