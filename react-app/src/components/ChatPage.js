@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ChatSidebar from './ChatSidebar'; // Import your ChatSidebar component
 import './ChatPage.css'; // Import your CSS file
 
-const ChatPage = () => {
+const ChatPage = ({ code }) => {
   const [messageInput, setMessageInput] = useState('');
   const [optionsVisible, setOptionsVisible] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
@@ -15,7 +15,7 @@ const ChatPage = () => {
 
   useEffect(() => {
     // Set up WebSocket connection when the component mounts
-    const socket = new WebSocket('ws://your-websocket-url'); // Replace with your WebSocket URL
+    const socket = new WebSocket('ws://192.168.0.14:9292/ws'); // Replace with your WebSocket URL
 
     // Add event listeners for WebSocket
     socket.addEventListener('open', () => {
@@ -23,8 +23,7 @@ const ChatPage = () => {
     });
 
     socket.addEventListener('message', (event) => {
-      const message = JSON.parse(event.data);
-      handleReceivedMessage(message);
+      handleReceivedMessage(event.data);
     });
 
     socket.addEventListener('error', (event) => {
@@ -45,20 +44,29 @@ const ChatPage = () => {
     };
   }, []);
 
-  const receiveMessage = (messageContent, messageType) => {
+  const displayMessage = (messageContent, messageType) => {
     const newMessage = {
-      timestamp: Date.now(), // or use a timestamp from the server
+      timestamp: Date.now(), 
       content: messageContent,
-      type: messageType, // 'user' or 'peer'
+      type: messageType,
     };
-
     setChatMessages((prevMessages) => [...prevMessages, newMessage]);
   };
 
   const handleReceivedMessage = (message) => {
-    // Handle logic for received messages
-    // For example, update the chatMessages state
-    setChatMessages((prevMessages) => [...prevMessages, message]);
+    const messageObj = JSON.parse(message)
+    console.log(messageObj.content, messageObj.timestamp)
+    setChatMessages((prevMessages) => {
+      const existingMessageIndex = prevMessages.findIndex((msg) => msg.timestamp === messageObj.timestamp);
+      console.log(existingMessageIndex);
+      if (existingMessageIndex !== -1) {
+        const updatedMessages = [...prevMessages];
+        updatedMessages[existingMessageIndex].content += messageObj.content;
+        return updatedMessages;
+      } else {
+        return [...prevMessages, { timestamp: messageObj.timestamp, content: messageObj.content, type: 'peer' }];
+      }
+    });
   };
 
   const handleImageUpload = (e) => {
@@ -66,18 +74,16 @@ const ChatPage = () => {
   };
 
   const sendMessage = () => {
-    // Check if the socket is open
-    /**if (socket && socket.readyState === WebSocket.OPEN) {
+    if (socket && socket.readyState === WebSocket.OPEN) {
       const message = {
-        type: 'text',
-        content: messageInput,
-        timestamp: Date.now(),
+        msg: messageInput,
+        code: code,
+        image: ''
       };
       socket.send(JSON.stringify(message));
-      setChatMessages((prevMessages) => [...prevMessages, message]);
       setMessageInput('');
-    } */
-    receiveMessage(messageInput, 'user');
+    }
+    displayMessage(messageInput, 'user');
   };
 
   const showOptions = () => {
@@ -85,7 +91,6 @@ const ChatPage = () => {
   }
 
   const switchChat = (chatId) => {
-    // Implement logic to switch to a different chat
     setCurrentChatId(chatId);
   };
 

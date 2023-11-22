@@ -5,24 +5,10 @@ from components.login.Login import Login
 from components.gpt_4.GPT4 import GPT4
 from components.chat_code_repository.CodeUseSupport import CodeUseSupport
 import logging, os, json, openai
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 # Register routes
-
-async def index(request: Request):
-    """
-    Returns main page
-    """
-    err = request.args["error"][0] if "error" in request.args else "No"
-    app = Sanic.get_app("chatgpt4")
-    html_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../static/index.html'))
-    with open(html_file_path, 'r') as f:
-        html_content = Template(f.read())
-    context = {
-        "subdirectory": app.ctx.sub_directory,
-        "error": err
-    }
-    return html(html_content.render(context))
 
 async def passwd_code(request: Request):
     """
@@ -41,25 +27,6 @@ async def passwd_code(request: Request):
     logger.info(f"Bad code entered by {request.headers.get('X-Forwarded-For', '').split(',')[0].strip()}: {code}")
     return HTTPResponse(status=401)
 
-
-async def chat_page(request: Request, code: str):
-    """
-    Serves the GPT-4 chat app in case the correct code is given. If not, request is redirected to <passwd_code>
-    """
-    login_supp = Login()
-    app = Sanic.get_app("chatgpt4")
-    if login_supp.check_code_is_correct(code):
-        html_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../static/chat.html'))
-        with open(html_file_path, 'r') as f:
-            html_content = Template(f.read())
-        context = {
-            "connection_code": code,
-            "ws_connection": app.ctx.ws_connection
-        }
-        return html(html_content.render(context))
-    logger.debug("Redirecting to Index because of bad code")
-    return redirect(app.url_for("index"))
-
 async def chat(request: Request, ws: Websocket):
     """
     Main websocket endpoint
@@ -68,6 +35,8 @@ async def chat(request: Request, ws: Websocket):
     socket_id = str(id(ws))
     logger.info(f"Client connected via WS: {client_ip} and socket_id {socket_id}")
     while True:
+        dt = datetime.now()
+        ts = datetime.timestamp(dt)
         gpt4 = GPT4.getInstance()
         code_use_support = CodeUseSupport.getInstance()
         try:
@@ -90,15 +59,9 @@ async def chat(request: Request, ws: Websocket):
         if "code" not in input_json:
             await ws.close()
             break
-        if input_json["msg"] == "RESET":
-            gpt4.reset_history(socket_id)
-            await ws.send("Historial de mensajes vaciado")
-            await ws.send("END")
-            continue
         code_use_support.update_chat_code_date_if_needed(input_json["code"])
         if code_use_support.max_use_reached(input_json["code"]):
-            await ws.send("Uso maximo por hoy alcanzado")
-            await ws.send("END")
+            await ws.send(json.dumps({"content": "Max use reached.", "timestamp": int(ts)}))
             continue
         logger.debug(input_json)
         code_use_support.incr_code_use_count(input_json["code"])
@@ -108,7 +71,7 @@ async def chat(request: Request, ws: Websocket):
             async for response_chunk in response_generator:
                 delta = response_chunk["choices"][0]["delta"]
                 if "content" in delta:
-                    await ws.send(delta["content"])
+                    await ws.send(json.dumps({"content": delta["content"], "timestamp": int(ts)}))
                     assistant_msg += delta["content"]
             gpt4.append_to_msg_history_as_assistant(socket_id, assistant_msg)
         except openai.error.RateLimitError:
@@ -123,5 +86,3 @@ async def chat(request: Request, ws: Websocket):
         except:
             logger.error(exc_info=True)
             await  ws.send("Error, vuelve a intentar mas tarde")
-        finally:
-            await ws.send("END")

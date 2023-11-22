@@ -5,6 +5,7 @@ import ChatPage from './components/ChatPage';
 
 function App() {
   const [isPasswordCorrect, setIsPasswordCorrect] = useState(false);
+  const [chatCode, setChatCode] = useState(null);
 
   const handlePasswordSubmit = (code) => {
     const requestBody = {
@@ -23,6 +24,7 @@ function App() {
           alert("Invalid code.")
         }else if(response.status == 200){
           setIsPasswordCorrect(true);
+          setChatCode(code);
         }else{
           alert("Unexpected error, please try again later.")
         }
@@ -41,7 +43,7 @@ function App() {
           <Switch>
             <Route path="/" exact>
               {isPasswordCorrect ? (
-                <ChatPage />
+                <ChatPage code={chatCode}/>
               ) : (
                 <PasswordForm onSubmit={handlePasswordSubmit} />
               )}
