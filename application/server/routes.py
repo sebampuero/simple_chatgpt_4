@@ -79,6 +79,7 @@ async def chat(request: Request, ws: Websocket):
                 if "content" in delta:
                     await ws.send(json.dumps({"content": delta["content"], "timestamp": int(ts)}))
                     assistant_msg += delta["content"]
+            await ws.send(json.dumps({"content": "END", "timestamp": int(ts)}))
             gpt4.append_to_msg_history_as_assistant(socket_id, assistant_msg)
         except openai.error.RateLimitError:
             logger.error(f"Rate limit exceeded", exc_info=True)
