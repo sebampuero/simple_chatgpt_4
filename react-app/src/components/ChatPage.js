@@ -55,16 +55,27 @@ const ChatPage = ({ code }) => {
 
   const handleReceivedMessage = (message) => {
     const messageObj = JSON.parse(message)
-    console.log(messageObj.content, messageObj.timestamp)
     setChatMessages((prevMessages) => {
       const existingMessageIndex = prevMessages.findIndex((msg) => msg.timestamp === messageObj.timestamp);
-      console.log(existingMessageIndex);
       if (existingMessageIndex !== -1) {
-        const updatedMessages = [...prevMessages];
-        updatedMessages[existingMessageIndex].content += messageObj.content;
-        return updatedMessages;
+        if (!prevMessages[existingMessageIndex].content.includes(messageObj.content)) {
+          const updatedMessages = [...prevMessages];
+          updatedMessages[existingMessageIndex] = {
+            timestamp: messageObj.timestamp,
+            content: prevMessages[existingMessageIndex].content + messageObj.content,
+            type: 'peer',
+          };
+          return updatedMessages;
+        } else {
+          return prevMessages;
+        }
       } else {
-        return [...prevMessages, { timestamp: messageObj.timestamp, content: messageObj.content, type: 'peer' }];
+        const newMessage = {
+          timestamp: messageObj.timestamp,
+          content: messageObj.content,
+          type: 'peer',
+        };
+        return [...prevMessages, newMessage];
       }
     });
   };
