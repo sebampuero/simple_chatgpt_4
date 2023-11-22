@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import PasswordForm from './components/PasswordForm';
 import ChatPage from './components/ChatPage';
@@ -6,12 +6,17 @@ import ChatPage from './components/ChatPage';
 function App() {
   const [isPasswordCorrect, setIsPasswordCorrect] = useState(false);
   const [chatCode, setChatCode] = useState(null);
+  const [subdir, setSubdir] = useState(null);
+
+  useEffect(() => {
+    setSubdir(process.env.PUBLIC_URL)
+  }, []);
 
   const handlePasswordSubmit = (code) => {
     const requestBody = {
       code: code,
     };
-    fetch("/code", {
+    fetch(subdir + "/code", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -41,7 +46,7 @@ function App() {
       <div className="App">
         <header className="App-header">
           <Switch>
-            <Route path="/" exact>
+            <Route path={`${process.env.NODE_ENV === 'production' ? subdir : subdir + '/'}`} exact>
               {isPasswordCorrect ? (
                 <ChatPage code={chatCode}/>
               ) : (
