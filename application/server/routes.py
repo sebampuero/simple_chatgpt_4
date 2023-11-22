@@ -1,5 +1,5 @@
 from sanic import redirect, Websocket, Request, Sanic
-from sanic.response import html, json, HTTPResponse
+from sanic.response import html, json, HTTPResponse, file
 from jinja2 import Template
 from components.login.Login import Login
 from components.gpt_4.GPT4 import GPT4
@@ -9,6 +9,12 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 # Register routes
+
+async def serve_index(request):
+    return await file("static/index.html")
+
+async def serve_static(request, filename):
+    return await file(f"static/{filename}")
 
 async def passwd_code(request: Request):
     """
