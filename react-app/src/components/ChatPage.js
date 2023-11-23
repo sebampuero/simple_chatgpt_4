@@ -72,17 +72,9 @@ const ChatPage = ({ code }) => {
     setChatMessages((prevMessages) => {
       const existingMessageIndex = prevMessages.findIndex((msg) => msg.timestamp === messageObj.timestamp);
       if (existingMessageIndex !== -1) {
-        if (!prevMessages[existingMessageIndex].content.includes(messageObj.content)) {
-          const updatedMessages = [...prevMessages];
-          updatedMessages[existingMessageIndex] = {
-            timestamp: messageObj.timestamp,
-            content: prevMessages[existingMessageIndex].content + messageObj.content,
-            type: 'peer',
-          };
-          return updatedMessages;
-        } else {
-          return prevMessages;
-        }
+        const updatedMessages = [...prevMessages];
+        updatedMessages[existingMessageIndex].content += messageObj.content;
+        return updatedMessages;
       } else {
         const newMessage = {
           timestamp: messageObj.timestamp,
