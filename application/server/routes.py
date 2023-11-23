@@ -3,18 +3,23 @@ from sanic.response import html, json, HTTPResponse, file
 from jinja2 import Template
 from components.login.Login import Login
 from components.gpt_4.GPT4 import GPT4
-from components.chat_code_repository.CodeUseSupport import CodeUseSupport
 import logging, os, json, openai
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
 # Register routes
 
-async def serve_index(request):
+async def serve_index(request: Request):
     return await file("static/index.html")
 
-async def serve_static(request, filename):
+async def serve_static(request: Request, filename):
     return await file(f"static/{filename}")
+
+async def get_chats(request: Request):
+    pass
+
+async def get_chat(request: Request, id: int):
+    pass
 
 async def passwd_code(request: Request):
     """
@@ -28,7 +33,7 @@ async def passwd_code(request: Request):
         logger.error(f"Error parsing JSON: {e}")
         return HTTPResponse(status=400)
     login_supp = Login()
-    if login_supp.check_code_is_correct(code):
+    if login_supp.check_user_is_authorized(code):
         return HTTPResponse(status=200)
     logger.info(f"Bad code entered by {request.headers.get('X-Forwarded-For', '').split(',')[0].strip()}: {code}")
     return HTTPResponse(status=401)
@@ -44,7 +49,6 @@ async def chat(request: Request, ws: Websocket):
         dt = datetime.now()
         ts = datetime.timestamp(dt)
         gpt4 = GPT4.getInstance()
-        code_use_support = CodeUseSupport.getInstance()
         try:
             input_raw = await ws.recv()
         except:
@@ -65,12 +69,7 @@ async def chat(request: Request, ws: Websocket):
         if "code" not in input_json:
             await ws.close()
             break
-        code_use_support.update_chat_code_date_if_needed(input_json["code"])
-        if code_use_support.max_use_reached(input_json["code"]):
-            await ws.send(json.dumps({"content": "Max use reached.", "timestamp": int(ts)}))
-            continue
         logger.debug(input_json)
-        code_use_support.incr_code_use_count(input_json["code"])
         response_generator = await gpt4.prompt(socket_id, input_json)
         assistant_msg = ""
         try:
