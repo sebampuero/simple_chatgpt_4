@@ -19,7 +19,7 @@ logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
 app = Sanic("chatgpt4")
-app.add_route(passwd_code, f"{SUB_DIRECTORY}/code", methods=["POST"])
+app.add_route(login, f"{SUB_DIRECTORY}/login", methods=["POST"])
 app.add_route(serve_index, f"{SUB_DIRECTORY}/", methods=["GET"])
 app.add_route(serve_static, f"{SUB_DIRECTORY}/<filename:path>", methods=["GET"])
 app.add_websocket_route(chat, f"{SUB_DIRECTORY}/ws")

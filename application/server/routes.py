@@ -2,6 +2,7 @@ from sanic import Websocket, Request
 from sanic.response import json, HTTPResponse, file
 from components.login.Login import Login
 from components.gpt_4.GPT4 import GPT4
+from components.repository.DDBRepository import DDBRepository
 import logging, json, openai
 from datetime import datetime
 
@@ -20,27 +21,27 @@ async def get_chats(request: Request):
 async def get_chat(request: Request, id: int):
     pass
 
-async def passwd_code(request: Request):
+async def login(request: Request):
     """
-    Checks if password code is correct and redirects to chat page if so
+    Checks if user's email is authenticated
     """
     try:
         # Assuming the request body is in JSON format
         body = request.json
-        code = body.get('code')
+        email = body.get('email')
     except Exception as e:
         logger.error(f"Error parsing JSON: {e}")
         return HTTPResponse(status=400)
-    login_supp = Login()
-    if login_supp.check_user_is_authorized(code):
+    login_supp = Login(DDBRepository())
+    if login_supp.check_user_is_authorized(email):
         return HTTPResponse(status=200)
-    logger.info(f"Bad code entered by {request.headers.get('X-Forwarded-For', '').split(',')[0].strip()}: {code}")
+    logger.info(f"Bad email entered by {request.headers.get('X-Forwarded-For', '').split(',')[0].strip()}: {email}")
     return HTTPResponse(status=401)
 
 async def chat(request: Request, ws: Websocket):
     """
     Main websocket endpoint
-    """
+    """ #TODO: dismantle in separate methods
     client_ip = request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
     socket_id = str(id(ws))
     logger.info(f"Client connected via WS: {client_ip} and socket_id {socket_id}")
