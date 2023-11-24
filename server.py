@@ -1,7 +1,7 @@
 from logging.handlers import RotatingFileHandler
 from application.server.routes import *
 from sanic import Sanic
-from components.database.Database import Database
+from components.database.DDBConnector import Database
 from psycopg2 import OperationalError
 import logging, os, sys
 
@@ -9,7 +9,6 @@ ENV = os.getenv("ENV")
 SUB_DIRECTORY = os.getenv("SUBDIRECTORY")
 DOMAIN = os.getenv("DOMAIN")
 PORT = 9191 if ENV == "PROD" else 9292
-DB = os.getenv("DB")
 
 log_file = 'log.log' if ENV == "PROD" else "test.log"
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
@@ -25,14 +24,6 @@ app.add_route(serve_index, f"{SUB_DIRECTORY}/", methods=["GET"])
 app.add_route(serve_static, f"{SUB_DIRECTORY}/<filename:path>", methods=["GET"])
 app.add_websocket_route(chat, f"{SUB_DIRECTORY}/ws")
 
-try:
-    db_name = DB
-    db = Database(db_name, 'pguser', 'pgpassword')
-except OperationalError:
-    logger.error("Database not running", exc_info=True)
-    sys.exit()
-
-app.ctx.db = db
 app.ctx.sub_directory = SUB_DIRECTORY
 app.ctx.domain = DOMAIN
 app.ctx.ws_connection = f"wss://{DOMAIN}/{SUB_DIRECTORY}/ws" if ENV == "PROD" \

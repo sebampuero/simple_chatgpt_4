@@ -1,9 +1,8 @@
-from sanic import redirect, Websocket, Request, Sanic
-from sanic.response import html, json, HTTPResponse, file
-from jinja2 import Template
+from sanic import Websocket, Request
+from sanic.response import json, HTTPResponse, file
 from components.login.Login import Login
 from components.gpt_4.GPT4 import GPT4
-import logging, os, json, openai
+import logging, json, openai
 from datetime import datetime
 
 logger = logging.getLogger(__name__)

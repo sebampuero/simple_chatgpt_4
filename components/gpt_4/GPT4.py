@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 openai.api_key = os.getenv("OPENAI_KEY")
 
-class GPT4: #TODO: unit test, somehow
+class GPT4: 
     __instance = None
 
     def __init__(self):
