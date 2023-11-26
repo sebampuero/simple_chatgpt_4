@@ -19,6 +19,7 @@ const ChatPage = ({ code }) => {
   const MAX_IMG_HEIGHT = 450;
 
   useEffect(() => {
+    //TODO: load chat messages? or maybe only when a chat is selected
     const socketUrl = process.env.NODE_ENV === 'production'
       ? process.env.REACT_APP_PROD_WS_URL
       : process.env.REACT_APP_WS_URL;
@@ -167,6 +168,8 @@ const ChatPage = ({ code }) => {
 
   const switchChat = (chatId) => {
     setCurrentChatId(chatId);
+    //TODO: close socket connection and open new one, send request to /register-socket-id with new socketid
+    // request chat id and populate chatmessages
   };
 
   const toggleSidebar = () => {

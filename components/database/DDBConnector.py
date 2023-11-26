@@ -13,7 +13,7 @@ class DDBConnector:
         async with aioboto3.client('dynamodb') as client:
             response = await client.query(
             TableName=self.chats_table,
-            KeyConditionExpression='user_email = :email',
+            KeyConditionExpression='email = :email',
             ExpressionAttributeValues={
                     ':email': {'S': email}
                 }

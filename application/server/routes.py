@@ -15,11 +15,15 @@ async def serve_index(request: Request):
 async def serve_static(request: Request, filename):
     return await file(f"static/{filename}")
 
-async def get_chats(request: Request):
-    pass
+async def get_chats_for_user(request: Request, email: str):
+    if email.trim() == '':
+        return HTTPResponse(status=400)
+    return await DDBRepository().get_chats_by_email(email)
 
-async def get_chat(request: Request, id: int):
-    pass
+async def get_chat(request: Request, id: str):
+    if id.trim() == '':
+        return HTTPResponse(status=400)
+    return await DDBRepository().get_chat_by_id(int(id))
 
 async def login(request: Request):
     """
@@ -33,7 +37,7 @@ async def login(request: Request):
         logger.error(f"Error parsing JSON: {e}")
         return HTTPResponse(status=400)
     login_supp = Login(DDBRepository())
-    if login_supp.check_user_is_authorized(email):
+    if await login_supp.check_user_is_authorized(email):
         return HTTPResponse(status=200)
     logger.info(f"Bad email entered by {request.headers.get('X-Forwarded-For', '').split(',')[0].strip()}: {email}")
     return HTTPResponse(status=401)

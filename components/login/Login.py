@@ -7,5 +7,5 @@ class Login:
         self.app =  Sanic.get_app("chatgpt4")
         self.repo = repo
 
-    def check_user_is_authorized(self,email: str) -> bool:
-        return not self.repo.get_user(email) == None
+    async def check_user_is_authorized(self,email: str) -> bool:
+        return not await self.repo.get_user(email) == None

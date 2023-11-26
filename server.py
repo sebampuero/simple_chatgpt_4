@@ -22,6 +22,8 @@ app = Sanic("chatgpt4")
 app.add_route(login, f"{SUB_DIRECTORY}/login", methods=["POST"])
 app.add_route(serve_index, f"{SUB_DIRECTORY}/", methods=["GET"])
 app.add_route(serve_static, f"{SUB_DIRECTORY}/<filename:path>", methods=["GET"])
+app.add_route(get_chat, f"{SUB_DIRECTORY}/<id>", methods=["GET"])
+app.add_route(get_chats_for_user, f"{SUB_DIRECTORY}/<email>", methods=["GET"])
 app.add_websocket_route(chat, f"{SUB_DIRECTORY}/ws")
 
 app.ctx.sub_directory = SUB_DIRECTORY
