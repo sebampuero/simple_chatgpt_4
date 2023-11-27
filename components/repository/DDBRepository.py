@@ -5,6 +5,9 @@ from decimal import Decimal
 from datetime import datetime
 import uuid
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 class DDBRepository(Repository):
 
@@ -28,12 +31,18 @@ class DDBRepository(Repository):
     async def get_user(self, email: str) -> User:
         return await self.ddb_connector.get_user(email)
 
-    async def store_chat(self, chat: dict, user_email: str):
+    async def store_chat(self, chats: list, user_email: str, chat_id: str):
+        if len(chats) == 0:
+            logger.info("No messages to store")
+            return
+        if user_email.strip() == '':
+            logger.info("Cannot store chats without email")
+            return
         new_chat = {
-            'chat_id': str(uuid.uuid4()),
+            'chat_id': str(uuid.uuid4()) if chat_id == '' else chat_id,
             'timestamp': int(datetime.now().timestamp()),
             'user_email': user_email,
-            'messages': chat
+            'messages': chats
         }
         await self.ddb_connector.store_chat(new_chat)
 

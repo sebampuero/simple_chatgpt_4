@@ -6,6 +6,8 @@ from components.repository.DDBRepository import DDBRepository
 import logging, json, openai
 from datetime import datetime
 
+CHANGING_CHAT = "chat_change"
+
 logger = logging.getLogger(__name__)
 # Register routes
 
@@ -26,6 +28,8 @@ async def load_new_chat(request: Request, id: str, timestamp: str, socket_id: st
     chat_data = await DDBRepository().get_chat_by_id(id, int(timestamp))
     if chat_data is None:
         return HTTPResponse(status=404)
+    gpt4 = GPT4.getInstance()
+    gpt4.set_messages(socket_id, chat_data['messages'])
     return json(chat_data)
 
 async def delete_chat(request: Request, id: str, timestamp: str):
@@ -58,6 +62,7 @@ async def chat(request: Request, ws: Websocket):
     client_ip = request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
     socket_id = str(id(ws))
     user_email = ""
+    chat_id = ""
     logger.info(f"Client connected via WS: {client_ip} and socket_id {socket_id}")
     while True:
         dt = datetime.now()
@@ -67,26 +72,31 @@ async def chat(request: Request, ws: Websocket):
             input_raw = await ws.recv()
         except:
             logger.error(f"Unexpected exception, most probably {client_ip} closed the websocket connection",exc_info=True)
-            await DDBRepository().store_chat(gpt4.get_messages(socket_id), user_email)
+            await DDBRepository().store_chat(gpt4.get_messages(socket_id), user_email, chat_id)
             gpt4.remove_socket_id(socket_id)
             break
         if not input_raw:
             logger.info(f"{client_ip} closed the connection")
-            await DDBRepository().store_chat(gpt4.get_messages(socket_id), user_email)
+            await DDBRepository().store_chat(gpt4.get_messages(socket_id), user_email, chat_id)
             gpt4.remove_socket_id(socket_id)
             break
         try:
             input_json = json.loads(input_raw)
         except json.JSONDecodeError:
-            await ws.send("Error")
-            logger.debug(f"Client IP {client_ip} did send bad WS packet {input_raw}")
-            await ws.close()
+            if input_raw == CHANGING_CHAT:
+                logger.debug(f"Client IP {client_ip} is changing chat")
+                await DDBRepository().store_chat(gpt4.get_messages(socket_id), user_email, chat_id)
+                await ws.close()
+            else:
+                logger.debug(f"Client IP {client_ip} sent unsupported command")
+                await ws.close()
             break
         if "email" not in input_json:
             await ws.close()
             break
         logger.debug(input_json)
         user_email = input_json['email']
+        chat_id = input_json['chat_id']
         response_generator = await gpt4.prompt(socket_id, input_json)
         assistant_msg = ""
         try:
