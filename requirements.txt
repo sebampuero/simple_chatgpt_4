@@ -28,3 +28,4 @@ websockets==10.4
 yarl==1.8.2
 aioboto3
 aiohttp
+aiounittest==1.4.2

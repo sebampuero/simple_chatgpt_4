@@ -22,11 +22,6 @@ class GPT4:
             GPT4()
         return GPT4.__instance
 
-    def reset_history(self, websocket_id: str) -> None:
-        if websocket_id not in self.map_messages:
-            return
-        self.map_messages[websocket_id].clear()
-
     def remove_socket_id(self, websocket_id: str) -> None:
         self.map_messages.pop(websocket_id, None)
 

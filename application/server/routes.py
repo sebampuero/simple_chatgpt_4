@@ -20,10 +20,15 @@ async def get_chats_for_user(request: Request, email: str):
         return HTTPResponse(status=400)
     return await DDBRepository().get_chats_by_email(email)
 
-async def get_chat(request: Request, id: str):
+async def get_chat(request: Request, id: str, timestamp: str):
     if id.trim() == '':
         return HTTPResponse(status=400)
-    return await DDBRepository().get_chat_by_id(int(id))
+    return await DDBRepository().get_chat_by_id(int(id), int(timestamp))
+
+async def delete_chat(request: Request, id: str, timestamp: str):
+    if id.trim() == '':
+        return HTTPResponse(status=400)
+    return await DDBRepository().delete_chat_by_id(int(id), int(timestamp))
 
 async def login(request: Request):
     """

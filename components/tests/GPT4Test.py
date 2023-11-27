@@ -14,10 +14,6 @@ class TestGPT4(unittest.TestCase):
         # check if both instances are the same
         self.assertEqual(instance1, instance2)
 
-    def test_reset_history(self):
-        self.instance.reset_history("1")
-        self.assertEqual(self.instance.map_messages["1"], [])
-
     def test_removal_of_socket_id(self):
         self.instance.remove_socket_id("1")
         self.assertEqual(self.instance.map_messages.get("1", None), None)
@@ -30,10 +26,10 @@ class TestGPT4(unittest.TestCase):
     async def test_prompt(self, mock_acreate):
         response = await self.instance.prompt("1", "Hello")
         mock_acreate.assert_called_once_with(
-            model="gpt-4",
+            model="gpt-4-vision-preview",
             messages=self.instance.map_messages["1"],
-            max_tokens=650,
-            temperature=0.3,
+            max_tokens=2000,
+            temperature=0.5,
             top_p=0,
             frequency_penalty=0,
             presence_penalty=1,
