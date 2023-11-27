@@ -2,6 +2,8 @@ from components.database.DDBConnector import DDBConnector
 from components.repository.Repository import Repository
 from components.repository.User import User
 from decimal import Decimal
+from datetime import datetime
+import uuid
 import os
 
 class DDBRepository(Repository):
@@ -16,18 +18,24 @@ class DDBRepository(Repository):
         chats = await self.ddb_connector.get_chats_by_email(email)
         return self.convert_decimal_to_int(chats)
 
-    async def get_chat_by_id(self, id: int, timestamp: int = None) -> dict:
+    async def get_chat_by_id(self, id: str, timestamp: int = None) -> dict:
         chat = await self.ddb_connector.get_chat_by_id(id, timestamp)
         return self.convert_decimal_to_int(chat)
 
-    async def delete_chat_by_id(self, id: int, timestamp: int = None):
+    async def delete_chat_by_id(self, id: str, timestamp: int = None):
         await self.ddb_connector.delete_chat_by_id(id, timestamp)
 
     async def get_user(self, email: str) -> User:
         return await self.ddb_connector.get_user(email)
 
-    async def store_chat(self, chat: dict):
-        await self.ddb_connector.store_chat(chat)
+    async def store_chat(self, chat: dict, user_email: str):
+        new_chat = {
+            'chat_id': str(uuid.uuid4()),
+            'timestamp': int(datetime.now().timestamp()),
+            'user_email': user_email,
+            'messages': chat
+        }
+        await self.ddb_connector.store_chat(new_chat)
 
     def convert_decimal_to_int(self, data):
         if isinstance(data, Decimal):

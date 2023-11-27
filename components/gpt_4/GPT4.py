@@ -28,6 +28,9 @@ class GPT4:
     def append_to_msg_history_as_assistant(self, websocket_id: str, message: str):
         self.map_messages[websocket_id].append({"role": "assistant", "content": message})
 
+    def get_messages(self, ws_id: str) -> dict:
+        return self.map_messages[ws_id]
+
     async def prompt(self, websocket_id: str, input: dict):
         if websocket_id not in self.map_messages:
             self.map_messages[websocket_id] = []

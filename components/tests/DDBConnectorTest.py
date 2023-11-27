@@ -14,7 +14,7 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
         self.sample_user_data = {'email': 'test@example.com'}
         self.sample_user_data2 = {'email': 'test2@example.com'}
         self.sample_chat_data = {
-                                    "chat_id": 1,
+                                    "chat_id": 'randomUUID1',
                                     "user_email": "test@example.com",
                                     "timestamp": 1234567789,
                                     "messages": [
@@ -30,7 +30,7 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
                                 }
 
         self.sample_chat_data2 = {
-                                    "chat_id": 2,
+                                    "chat_id": 'randomUUID2',
                                     "user_email": "test@example.com",
                                     "timestamp": 1234567789,
                                     "messages": [
@@ -67,27 +67,27 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
     def tearDown(self):
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self._delete_sample_data(self.users_table, {'email': 'test@example.com'}))
-        loop.run_until_complete(self._delete_sample_data(self.chats_table, {'chat_id': 1, 'timestamp': 1234567789}))
+        loop.run_until_complete(self._delete_sample_data(self.chats_table, {'chat_id': 'randomUUID1', 'timestamp': 1234567789}))
         loop.run_until_complete(self._delete_sample_data(self.users_table, {'email': 'test2@example.com'}))
-        loop.run_until_complete(self._delete_sample_data(self.chats_table, {'chat_id': 2, 'timestamp': 1234567789}))
+        loop.run_until_complete(self._delete_sample_data(self.chats_table, {'chat_id': 'randomUUID2', 'timestamp': 1234567789}))
 
 
     async def test_integration_get_chats_by_email(self):
         # Given a test email
         email = "test@example.com"
         result = await self.connector.get_chats_by_email(email)
-        expected = [{'messages': [{'role': 'user', 'content': 'some content'}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': Decimal('2'), 'timestamp': Decimal('1234567789')}, {'messages': [{'role': 'user', 'content': 'some content'}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': Decimal('1'), 'timestamp': Decimal('1234567789')}]
+        expected = [{'messages': [{'role': 'user', 'content': 'some content'}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': 'randomUUID2', 'timestamp': Decimal('1234567789')}, {'messages': [{'role': 'user', 'content': 'some content'}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': 'randomUUID1', 'timestamp': Decimal('1234567789')}]
         self.assertEqual(result, expected)
 
     async def test_get_chat_by_id(self):
-        id = 1
+        id = 'randomUUID1'
         ts = 1234567789
         result = await self.connector.get_chat_by_id(id,ts)
-        expected = {'messages': [{'role': 'user', 'content': 'some content'}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': Decimal('1'), 'timestamp': Decimal('1234567789')}
+        expected = {'messages': [{'role': 'user', 'content': 'some content'}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': 'randomUUID1', 'timestamp': Decimal('1234567789')}
         self.assertDictEqual(result, expected)
 
     async def test_delete_chat_by_id(self):
-        id = 10
+        id = 'randomUUID10'
         ts = 1234567789
         sample_chat_data = {
                                     "chat_id": id,
@@ -116,7 +116,7 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
         self.assertDictEqual(result, expected)
 
     async def test_store_chat(self):
-        id = 15
+        id = 'randomUUID15'
         ts = 1234567789
         sample_chat_data = {
                                     "chat_id": id,
@@ -135,6 +135,6 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
                                 }
         await self.connector.store_chat(sample_chat_data)
         result = await self.connector.get_chat_by_id(id, ts)
-        expected = {'messages': [{'role': 'user', 'content': 'some content'}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': Decimal('15'), 'timestamp': Decimal('1234567789')}
+        expected = {'messages': [{'role': 'user', 'content': 'some content'}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': 'randomUUID15', 'timestamp': Decimal('1234567789')}
         self.assertDictEqual(result, expected)
         await self.connector.delete_chat_by_id(id, ts)

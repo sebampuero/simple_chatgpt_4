@@ -23,7 +23,7 @@ async def get_chats_for_user(request: Request, email: str):
 async def load_new_chat(request: Request, id: str, timestamp: str, socket_id: str):
     if id is None or id.strip() == '':
         return HTTPResponse(status=400)
-    chat_data = await DDBRepository().get_chat_by_id(int(id), int(timestamp))
+    chat_data = await DDBRepository().get_chat_by_id(id, int(timestamp))
     if chat_data is None:
         return HTTPResponse(status=404)
     return json(chat_data)
@@ -31,7 +31,7 @@ async def load_new_chat(request: Request, id: str, timestamp: str, socket_id: st
 async def delete_chat(request: Request, id: str, timestamp: str):
     if id.strip() == '':
         return HTTPResponse(status=400)
-    await DDBRepository().delete_chat_by_id(int(id), int(timestamp))
+    await DDBRepository().delete_chat_by_id(id, int(timestamp))
     return HTTPResponse(status=204)
 
 async def login(request: Request):
@@ -57,6 +57,7 @@ async def chat(request: Request, ws: Websocket):
     """ #TODO: dismantle in separate methods
     client_ip = request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
     socket_id = str(id(ws))
+    user_email = ""
     logger.info(f"Client connected via WS: {client_ip} and socket_id {socket_id}")
     while True:
         dt = datetime.now()
@@ -66,10 +67,12 @@ async def chat(request: Request, ws: Websocket):
             input_raw = await ws.recv()
         except:
             logger.error(f"Unexpected exception, most probably {client_ip} closed the websocket connection",exc_info=True)
+            await DDBRepository().store_chat(gpt4.get_messages(socket_id), user_email)
             gpt4.remove_socket_id(socket_id)
             break
         if not input_raw:
             logger.info(f"{client_ip} closed the connection")
+            await DDBRepository().store_chat(gpt4.get_messages(socket_id), user_email)
             gpt4.remove_socket_id(socket_id)
             break
         try:
@@ -79,10 +82,11 @@ async def chat(request: Request, ws: Websocket):
             logger.debug(f"Client IP {client_ip} did send bad WS packet {input_raw}")
             await ws.close()
             break
-        if "code" not in input_json:
+        if "email" not in input_json:
             await ws.close()
             break
         logger.debug(input_json)
+        user_email = input_json['email']
         response_generator = await gpt4.prompt(socket_id, input_json)
         assistant_msg = ""
         try:
