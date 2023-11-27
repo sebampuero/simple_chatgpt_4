@@ -16,19 +16,23 @@ async def serve_static(request: Request, filename):
     return await file(f"static/{filename}")
 
 async def get_chats_for_user(request: Request, email: str):
-    if email.trim() == '':
+    if email.strip() == '':
         return HTTPResponse(status=400)
-    return await DDBRepository().get_chats_by_email(email)
+    return json(await DDBRepository().get_chats_by_email(email))
 
-async def get_chat(request: Request, id: str, timestamp: str):
-    if id.trim() == '':
+async def load_new_chat(request: Request, id: str, timestamp: str, socket_id: str):
+    if id is None or id.strip() == '':
         return HTTPResponse(status=400)
-    return await DDBRepository().get_chat_by_id(int(id), int(timestamp))
+    chat_data = await DDBRepository().get_chat_by_id(int(id), int(timestamp))
+    if chat_data is None:
+        return HTTPResponse(status=404)
+    return json(chat_data)
 
 async def delete_chat(request: Request, id: str, timestamp: str):
-    if id.trim() == '':
+    if id.strip() == '':
         return HTTPResponse(status=400)
-    return await DDBRepository().delete_chat_by_id(int(id), int(timestamp))
+    await DDBRepository().delete_chat_by_id(int(id), int(timestamp))
+    return HTTPResponse(status=204)
 
 async def login(request: Request):
     """

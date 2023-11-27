@@ -13,10 +13,12 @@ class DDBRepository(Repository):
         self.ddb_connector =  DDBConnector(chats_table=chats_table, users_table=users_table)
 
     async def get_chats_by_email(self, email: str) -> dict:
-        return await self.ddb_connector.get_chats_by_email(email)
+        chats = await self.ddb_connector.get_chats_by_email(email)
+        return self.convert_decimal_to_int(chats)
 
     async def get_chat_by_id(self, id: int, timestamp: int = None) -> dict:
-        return await self.ddb_connector.get_chat_by_id(id, timestamp)
+        chat = await self.ddb_connector.get_chat_by_id(id, timestamp)
+        return self.convert_decimal_to_int(chat)
 
     async def delete_chat_by_id(self, id: int, timestamp: int = None):
         await self.ddb_connector.delete_chat_by_id(id, timestamp)
