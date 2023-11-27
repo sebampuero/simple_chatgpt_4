@@ -2,7 +2,6 @@ import aiounittest
 import asyncio
 import aioboto3
 from components.database.DDBConnector import DDBConnector
-from boto3.dynamodb.conditions import Key
 from decimal import Decimal
 
 class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
