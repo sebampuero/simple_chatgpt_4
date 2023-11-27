@@ -2,24 +2,46 @@ import React, { useState, useEffect } from 'react';
 import ChatSidebar from './ChatSidebar';
 import './ChatPage.css';
 
-const ChatPage = ({ code }) => {
+const ChatPage = ({ email }) => {
   const [messageInput, setMessageInput] = useState('');
   const [optionsVisible, setOptionsVisible] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
-  const [chats, setChats] = useState(
-    Array.from({ length: 50 }, (_, index) => ({ id: index + 1, title: `Chat ${index + 1}` }))
-  );
+  const [chats, setChats] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
   const [socket, setSocket] = useState(null);
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [isPromptLoading, setIsPromptLoading] = useState(false);
   const [imgBase64Data, setImageBase64Data] = useState('');
   const [imageDataURL, setImageDataURL] = useState(null);
+  const [subdir, setSubdir] = useState(null);
+
   const MAX_IMG_WIDTH = 450;
   const MAX_IMG_HEIGHT = 450;
 
+  const loadChats = () => {
+    fetch(subdir + "/user/" + email, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      }
+    })
+      .then((response) => { 
+        chats = JSON.parse(response)
+        chats.forEach(obj => {
+          let userContent = obj.messages.find(msg => msg.role === 'user')?.content;
+          obj.title = userContent.substring(0,10) + "..."; // very basic and naive way to show main idea of a chat
+        })
+        setChats(chats)
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("There was a problem loading your chats history!")
+      });
+  }
+
   useEffect(() => {
-    //TODO: load chat messages? or maybe only when a chat is selected
+    setSubdir(process.env.PUBLIC_URL)
+    loadChats()
     const socketUrl = process.env.NODE_ENV === 'production'
       ? process.env.REACT_APP_PROD_WS_URL
       : process.env.REACT_APP_WS_URL;
@@ -152,7 +174,7 @@ const ChatPage = ({ code }) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       const message = {
         msg: messageInput,
-        code: code,
+        email: email,
         image: imgBase64Data
       };
       socket.send(JSON.stringify(message));
@@ -166,19 +188,20 @@ const ChatPage = ({ code }) => {
     setOptionsVisible(!optionsVisible);
   }
 
-  const switchChat = (chatId) => {
+  const switchChat = (chatId, timestamp) => {
     setCurrentChatId(chatId);
     //TODO: close socket connection and open new one, send request to /register-socket-id with new socketid
     // request chat id and populate chatmessages
+    
   };
 
   const toggleSidebar = () => {
     setSidebarVisible(!sidebarVisible);
   };
 
-  const deleteChat = (chatId) => {
+  const deleteChat = (chatId, timestamp) => {
     // TODO: implement delete chat functionality, this should send a DELETE request for the given chat
-    setChats((prevChats) => prevChats.filter((chat) => chat.id !== chatId));
+    setChats((prevChats) => prevChats.filter((chat) => chat.chat_id !== chatId));
   };
 
   return (

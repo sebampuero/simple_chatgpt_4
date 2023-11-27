@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import PasswordForm from './components/PasswordForm';
+import EmailForm from './components/EmailForm';
 import ChatPage from './components/ChatPage';
 
 function App() {
-  const [isPasswordCorrect, setIsPasswordCorrect] = useState(false);
-  const [chatCode, setChatCode] = useState(null);
+  const [isEmailAuthorized, setIsEmailAuthorized] = useState(false);
+  const [email, setEmail] = useState(null);
   const [subdir, setSubdir] = useState(null);
 
   useEffect(() => {
     setSubdir(process.env.PUBLIC_URL)
   }, []);
 
-  const handlePasswordSubmit = (code) => {
+  const handleEmailSubmit = (email) => {
     const requestBody = {
-      code: code,
+      email: email,
     };
-    fetch(subdir + "/code", {
+    fetch(subdir + "/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -25,18 +25,18 @@ function App() {
     })
       .then((response) => {
         if (response.status == 401) {
-          setIsPasswordCorrect(false);
-          alert("Invalid code.")
+          setIsEmailAuthorized(false);
+          alert("Unauthorized email")
         }else if(response.status == 200){
-          setIsPasswordCorrect(true);
-          setChatCode(code);
+          setIsEmailAuthorized(true);
+          setEmail(code);
         }else{
           alert("Unexpected error, please try again later.")
         }
       })
       .catch((error) => {
         console.error("Error:", error);
-        setIsPasswordCorrect(false);
+        setIsEmailAuthorized(false);
         alert("Unexpected error, please try again later.")
       });
   };
@@ -47,10 +47,10 @@ function App() {
         <header className="App-header">
           <Switch>
             <Route path={`${process.env.NODE_ENV === 'production' ? subdir : subdir + '/'}`} exact>
-              {isPasswordCorrect ? (
-                <ChatPage code={chatCode}/>
+              {isEmailAuthorized ? (
+                <ChatPage email={email}/>
               ) : (
-                <PasswordForm onSubmit={handlePasswordSubmit} />
+                <EmailForm onSubmit={handleEmailSubmit} />
               )}
             </Route>
           </Switch>

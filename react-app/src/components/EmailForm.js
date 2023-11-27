@@ -1,16 +1,16 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const PasswordForm = ({ onSubmit }) => {
+const EmailForm = ({ onSubmit }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(e.target.elements['password-code'].value);
+    onSubmit(e.target.elements['email'].value);
   };
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
       <form
-        id="password-form"
+        id="email-form"
         action=""
         method="POST"
         onSubmit={handleSubmit}
@@ -19,19 +19,19 @@ const PasswordForm = ({ onSubmit }) => {
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-xs-12 text-center">
-              <h2>Código de acceso</h2>
+              <h2>Email address</h2>
               <div className="form-group">
                 <input
                   type="password"
                   className="form-control"
-                  id="password-code"
-                  name="password-code"
-                  placeholder="Código"
+                  id="email"
+                  name="email"
+                  placeholder="Email address"
                   required
                 />
               </div>
               <button type="submit" className="btn btn-primary">
-                Enviar
+                Send
               </button>
             </div>
           </div>
@@ -41,4 +41,4 @@ const PasswordForm = ({ onSubmit }) => {
   );
 };
 
-export default PasswordForm;
+export default EmailForm;
