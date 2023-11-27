@@ -1,5 +1,4 @@
 import aiounittest
-import unittest
 import asyncio
 import aioboto3
 from components.database.DDBConnector import DDBConnector
@@ -82,17 +81,61 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
         self.assertEqual(result, expected)
 
     async def test_get_chat_by_id(self):
-        pass
+        id = 1
+        ts = 1234567789
+        result = await self.connector.get_chat_by_id(id,ts)
+        expected = {'messages': [{'type': 'user', 'content': 'some content'}, {'type': 'peer', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': Decimal('1'), 'timestamp': Decimal('1234567789')}
+        self.assertDictEqual(result, expected)
 
     async def test_delete_chat_by_id(self):
-        pass
+        id = 10
+        ts = 1234567789
+        sample_chat_data = {
+                                    "chat_id": id,
+                                    "user_email": "test@example.com",
+                                    "timestamp": ts,
+                                    "messages": [
+                                        {
+                                        "type": "user",
+                                        "content": "some content"
+                                        },
+                                        {
+                                        "type": "peer",
+                                        "content": "some content from peer"
+                                        }
+                                    ]
+                                }
+        await self._insert_sample_data(self.chats_table, sample_chat_data)
+        await self.connector.delete_chat_by_id(id, ts)
+        result = await self.connector.get_chat_by_id(id,ts)
+        self.assertIsNone(result)
 
     async def test_get_user(self):
-        pass
+        email = "test2@example.com"
+        result = await self.connector.get_user(email)
+        expected = {'email': 'test2@example.com'}
+        self.assertDictEqual(result, expected)
 
     async def test_store_chat(self):
-        pass
-        
-
-if __name__ == '__main__':
-    unittest.main()
+        id = 15
+        ts = 1234567789
+        sample_chat_data = {
+                                    "chat_id": id,
+                                    "user_email": "test@example.com",
+                                    "timestamp": ts,
+                                    "messages": [
+                                        {
+                                        "type": "user",
+                                        "content": "some content"
+                                        },
+                                        {
+                                        "type": "peer",
+                                        "content": "some content from peer"
+                                        }
+                                    ]
+                                }
+        await self.connector.store_chat(sample_chat_data)
+        result = await self.connector.get_chat_by_id(id, ts)
+        expected = {'messages': [{'type': 'user', 'content': 'some content'}, {'type': 'peer', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': Decimal('15'), 'timestamp': Decimal('1234567789')}
+        self.assertDictEqual(result, expected)
+        await self.connector.delete_chat_by_id(id, ts)

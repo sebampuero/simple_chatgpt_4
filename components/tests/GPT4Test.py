@@ -1,8 +1,8 @@
-import unittest
+import aiounittest
 from components.gpt_4.GPT4 import GPT4
 from unittest.mock import patch, AsyncMock
 
-class TestGPT4(unittest.TestCase):
+class TestGPT4(aiounittest.AsyncTestCase):
     
     def setUp(self) -> None:
         self.instance = GPT4.getInstance()
@@ -24,7 +24,7 @@ class TestGPT4(unittest.TestCase):
 
     @patch('openai.ChatCompletion.acreate', new_callable=AsyncMock)
     async def test_prompt(self, mock_acreate):
-        response = await self.instance.prompt("1", "Hello")
+        response = await self.instance.prompt("1", {'msg': 'Hello', 'image': ''})
         mock_acreate.assert_called_once_with(
             model="gpt-4-vision-preview",
             messages=self.instance.map_messages["1"],

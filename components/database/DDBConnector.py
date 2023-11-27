@@ -24,14 +24,14 @@ class DDBConnector:
         session = aioboto3.Session()
         async with session.resource('dynamodb', region_name='eu-central-1') as client:
             table = await client.Table(self.chats_table)
-            response = await table.get_item(Key={'id': id, 'timestamp': timestamp})
+            response = await table.get_item(Key={'chat_id': id, 'timestamp': timestamp})
             return response.get('Item')
 
     async def delete_chat_by_id(self, id: int, timestamp: int):
         session = aioboto3.Session()
         async with session.resource('dynamodb', region_name='eu-central-1') as client:
             table = await client.Table(self.chats_table)
-            await table.delete_item(Key={'id': id, 'timestamp': timestamp})
+            await table.delete_item(Key={'chat_id': id, 'timestamp': timestamp})
 
     async def get_user(self, email: str):
         session = aioboto3.Session()
