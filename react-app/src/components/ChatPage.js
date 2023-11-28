@@ -8,6 +8,7 @@ const ChatPage = ({ email }) => {
   const [chatMessages, setChatMessages] = useState([]);
   const [chats, setChats] = useState([]);
   const [currentChatId, setCurrentChatId] = useState("");
+  const [currentChatTimestamp, setCurrentChatTimestamp] = useState(0);
   const [socket, setSocket] = useState(null);
   const [socketId, setSocketId] = useState('');
   const [sidebarVisible, setSidebarVisible] = useState(true);
@@ -98,11 +99,36 @@ const ChatPage = ({ email }) => {
     };
     setChatMessages((prevMessages) => [...prevMessages, newMessage]);
   };
-
+  const retrieveMessagesForNewOpenedChat = () => {
+    fetch(subdir + `chat/${currentChatId}/${currentChatTimestamp}/${socketId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      }
+    })
+      .then((response) => { 
+        if (response.status === 400){
+          throw new Error("Bad request")
+        }
+        if (response.status === 404){
+          throw new Error("Chat not found " + chatId)
+        }
+        return response.json();
+      })
+      .then((resp) => {
+        const chat = resp.body
+        setChatMessages(chat.messages) //TODO: when receiving messages with images in base64 format, they need to be encoded to imageDataURL to be displayed in HTML
+      })
+      .catch((error) => {
+        console.error("Error: ", error);
+        alert("There was a problem loading the chat, please refresh the page!")
+      });
+  }
   const processMessageType = (data) => {
     const msg = JSON.parse(data);
     if (msg.type === "INIT"){
       setSocketId(msg.socket_id)
+      retrieveMessagesForNewOpenedChat()
     }else if(msg.type === "CONTENT"){
       handleReceivedMessage(data)
     }
@@ -215,35 +241,9 @@ const ChatPage = ({ email }) => {
 
   const switchChat = (chatId, timestamp) => {
     setCurrentChatId(chatId);
+    setCurrentChatTimestamp(timestamp)
     closeSocket();
     createSocket();
-    if (socket) {
-      fetch(subdir + `chat/${chatId}/${timestamp}/${socketId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        }
-      })
-        .then((response) => { 
-          if (response.status === 400){
-            throw new Error("Bad request")
-          }
-          if (response.status === 404){
-            throw new Error("Chat not found " + chatId)
-          }
-          return response.json();
-        })
-        .then((resp) => {
-          const chat = resp.body
-          setChatMessages(chat.messages) //TODO: when receiving messages with images in base64 format, they need to be encoded to imageDataURL to be displayed in HTML
-        })
-        .catch((error) => {
-          console.error("Error: ", error);
-          alert("There was a problem loading the chat, please refresh the page!")
-        });
-    }else{
-      alert("Could not establish connection to server, please try again later.")
-    }
   };
 
   const toggleSidebar = () => {

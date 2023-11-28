@@ -86,13 +86,8 @@ async def chat(request: Request, ws: Websocket):
         try:
             input_json = json.loads(input_raw)
         except json.JSONDecodeError:
-            if input_raw == CHANGING_CHAT:
-                logger.debug(f"Client IP {client_ip} is changing chat")
-                await DDBRepository().store_chat(gpt4.get_messages(socket_id), user_email, chat_id)
-                #await ws.close()
-            else:
-                logger.debug(f"Client IP {client_ip} sent unsupported command")
-                await ws.close()
+            logger.debug(f"Client IP {client_ip} sent unsupported command")
+            await ws.close()
             break
         if "email" not in input_json:
             await ws.close()
