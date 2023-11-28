@@ -111,7 +111,7 @@ const ChatPage = ({ email }) => {
           throw new Error("Bad request")
         }
         if (response.status === 404){
-          throw new Error("Chat not found " + chatId)
+          throw new Error("Chat not found " + currentChatId)
         }
         return response.json();
       })
@@ -128,7 +128,7 @@ const ChatPage = ({ email }) => {
     const msg = JSON.parse(data);
     if (msg.type === "INIT"){
       setSocketId(msg.socket_id)
-      retrieveMessagesForNewOpenedChat()
+      if(currentChatId != "") retrieveMessagesForNewOpenedChat()
     }else if(msg.type === "CONTENT"){
       handleReceivedMessage(data)
     }
