@@ -26,13 +26,46 @@ class GPT4:
         self.map_messages.pop(websocket_id, None)
 
     def append_to_msg_history_as_assistant(self, websocket_id: str, message: str):
-        self.map_messages[websocket_id].append({"role": "assistant", "content": message}) #TODO: messages would need to have a timestamp value too
+        self.map_messages[websocket_id].append({"role": "assistant", "content": message})
 
     def get_messages(self, ws_id: str) -> dict:
-        return self.map_messages[ws_id] if ws_id in self.map_messages else []
+        return self._from_gpt4_format_to_own_format(self.map_messages[ws_id]) if ws_id in self.map_messages else []
     
     def set_messages(self, ws_id: str, chats: list):
-        self.map_messages[ws_id] = chats
+        self.map_messages[ws_id] = self._from_own_format_to_gpt4_format(chats)
+
+    def _from_own_format_to_gpt4_format(self, chats: list) -> list:
+        output_list = []
+        for item in chats:
+            if item["role"] == "assistant":
+                output_list.append(item)
+                continue
+            if item["image"] == "":
+                new_item = {"role": item["role"], "content": item["content"]}
+            else:
+                new_item = {"role": item["role"], "content": []}
+                new_item["content"].append({"type": "text", "text": item["content"]})
+                image_url = f"data:image/jpeg;base64,{item['image']}"
+                new_item["content"].append({"type": "image_url", "image_url": {"url": image_url}})
+            output_list.append(new_item)
+        return output_list
+
+    def _from_gpt4_format_to_own_format(self, chats: list) -> list:
+        output_list = []
+        for item in chats:
+            if item["role"] == "assistant":
+                output_list.append(item)
+                continue
+            new_item = {"role": item["role"], "content": "", "image": ""}
+            if isinstance(item["content"], list):
+                new_item["content"] = item["content"][0]["text"]
+                data_index = item["content"][1]["image_url"]["url"].index(',') + 1
+                image_data = item["content"][1]["image_url"]["url"][data_index:]
+                new_item["image"] = image_data
+            else:
+                new_item["content"] = item["content"]
+            output_list.append(new_item)
+        return output_list
 
     async def prompt(self, websocket_id: str, input: dict):
         if websocket_id not in self.map_messages:

@@ -20,7 +20,8 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
                                     "messages": [
                                         {
                                         "role": "user",
-                                        "content": "some content" #TODO: update with timestamp values
+                                        "content": "some content",
+                                        "image": "base64"
                                         },
                                         {
                                         "role": "assistant",
@@ -36,7 +37,8 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
                                     "messages": [
                                         {
                                         "role": "user",
-                                        "content": "some content"
+                                        "content": "some content",
+                                        "image": ""
                                         },
                                         {
                                         "role": "assistant",
@@ -76,14 +78,14 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
         # Given a test email
         email = "test@example.com"
         result = await self.connector.get_chats_by_email(email)
-        expected = [{'messages': [{'role': 'user', 'content': 'some content'}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': 'randomUUID2', 'timestamp': Decimal('1234567789')}, {'messages': [{'role': 'user', 'content': 'some content'}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': 'randomUUID1', 'timestamp': Decimal('1234567789')}]
+        expected = [{'messages': [{'role': 'user', 'content': 'some content', 'image': ''}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': 'randomUUID2', 'timestamp': Decimal('1234567789')}, {'messages': [{'role': 'user', 'content': 'some content', 'image': 'base64'}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': 'randomUUID1', 'timestamp': Decimal('1234567789')}]
         self.assertEqual(result, expected)
 
     async def test_get_chat_by_id(self):
         id = 'randomUUID1'
         ts = 1234567789
         result = await self.connector.get_chat_by_id(id,ts)
-        expected = {'messages': [{'role': 'user', 'content': 'some content'}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': 'randomUUID1', 'timestamp': Decimal('1234567789')}
+        expected = {'messages': [{'role': 'user', 'content': 'some content', 'image': 'base64'}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': 'randomUUID1', 'timestamp': Decimal('1234567789')}
         self.assertDictEqual(result, expected)
 
     async def test_delete_chat_by_id(self):
@@ -96,7 +98,8 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
                                     "messages": [
                                         {
                                         "role": "user",
-                                        "content": "some content"
+                                        "content": "some content",
+                                        "image": "base64"
                                         },
                                         {
                                         "role": "assistant",
@@ -125,7 +128,8 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
                                     "messages": [
                                         {
                                         "role": "user",
-                                        "content": "some content"
+                                        "content": "some content",
+                                        "image": "base64"
                                         },
                                         {
                                         "role": "assistant",
@@ -135,6 +139,6 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
                                 }
         await self.connector.store_chat(sample_chat_data)
         result = await self.connector.get_chat_by_id(id, ts)
-        expected = {'messages': [{'role': 'user', 'content': 'some content'}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': 'randomUUID15', 'timestamp': Decimal('1234567789')}
+        expected = {'messages': [{'role': 'user', 'content': 'some content', 'image': 'base64'}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': 'randomUUID15', 'timestamp': Decimal('1234567789')}
         self.assertDictEqual(result, expected)
         await self.connector.delete_chat_by_id(id, ts)

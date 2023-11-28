@@ -217,11 +217,17 @@ const ChatPage = ({ email }) => {
         }
       })
         .then((response) => { 
+          if (response.status == 400){
+            throw new Error("Bad request")
+          }
+          if (response.status == 404){
+            throw new Error("Chat not found " + chatId)
+          }
           const chat = JSON.parse(response)
-          setChatMessages(chat.messages)
+          setChatMessages(chat.messages) //TODO: when receiving messages with images in base64 format, they need to be encoded to imageDataURL to be displayed in HTML
         })
         .catch((error) => {
-          console.error("Error:", error);
+          console.error("Error: ", error);
           alert("There was a problem loading the chat, please refresh the page!")
         });
     }else{

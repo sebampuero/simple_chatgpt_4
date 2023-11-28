@@ -22,6 +22,42 @@ class TestGPT4(aiounittest.AsyncTestCase):
         self.instance.append_to_msg_history_as_assistant("1", "Assistant message")
         self.assertDictEqual(self.instance.map_messages["1"][1], {'role': 'assistant', 'content': 'Assistant message'})
 
+    def test_format_to_gpt4_msg_format(self):
+        input_data = [
+            {"role": "user", "content": "some content", "image": ""},
+            {"role": "user", "content": "more content", "image": "base64encodeddata"},
+            {"role": "assistant", "content": "some content"}
+        ]
+        expected_output = [
+            {"role": "user", "content": "some content"},
+            {"role": "user", "content": [
+                {"type": "text", "text": "more content"},
+                {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,base64encodeddata"}}
+            ]},
+            {"role": "assistant", "content": "some content"}
+        ]
+
+        result = self.instance._from_own_format_to_gpt4_format(input_data)
+        self.assertEqual(result, expected_output)
+
+    def test_reverse_process_list(self):
+        processed_data = [
+            {"role": "user", "content": "some content"},
+            {"role": "assistant", "content": "some content"},
+            {"role": "user", "content": [
+                {"type": "text", "text": "more content"},
+                {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64,base64encodeddata"}}
+            ]}
+        ]
+        expected_output = [
+            {"role": "user", "content": "some content", "image": ""},
+            {"role": "assistant", "content": "some content"},
+            {"role": "user", "content": "more content", "image": "base64encodeddata"}
+        ]
+
+        result = self.instance._from_gpt4_format_to_own_format(processed_data)
+        self.assertEqual(result, expected_output)
+
     @patch('openai.ChatCompletion.acreate', new_callable=AsyncMock)
     async def test_prompt(self, mock_acreate):
         response = await self.instance.prompt("1", {'msg': 'Hello', 'image': ''})
