@@ -9,6 +9,7 @@ const ChatPage = ({ email }) => {
   const [chats, setChats] = useState([]);
   const [currentChatId, setCurrentChatId] = useState("");
   const [socket, setSocket] = useState(null);
+  const [socketId, setSocketId] = useState('');
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [isPromptLoading, setIsPromptLoading] = useState(false);
   const [imgBase64Data, setImageBase64Data] = useState('');
@@ -39,20 +40,18 @@ const ChatPage = ({ email }) => {
       });
   }
 
-  useEffect(() => {
-    setSubdir(process.env.PUBLIC_URL)
-    loadChats()
+  const createSocket = () => {
     const socketUrl = process.env.NODE_ENV === 'production'
       ? process.env.REACT_APP_PROD_WS_URL
       : process.env.REACT_APP_WS_URL;
     const socket = new WebSocket(socketUrl);
 
     socket.addEventListener('open', () => {
-      console.log('WebSocket connection opened');
+      console.log('WebSocket connection opened');      
     });
 
     socket.addEventListener('message', (event) => {
-      handleReceivedMessage(event.data);
+      processMessageType(event.data)
     });
 
     socket.addEventListener('error', (event) => {
@@ -62,15 +61,23 @@ const ChatPage = ({ email }) => {
 
     socket.addEventListener('close', (event) => {
       console.log('WebSocket connection closed:', event);
-      alert("Connection closed");
     });
 
     setSocket(socket);
+  }
 
+  const closeSocket = () => {
+    if (socket) {
+      socket.close()
+    }
+  }
+
+  useEffect(() => {
+    setSubdir(process.env.PUBLIC_URL)
+    loadChats()
+    createSocket()
     return () => {
-      if (socket) {
-        socket.close();
-      }
+      closeSocket()
     };
   }, []);
 
@@ -83,6 +90,15 @@ const ChatPage = ({ email }) => {
     };
     setChatMessages((prevMessages) => [...prevMessages, newMessage]);
   };
+
+  const processMessageType = (data) => {
+    msg = JSON.parse(data);
+    if (msg.type == "INIT"){
+      setSocketId(msg.socket_id)
+    }else if(msg.type == "CONTENT"){
+      handleReceivedMessage(data)
+    }
+  }
 
   const handleReceivedMessage = (message) => {
     const messageObj = JSON.parse(message)
@@ -191,9 +207,26 @@ const ChatPage = ({ email }) => {
 
   const switchChat = (chatId, timestamp) => {
     setCurrentChatId(chatId);
-    //TODO: close socket connection and open new one, send request to /register-socket-id with new socketid
-    // request chat id and populate chatmessages
-    
+    closeSocket();
+    createSocket();
+    if (socket) {
+      fetch(subdir + `chat/${chatId}/${timestamp}/${socketId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      })
+        .then((response) => { 
+          const chat = JSON.parse(response)
+          setChatMessages(chat.messages)
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("There was a problem loading the chat, please refresh the page!")
+        });
+    }else{
+      alert("Could not establish connection to server, please try again later.")
+    }
   };
 
   const toggleSidebar = () => {
@@ -213,7 +246,7 @@ const ChatPage = ({ email }) => {
       <div id="content-container" style={{ flex: 1 }}>
         <div id="chat-messages">
         {chatMessages.map((message) => (
-            <div key={message.timestamp} className={`message-bubble ${message.role === 'user' ? 'user-message' : 'peer-message'}`}>
+            <div className={`message-bubble ${message.role === 'user' ? 'user-message' : 'peer-message'}`}>
               {message.img && message.img !== null && (
                 <img src={message.img} alt="GPT4-V image prompt" />
               )}

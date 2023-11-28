@@ -64,6 +64,7 @@ async def chat(request: Request, ws: Websocket):
     user_email = ""
     chat_id = ""
     logger.info(f"Client connected via WS: {client_ip} and socket_id {socket_id}")
+    await ws.send(json.dumps({"socket_id": socket_id, "type": "INIT"}))
     while True:
         dt = datetime.now()
         ts = datetime.timestamp(dt)
@@ -86,7 +87,7 @@ async def chat(request: Request, ws: Websocket):
             if input_raw == CHANGING_CHAT:
                 logger.debug(f"Client IP {client_ip} is changing chat")
                 await DDBRepository().store_chat(gpt4.get_messages(socket_id), user_email, chat_id)
-                await ws.close()
+                #await ws.close()
             else:
                 logger.debug(f"Client IP {client_ip} sent unsupported command")
                 await ws.close()
@@ -103,9 +104,9 @@ async def chat(request: Request, ws: Websocket):
             async for response_chunk in response_generator:
                 delta = response_chunk["choices"][0]["delta"]
                 if "content" in delta:
-                    await ws.send(json.dumps({"content": delta["content"], "timestamp": int(ts)}))
+                    await ws.send(json.dumps({"content": delta["content"], "timestamp": int(ts), "type": "CONTENT"}))
                     assistant_msg += delta["content"]
-            await ws.send(json.dumps({"content": "END", "timestamp": int(ts)}))
+            await ws.send(json.dumps({"content": "END", "timestamp": int(ts), "type": "CONTENT"}))
             gpt4.append_to_msg_history_as_assistant(socket_id, assistant_msg)
         except openai.error.RateLimitError:
             logger.error(f"Rate limit exceeded", exc_info=True)

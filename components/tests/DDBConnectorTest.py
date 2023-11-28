@@ -20,7 +20,7 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
                                     "messages": [
                                         {
                                         "role": "user",
-                                        "content": "some content"
+                                        "content": "some content" #TODO: update with timestamp values
                                         },
                                         {
                                         "role": "assistant",

@@ -26,7 +26,7 @@ class GPT4:
         self.map_messages.pop(websocket_id, None)
 
     def append_to_msg_history_as_assistant(self, websocket_id: str, message: str):
-        self.map_messages[websocket_id].append({"role": "assistant", "content": message})
+        self.map_messages[websocket_id].append({"role": "assistant", "content": message}) #TODO: messages would need to have a timestamp value too
 
     def get_messages(self, ws_id: str) -> dict:
         return self.map_messages[ws_id] if ws_id in self.map_messages else []
