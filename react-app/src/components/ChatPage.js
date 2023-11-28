@@ -7,7 +7,7 @@ const ChatPage = ({ email }) => {
   const [optionsVisible, setOptionsVisible] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [chats, setChats] = useState([]);
-  const [currentChatId, setCurrentChatId] = useState(null);
+  const [currentChatId, setCurrentChatId] = useState("");
   const [socket, setSocket] = useState(null);
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [isPromptLoading, setIsPromptLoading] = useState(false);
@@ -78,7 +78,7 @@ const ChatPage = ({ email }) => {
     const newMessage = {
       timestamp: Date.now(), 
       content: messageContent,
-      type: messageType,
+      role: messageType,
       img: imageDataURL
     };
     setChatMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -102,7 +102,7 @@ const ChatPage = ({ email }) => {
         const newMessage = {
           timestamp: messageObj.timestamp,
           content: messageObj.content,
-          type: 'peer',
+          role: 'peer',
         };
         return [...prevMessages, newMessage];
       }
@@ -175,6 +175,7 @@ const ChatPage = ({ email }) => {
       const message = {
         msg: messageInput,
         email: email,
+        chat_id: currentChatId,
         image: imgBase64Data
       };
       socket.send(JSON.stringify(message));
@@ -212,7 +213,7 @@ const ChatPage = ({ email }) => {
       <div id="content-container" style={{ flex: 1 }}>
         <div id="chat-messages">
         {chatMessages.map((message) => (
-            <div key={message.timestamp} className={`message-bubble ${message.type === 'user' ? 'user-message' : 'peer-message'}`}>
+            <div key={message.timestamp} className={`message-bubble ${message.role === 'user' ? 'user-message' : 'peer-message'}`}>
               {message.img && message.img !== null && (
                 <img src={message.img} alt="GPT4-V image prompt" />
               )}
