@@ -240,8 +240,19 @@ const ChatPage = ({ email }) => {
   };
 
   const deleteChat = (chatId, timestamp) => {
-    // TODO: implement delete chat functionality, this should send a DELETE request for the given chat
-    setChats((prevChats) => prevChats.filter((chat) => chat.chat_id !== chatId));
+    fetch(subdir + `/chat/${chatId}/${timestamp}`, {
+      method: "DELETE"
+    })
+      .then((response) => { 
+        if(response.status == 204){
+          setChats((prevChats) => prevChats.filter((chat) => chat.chat_id !== chatId));
+        }
+        throw new Error("Could not delete chat with ID " + chatId)
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("There was a problem deleting the chat.")
+      });
   };
 
   return (
