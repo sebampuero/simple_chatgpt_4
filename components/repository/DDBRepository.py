@@ -13,8 +13,8 @@ class DDBRepository(Repository):
 
     def __init__(self, chats_table=None, users_table=None) -> None:
         if not chats_table and not users_table:
-            chats_table = os.env('DDB_CHATS_TABLE')
-            users_table = os.env('DDB_USERS_TABLE')
+            chats_table = os.getenv('DDB_CHATS_TABLE')
+            users_table = os.getenv('DDB_USERS_TABLE')
         self.ddb_connector =  DDBConnector(chats_table=chats_table, users_table=users_table)
 
     async def get_chats_by_email(self, email: str) -> dict:

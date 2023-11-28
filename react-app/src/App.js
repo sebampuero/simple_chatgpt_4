@@ -6,7 +6,7 @@ import ChatPage from './components/ChatPage';
 function App() {
   const [isEmailAuthorized, setIsEmailAuthorized] = useState(false);
   const [email, setEmail] = useState(null);
-  const [subdir, setSubdir] = useState(null);
+  const [subdir, setSubdir] = useState("");
 
   useEffect(() => {
     setSubdir(process.env.PUBLIC_URL)
@@ -29,7 +29,7 @@ function App() {
           alert("Unauthorized email")
         }else if(response.status == 200){
           setIsEmailAuthorized(true);
-          setEmail(code);
+          setEmail(email);
         }else{
           alert("Unexpected error, please try again later.")
         }

@@ -22,7 +22,7 @@ const EmailForm = ({ onSubmit }) => {
               <h2>Email address</h2>
               <div className="form-group">
                 <input
-                  type="password"
+                  type="email"
                   className="form-control"
                   id="email"
                   name="email"

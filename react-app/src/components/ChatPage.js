@@ -14,7 +14,7 @@ const ChatPage = ({ email }) => {
   const [isPromptLoading, setIsPromptLoading] = useState(false);
   const [imgBase64Data, setImageBase64Data] = useState('');
   const [imageDataURL, setImageDataURL] = useState(null);
-  const [subdir, setSubdir] = useState(null);
+  const [subdir, setSubdir] = useState("");
 
   const MAX_IMG_WIDTH = 450;
   const MAX_IMG_HEIGHT = 450;
@@ -27,7 +27,15 @@ const ChatPage = ({ email }) => {
       }
     })
       .then((response) => { 
-        chats = JSON.parse(response)
+        if(response.status === 400){
+          throw new Error("Bad request sent")
+        }
+        if(response.status === 200){
+          return response.json();
+        }
+      })
+      .then((resp) => {
+        const chats = resp.body
         chats.forEach(obj => {
           let userContent = obj.messages.find(msg => msg.role === 'user')?.content;
           obj.title = userContent.substring(0,10) + "..."; // very basic and naive way to show main idea of a chat
@@ -92,10 +100,10 @@ const ChatPage = ({ email }) => {
   };
 
   const processMessageType = (data) => {
-    msg = JSON.parse(data);
-    if (msg.type == "INIT"){
+    const msg = JSON.parse(data);
+    if (msg.type === "INIT"){
       setSocketId(msg.socket_id)
-    }else if(msg.type == "CONTENT"){
+    }else if(msg.type === "CONTENT"){
       handleReceivedMessage(data)
     }
   }
@@ -217,13 +225,16 @@ const ChatPage = ({ email }) => {
         }
       })
         .then((response) => { 
-          if (response.status == 400){
+          if (response.status === 400){
             throw new Error("Bad request")
           }
-          if (response.status == 404){
+          if (response.status === 404){
             throw new Error("Chat not found " + chatId)
           }
-          const chat = JSON.parse(response)
+          return response.json();
+        })
+        .then((resp) => {
+          const chat = resp.body
           setChatMessages(chat.messages) //TODO: when receiving messages with images in base64 format, they need to be encoded to imageDataURL to be displayed in HTML
         })
         .catch((error) => {
@@ -244,10 +255,11 @@ const ChatPage = ({ email }) => {
       method: "DELETE"
     })
       .then((response) => { 
-        if(response.status == 204){
+        if(response.status === 204){
           setChats((prevChats) => prevChats.filter((chat) => chat.chat_id !== chatId));
+        }else{
+          throw new Error("Could not delete chat with ID " + chatId)
         }
-        throw new Error("Could not delete chat with ID " + chatId)
       })
       .catch((error) => {
         console.error("Error:", error);

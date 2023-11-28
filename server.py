@@ -1,9 +1,7 @@
 from logging.handlers import RotatingFileHandler
 from application.server.routes import *
 from sanic import Sanic
-from components.database.DDBConnector import Database
-from psycopg2 import OperationalError
-import logging, os, sys
+import logging, os
 
 ENV = os.getenv("ENV")
 SUB_DIRECTORY = os.getenv("SUBDIRECTORY")

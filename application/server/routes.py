@@ -1,5 +1,6 @@
 from sanic import Websocket, Request
-from sanic.response import json, HTTPResponse, file
+from sanic.response import HTTPResponse, file
+from sanic.response import json as sanicjson
 from components.login.Login import Login
 from components.gpt_4.GPT4 import GPT4
 from components.repository.DDBRepository import DDBRepository
@@ -20,7 +21,8 @@ async def serve_static(request: Request, filename):
 async def get_chats_for_user(request: Request, email: str):
     if email.strip() == '':
         return HTTPResponse(status=400)
-    return json(await DDBRepository().get_chats_by_email(email))
+    chats = await DDBRepository().get_chats_by_email(email)
+    return sanicjson({"body": chats})
 
 async def load_new_chat(request: Request, id: str, timestamp: str, socket_id: str):
     if id is None or id.strip() == '':
@@ -30,7 +32,7 @@ async def load_new_chat(request: Request, id: str, timestamp: str, socket_id: st
         return HTTPResponse(status=404)
     gpt4 = GPT4.getInstance()
     gpt4.set_messages(socket_id, chat_data['messages'])
-    return json(chat_data)
+    return sanicjson({"body": chat_data})
 
 async def delete_chat(request: Request, id: str, timestamp: str):
     if id.strip() == '':

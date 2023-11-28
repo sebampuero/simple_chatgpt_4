@@ -81,6 +81,12 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
         expected = [{'messages': [{'role': 'user', 'content': 'some content', 'image': ''}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': 'randomUUID2', 'timestamp': Decimal('1234567789')}, {'messages': [{'role': 'user', 'content': 'some content', 'image': 'base64'}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': 'randomUUID1', 'timestamp': Decimal('1234567789')}]
         self.assertEqual(result, expected)
 
+        # Given email without chats
+        email = "test2@example.com"
+        result = await self.connector.get_chats_by_email(email)
+        expected = []
+        self.assertEqual(result, expected)
+
     async def test_get_chat_by_id(self):
         id = 'randomUUID1'
         ts = 1234567789
