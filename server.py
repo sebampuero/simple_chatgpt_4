@@ -14,7 +14,7 @@ handler = RotatingFileHandler(os.path.abspath(os.path.join(os.path.dirname(__fil
 handler.setFormatter(formatter)
 logger = logging.getLogger()
 logger.addHandler(handler)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG) if os.getenv("ENV") == "DEV" else logger.setLevel(logging.INFO)
 
 app = Sanic("chatgpt4")
 app.add_route(login, f"{SUB_DIRECTORY}/login", methods=["POST"])
