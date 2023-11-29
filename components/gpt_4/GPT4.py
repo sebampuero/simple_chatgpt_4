@@ -1,6 +1,7 @@
 import openai
 import os
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +30,12 @@ class GPT4:
         self.map_messages[websocket_id].append({"role": "assistant", "content": message})
 
     def get_messages(self, ws_id: str) -> dict:
+        logger.debug("Retrieved messages. " + json.dumps(self.map_messages, indent=4))
         return self._from_gpt4_format_to_own_format(self.map_messages[ws_id]) if ws_id in self.map_messages else []
     
     def set_messages(self, ws_id: str, chats: list):
         self.map_messages[ws_id] = self._from_own_format_to_gpt4_format(chats)
+        logger.debug("Set messages. " + json.dumps(self.map_messages, indent=4))
 
     def _from_own_format_to_gpt4_format(self, chats: list) -> list:
         output_list = []
@@ -83,6 +86,7 @@ class GPT4:
             }
         ]
         self.map_messages[websocket_id].append({"role": "user", "content": content})
+        logger.debug(f"Sending prompt with {self.map_messages[websocket_id]}")
         response = await openai.ChatCompletion.acreate(
                 model="gpt-4-vision-preview",
                 messages=self.map_messages[websocket_id],

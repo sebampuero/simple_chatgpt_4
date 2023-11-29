@@ -92,7 +92,7 @@ async def chat(request: Request, ws: Websocket):
         if "email" not in input_json:
             await ws.close()
             break
-        logger.debug(input_json)
+        logger.debug("Input JSON from WS: " + json.dumps(input_json, indent=4))
         user_email = input_json['email']
         chat_id = input_json['chat_id']
         response_generator = await gpt4.prompt(socket_id, input_json)

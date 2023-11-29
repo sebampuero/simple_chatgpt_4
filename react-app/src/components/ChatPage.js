@@ -10,7 +10,6 @@ const ChatPage = ({ email }) => {
   const [currentChatId, setCurrentChatId] = useState("");
   const [currentChatTimestamp, setCurrentChatTimestamp] = useState(0);
   const [socket, setSocket] = useState(null);
-  const [socketId, setSocketId] = useState('');
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [isPromptLoading, setIsPromptLoading] = useState(false);
   const [imgBase64Data, setImageBase64Data] = useState('');
@@ -42,6 +41,7 @@ const ChatPage = ({ email }) => {
           obj.title = userContent.substring(0,10) + "..."; // very basic and naive way to show main idea of a chat
         })
         setChats(chats)
+        console.log("Set chat messages: " + chats)
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -50,34 +50,37 @@ const ChatPage = ({ email }) => {
   }
 
   const createSocket = () => {
-    const socketUrl = process.env.NODE_ENV === 'production'
+    if(!socket){
+      const socketUrl = process.env.NODE_ENV === 'production'
       ? process.env.REACT_APP_PROD_WS_URL
       : process.env.REACT_APP_WS_URL;
-    const socket = new WebSocket(socketUrl);
+      const socket = new WebSocket(socketUrl);
 
-    socket.addEventListener('open', () => {
-      console.log('WebSocket connection opened');      
-    });
+      socket.addEventListener('open', () => {
+        console.log('WebSocket connection opened');      
+      });
 
-    socket.addEventListener('message', (event) => {
-      processMessageType(event.data)
-    });
+      socket.addEventListener('message', (event) => {
+        processMessageType(event.data)
+      });
 
-    socket.addEventListener('error', (event) => {
-      console.error('WebSocket error:', event);
-      alert("There was an error, try again later.");
-    });
+      socket.addEventListener('error', (event) => {
+        console.error('WebSocket error:', event);
+        alert("There was an error, try again later.");
+      });
 
-    socket.addEventListener('close', (event) => {
-      console.log('WebSocket connection closed:', event);
-    });
+      socket.addEventListener('close', (event) => {
+        console.log('WebSocket connection closed:', event);
+      });
 
-    setSocket(socket);
+      setSocket(socket);
+    }
   }
 
   const closeSocket = () => {
     if (socket) {
       socket.close()
+      setSocket(null)
     }
   }
 
@@ -85,10 +88,7 @@ const ChatPage = ({ email }) => {
     setSubdir(process.env.PUBLIC_URL)
     loadChats()
     createSocket()
-    return () => {
-      closeSocket()
-    };
-  }, []);
+  }, [currentChatId, currentChatTimestamp, socket]); // needed here because rendering is needed every time a new chat is selected
 
   const displayMessage = (messageContent, messageType) => {
     const newMessage = {
@@ -99,7 +99,7 @@ const ChatPage = ({ email }) => {
     };
     setChatMessages((prevMessages) => [...prevMessages, newMessage]);
   };
-  const retrieveMessagesForNewOpenedChat = () => {
+  const retrieveMessagesForNewOpenedChat = (socketId) => {
     fetch(subdir + `chat/${currentChatId}/${currentChatTimestamp}/${socketId}`, {
       method: "GET",
       headers: {
@@ -127,8 +127,7 @@ const ChatPage = ({ email }) => {
   const processMessageType = (data) => {
     const msg = JSON.parse(data);
     if (msg.type === "INIT"){
-      setSocketId(msg.socket_id)
-      if(currentChatId != "") retrieveMessagesForNewOpenedChat()
+      if(currentChatId != "") retrieveMessagesForNewOpenedChat(msg.socket_id)
     }else if(msg.type === "CONTENT"){
       handleReceivedMessage(data)
     }
@@ -240,6 +239,7 @@ const ChatPage = ({ email }) => {
   }
 
   const switchChat = (chatId, timestamp) => {
+    console.log("Switching chat to " + chatId + " " + timestamp)
     setCurrentChatId(chatId);
     setCurrentChatTimestamp(timestamp)
     closeSocket();

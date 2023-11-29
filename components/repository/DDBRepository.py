@@ -44,6 +44,8 @@ class DDBRepository(Repository):
             'user_email': user_email,
             'messages': chats
         }
+        logger.info("Storing chat with id " + new_chat["chat_id"])
+        logger.debug(f"Message to store: {new_chat}")
         await self.ddb_connector.store_chat(new_chat)
 
     def convert_decimal_to_int(self, data):
