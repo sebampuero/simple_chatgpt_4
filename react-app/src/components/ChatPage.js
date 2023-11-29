@@ -7,20 +7,19 @@ const ChatPage = ({ email }) => {
   const [optionsVisible, setOptionsVisible] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [chats, setChats] = useState([]);
-  const [currentChatId, setCurrentChatId] = useState("");
-  const [currentChatTimestamp, setCurrentChatTimestamp] = useState(0);
-  const [socket, setSocket] = useState(null);
+  const [currentChatId, setCurrentChatId] = useState(""); //TODO: normal var
+  const [currentChatTimestamp, setCurrentChatTimestamp] = useState(0); //TODO: not needed?
+  const [socket, setSocket] = useState(null); //TODO: normal var
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [isPromptLoading, setIsPromptLoading] = useState(false);
-  const [imgBase64Data, setImageBase64Data] = useState('');
-  const [imageDataURL, setImageDataURL] = useState(null);
-  const [subdir, setSubdir] = useState("");
+  const [imgBase64Data, setImageBase64Data] = useState(''); //TODO: normal var
+  const [imageDataURL, setImageDataURL] = useState(null); //TODO: normal var
 
   const MAX_IMG_WIDTH = 450;
   const MAX_IMG_HEIGHT = 450;
 
   const loadChats = () => {
-    fetch(subdir + "/user/" + email, {
+    fetch(process.env.PUBLIC_URL + "/user/" + email, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -85,7 +84,6 @@ const ChatPage = ({ email }) => {
   }
 
   useEffect(() => {
-    setSubdir(process.env.PUBLIC_URL)
     loadChats()
     createSocket()
   }, [currentChatId, currentChatTimestamp, socket]); // needed here because rendering is needed every time a new chat is selected
@@ -100,7 +98,7 @@ const ChatPage = ({ email }) => {
     setChatMessages((prevMessages) => [...prevMessages, newMessage]);
   };
   const retrieveMessagesForNewOpenedChat = (socketId) => {
-    fetch(subdir + `chat/${currentChatId}/${currentChatTimestamp}/${socketId}`, {
+    fetch(process.env.PUBLIC_URL + `chat/${currentChatId}/${currentChatTimestamp}/${socketId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -251,7 +249,7 @@ const ChatPage = ({ email }) => {
   };
 
   const deleteChat = (chatId, timestamp) => {
-    fetch(subdir + `/chat/${chatId}/${timestamp}`, {
+    fetch(process.env.PUBLIC_URL + `/chat/${chatId}/${timestamp}`, {
       method: "DELETE"
     })
       .then((response) => { 

@@ -6,17 +6,12 @@ import ChatPage from './components/ChatPage';
 function App() {
   const [isEmailAuthorized, setIsEmailAuthorized] = useState(false);
   const [email, setEmail] = useState(null);
-  const [subdir, setSubdir] = useState("");
-
-  useEffect(() => {
-    setSubdir(process.env.PUBLIC_URL)
-  }, []);
 
   const handleEmailSubmit = (email) => {
     const requestBody = {
       email: email,
     };
-    fetch(subdir + "/login", {
+    fetch(process.env.PUBLIC_URL + "/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -46,7 +41,7 @@ function App() {
       <div className="App">
         <header className="App-header">
           <Switch>
-            <Route path={`${process.env.NODE_ENV === 'production' ? subdir : subdir + '/'}`} exact>
+            <Route path={`${process.env.NODE_ENV === 'production' ? process.env.PUBLIC_URL : process.env.PUBLIC_URL + '/'}`} exact>
               {isEmailAuthorized ? (
                 <ChatPage email={email}/>
               ) : (
