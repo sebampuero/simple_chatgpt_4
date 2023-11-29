@@ -2,7 +2,6 @@ from components.database.DDBConnector import DDBConnector
 from components.repository.Repository import Repository
 from components.repository.User import User
 from decimal import Decimal
-from datetime import datetime
 import uuid
 import os
 import logging
@@ -21,18 +20,18 @@ class DDBRepository(Repository):
         chats = await self.ddb_connector.get_chats_by_email(email)
         return self.convert_decimal_to_int(chats)
 
-    async def get_chat_by_id(self, id: str) -> dict:
-        chat = await self.ddb_connector.get_chat_by_id(id)
+    async def get_chat_by_id(self, id: str, timestamp: int = None) -> dict:
+        chat = await self.ddb_connector.get_chat_by_id(id,timestamp)
         return self.convert_decimal_to_int(chat)
 
-    async def delete_chat_by_id(self, id: str):
-        await self.ddb_connector.delete_chat_by_id(id)
+    async def delete_chat_by_id(self, id: str, timestamp: int = None):
+        await self.ddb_connector.delete_chat_by_id(id, timestamp)
 
     async def get_user(self, email: str) -> User:
         return await self.ddb_connector.get_user(email)
 
-    async def store_chat(self, chats: list, user_email: str, chat_id: str):
-        if len(chats) == 0:
+    async def store_chat(self, chats_info: dict, user_email: str, chat_id: str):
+        if chats_info.items() == 0:
             logger.info("No messages to store")
             return
         if user_email.strip() == '':
@@ -40,9 +39,9 @@ class DDBRepository(Repository):
             return
         new_chat = {
             'chat_id': str(uuid.uuid4()) if chat_id == '' else chat_id,
-            'timestamp': int(datetime.now().timestamp()),
+            'timestamp': chats_info['timestamp'],
             'user_email': user_email,
-            'messages': chats
+            'messages': chats_info['messages']
         }
         logger.info("Storing chat with id " + new_chat["chat_id"])
         logger.debug(f"Message to store: {new_chat}")

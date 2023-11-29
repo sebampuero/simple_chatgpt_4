@@ -2,6 +2,7 @@ import openai
 import os
 import logging
 import json
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,7 @@ class GPT4:
             raise Exception("Singleton class. Use getInstance() method to get an instance.")
         else:
             self.map_messages = {}
+            self.map_ws_id_to_timestamp = {}
             GPT4.__instance = self
 
     @staticmethod
@@ -25,16 +27,23 @@ class GPT4:
 
     def remove_socket_id(self, websocket_id: str) -> None:
         self.map_messages.pop(websocket_id, None)
+        self.map_ws_id_to_timestamp.pop(websocket_id, None)
 
     def append_to_msg_history_as_assistant(self, websocket_id: str, message: str):
         self.map_messages[websocket_id].append({"role": "assistant", "content": message})
 
-    def get_messages(self, ws_id: str) -> dict:
+    def get_messages_info(self, ws_id: str) -> dict:
         logger.debug("Retrieved messages. " + json.dumps(self.map_messages, indent=4))
-        return self._from_gpt4_format_to_own_format(self.map_messages[ws_id]) if ws_id in self.map_messages else []
+        if ws_id in self.map_messages and ws_id in self.map_ws_id_to_timestamp:
+            return {
+                "messages": self._from_gpt4_format_to_own_format(self.map_messages[ws_id]),
+                "timestamp": self.map_ws_id_to_timestamp[ws_id]
+            }
+        return {}
     
-    def set_messages(self, ws_id: str, chats: list):
+    def set_messages_info(self, ws_id: str, timestamp: int, chats: list):
         self.map_messages[ws_id] = self._from_own_format_to_gpt4_format(chats)
+        self.map_ws_id_to_timestamp[ws_id] = timestamp
         logger.debug("Set messages. " + json.dumps(self.map_messages, indent=4))
 
     def _from_own_format_to_gpt4_format(self, chats: list) -> list:
@@ -73,6 +82,8 @@ class GPT4:
     async def prompt(self, websocket_id: str, input: dict):
         if websocket_id not in self.map_messages:
             self.map_messages[websocket_id] = []
+        if websocket_id not in self.map_ws_id_to_timestamp:
+            self.map_ws_id_to_timestamp[websocket_id] = int(datetime.now().timestamp())
         content = input['msg'] if input['image'] == '' \
             else [{
                 "type": "text",

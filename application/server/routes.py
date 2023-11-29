@@ -24,20 +24,20 @@ async def get_chats_for_user(request: Request, email: str):
     chats = await DDBRepository().get_chats_by_email(email)
     return sanicjson({"body": chats})
 
-async def load_new_chat(request: Request, id: str, socket_id: str):
+async def load_new_chat(request: Request, id: str, timestamp: str, socket_id: str):
     if id is None or id.strip() == '':
         return HTTPResponse(status=400)
-    chat_data = await DDBRepository().get_chat_by_id(id)
+    chat_data = await DDBRepository().get_chat_by_id(id, int(timestamp))
     if chat_data is None:
         return HTTPResponse(status=404)
     gpt4 = GPT4.getInstance()
-    gpt4.set_messages(socket_id, chat_data['messages'])
+    gpt4.set_messages_info(socket_id, int(timestamp), chat_data['messages'])
     return sanicjson({"body": chat_data})
 
-async def delete_chat(request: Request, id: str):
+async def delete_chat(request: Request, id: str, timestamp: str):
     if id.strip() == '':
         return HTTPResponse(status=400)
-    await DDBRepository().delete_chat_by_id(id)
+    await DDBRepository().delete_chat_by_id(id, int(timestamp))
     return HTTPResponse(status=204)
 
 async def login(request: Request):
@@ -68,19 +68,18 @@ async def chat(request: Request, ws: Websocket):
     logger.info(f"Client connected via WS: {client_ip} and socket_id {socket_id}")
     await ws.send(json.dumps({"socket_id": socket_id, "type": "INIT"}))
     while True:
-        dt = datetime.now()
-        ts = datetime.timestamp(dt)
+        message_timestamp = datetime.timestamp(datetime.now())
         gpt4 = GPT4.getInstance()
         try:
             input_raw = await ws.recv()
         except:
             logger.error(f"Unexpected exception, most probably {client_ip} closed the websocket connection",exc_info=True)
-            await DDBRepository().store_chat(gpt4.get_messages(socket_id), user_email, chat_id)
+            await DDBRepository().store_chat(gpt4.get_messages_info(socket_id), user_email, chat_id)
             gpt4.remove_socket_id(socket_id)
             break
         if not input_raw:
             logger.info(f"{client_ip} closed the connection")
-            await DDBRepository().store_chat(gpt4.get_messages(socket_id), user_email, chat_id)
+            await DDBRepository().store_chat(gpt4.get_messages_info(socket_id), user_email, chat_id)
             gpt4.remove_socket_id(socket_id)
             break
         try:
@@ -101,9 +100,9 @@ async def chat(request: Request, ws: Websocket):
             async for response_chunk in response_generator:
                 delta = response_chunk["choices"][0]["delta"]
                 if "content" in delta:
-                    await ws.send(json.dumps({"content": delta["content"], "timestamp": int(ts), "type": "CONTENT"}))
+                    await ws.send(json.dumps({"content": delta["content"], "timestamp": int(message_timestamp), "type": "CONTENT"}))
                     assistant_msg += delta["content"]
-            await ws.send(json.dumps({"content": "END", "timestamp": int(ts), "type": "CONTENT"}))
+            await ws.send(json.dumps({"content": "END", "timestamp": int(message_timestamp), "type": "CONTENT"}))
             gpt4.append_to_msg_history_as_assistant(socket_id, assistant_msg)
         except openai.error.RateLimitError:
             logger.error(f"Rate limit exceeded", exc_info=True)

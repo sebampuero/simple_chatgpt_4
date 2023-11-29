@@ -8,6 +8,7 @@ const ChatPage = ({ email }) => {
   const [chatMessages, setChatMessages] = useState([]);
   const [chats, setChats] = useState([]);
   const [currentChatId, setCurrentChatId] = useState("");
+  const [currentChatTimestamp, setCurrentChatTimestamp] = useState(0);
   const [socket, setSocket] = useState(null);
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [isPromptLoading, setIsPromptLoading] = useState(false);
@@ -39,7 +40,6 @@ const ChatPage = ({ email }) => {
           obj.title = userContent.substring(0,10) + "..."; // very basic and naive way to show main idea of a chat
         })
         setChats(chats)
-        console.log("Set chat messages: " + chats)
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -85,7 +85,7 @@ const ChatPage = ({ email }) => {
   useEffect(() => {
     loadChats()
     createSocket()
-  }, [currentChatId, socket]); // needed here because rendering is needed every time a new chat is selected
+  }, [currentChatId, socket, currentChatTimestamp]); // needed here because rendering is needed every time a new chat is selected
 
   const displayMessage = (messageContent, messageType) => {
     const newMessage = {
@@ -97,7 +97,7 @@ const ChatPage = ({ email }) => {
     setChatMessages((prevMessages) => [...prevMessages, newMessage]);
   };
   const retrieveMessagesForNewOpenedChat = (socketId) => {
-    fetch(process.env.PUBLIC_URL + `/chat/${currentChatId}/${socketId}`, {
+    fetch(process.env.PUBLIC_URL + `/chat/${currentChatId}/${currentChatTimestamp}/${socketId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -236,9 +236,10 @@ const ChatPage = ({ email }) => {
     setOptionsVisible(!optionsVisible);
   }
 
-  const switchChat = (chatId) => {
+  const switchChat = (chatId, timestamp) => {
     console.log("Switching chat to " + chatId)
     setCurrentChatId(chatId);
+    setCurrentChatTimestamp(timestamp);
     closeSocket();
     createSocket();
   };
@@ -247,8 +248,8 @@ const ChatPage = ({ email }) => {
     setSidebarVisible(!sidebarVisible);
   };
 
-  const deleteChat = (chatId) => {
-    fetch(process.env.PUBLIC_URL + `/chat/${chatId}`, {
+  const deleteChat = (chatId, timestamp) => {
+    fetch(process.env.PUBLIC_URL + `/chat/${chatId}/${timestamp}`, {
       method: "DELETE"
     })
       .then((response) => { 

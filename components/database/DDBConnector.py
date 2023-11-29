@@ -35,21 +35,21 @@ class DDBConnector:
                 return []
             return response.get('Items', [])
 
-    async def get_chat_by_id(self, id: str) -> dict:
+    async def get_chat_by_id(self, id: str, timestamp: int) -> dict:
         async with self.session.resource('dynamodb', region_name='eu-central-1') as client:
             table = await client.Table(self.chats_table)
             try:
-                response = await table.get_item(Key={'chat_id': id})
+                response = await table.get_item(Key={'chat_id': id, 'timestamp': timestamp})
             except Exception as e:
                 logger.error(f"Error querying chat with id {id} {e}")
                 return None
             return response.get('Item')
 
-    async def delete_chat_by_id(self, id: str):
+    async def delete_chat_by_id(self, id: str, timestamp: int):
         async with self.session.resource('dynamodb', region_name='eu-central-1') as client:
             table = await client.Table(self.chats_table)
             try:
-                await table.delete_item(Key={'chat_id': id})
+                await table.delete_item(Key={'chat_id': id, 'timestamp': timestamp})
             except Exception as e:
                 logger.error(f"Error deleting chat with id {id} {e}")
 
