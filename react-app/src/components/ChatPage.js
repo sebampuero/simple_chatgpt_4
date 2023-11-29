@@ -7,16 +7,16 @@ const ChatPage = ({ email }) => {
   const [optionsVisible, setOptionsVisible] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [chats, setChats] = useState([]);
-  const [currentChatId, setCurrentChatId] = useState(""); //TODO: normal var
-  const [currentChatTimestamp, setCurrentChatTimestamp] = useState(0); //TODO: not needed?
-  const [socket, setSocket] = useState(null); //TODO: normal var
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [isPromptLoading, setIsPromptLoading] = useState(false);
-  const [imgBase64Data, setImageBase64Data] = useState(''); //TODO: normal var
-  const [imageDataURL, setImageDataURL] = useState(null); //TODO: normal var
 
   const MAX_IMG_WIDTH = 450;
   const MAX_IMG_HEIGHT = 450;
+  let currentChatId = "";
+  let currentChatTimestamp = 0;
+  const socket = null;
+  let imgBase64Data = "";
+  let imageDataURL = null;
 
   const loadChats = () => {
     fetch(process.env.PUBLIC_URL + "/user/" + email, {
@@ -53,7 +53,7 @@ const ChatPage = ({ email }) => {
       const socketUrl = process.env.NODE_ENV === 'production'
       ? process.env.REACT_APP_PROD_WS_URL
       : process.env.REACT_APP_WS_URL;
-      const socket = new WebSocket(socketUrl);
+      socket = new WebSocket(socketUrl);
 
       socket.addEventListener('open', () => {
         console.log('WebSocket connection opened');      
@@ -71,22 +71,20 @@ const ChatPage = ({ email }) => {
       socket.addEventListener('close', (event) => {
         console.log('WebSocket connection closed:', event);
       });
-
-      setSocket(socket);
     }
   }
 
   const closeSocket = () => {
     if (socket) {
       socket.close()
-      setSocket(null)
+      socket = null;
     }
   }
 
   useEffect(() => {
     loadChats()
     createSocket()
-  }, [currentChatId, currentChatTimestamp, socket]); // needed here because rendering is needed every time a new chat is selected
+  }, []);
 
   const displayMessage = (messageContent, messageType) => {
     const newMessage = {
@@ -135,8 +133,8 @@ const ChatPage = ({ email }) => {
     const messageObj = JSON.parse(message)
     if (messageObj.content === "END") {
       setIsPromptLoading(false);
-      setImageBase64Data('');
-      setImageDataURL(null);
+      imgBase64Data = "";
+      imageDataURL = null;
       return
     }
     setChatMessages((prevMessages) => {
@@ -183,7 +181,7 @@ const ChatPage = ({ email }) => {
         ctx.drawImage(img, 0, 0, width, height);
 
         canvas.toBlob(blob => {
-          setImageDataURL(URL.createObjectURL(blob));
+          imageDataURL = URL.createObjectURL(blob);
           const reader = new FileReader();
           reader.onload = function () {
             resolve(reader.result.split(',')[1]);
@@ -203,13 +201,13 @@ const ChatPage = ({ email }) => {
       reader.onload = function (e) {
         resizeImageAndConvertToBase64(e.target.result, MAX_IMG_WIDTH, MAX_IMG_HEIGHT)
         .then(base64Data => {
-          setImageBase64Data(base64Data);
+          imgBase64Data = base64Data;
         })
         .catch(error => {
           console.error('Error:', error);
           alert("There was an error uploading the image");
-          setImageBase64Data('');
-          setImageDataURL(null);
+          imgBase64Data = "";
+          imageDataURL = null;
         });
       };
       reader.readAsArrayBuffer(file);
@@ -238,8 +236,8 @@ const ChatPage = ({ email }) => {
 
   const switchChat = (chatId, timestamp) => {
     console.log("Switching chat to " + chatId + " " + timestamp)
-    setCurrentChatId(chatId);
-    setCurrentChatTimestamp(timestamp)
+    currentChatId = chatId;
+    currentChatTimestamp = timestamp;
     closeSocket();
     createSocket();
   };
