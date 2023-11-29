@@ -9,7 +9,7 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
     def setUp(self):
         self.chats_table = "chats_test"
         self.users_table = "authorized_users"
-        self.connector = DDBConnector(chats_table=self.chats_table, users_table=self.users_table)
+        self.connector = DDBConnector.getInstance(chats_table=self.chats_table, users_table=self.users_table)
 
         self.sample_user_data = {'email': 'test@example.com'}
         self.sample_user_data2 = {'email': 'test2@example.com'}
@@ -92,6 +92,56 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
         result = await self.connector.get_chat_by_id(id)
         expected = {'messages': [{'role': 'user', 'content': 'some content', 'image': 'base64'}, {'role': 'assistant', 'content': 'some content from peer'}], 'user_email': 'test@example.com', 'chat_id': 'randomUUID1', 'timestamp': Decimal('1234567789')}
         self.assertDictEqual(result, expected)
+
+    async def test_update_item(self):
+        id = 'randomUUID11'
+        sample_chat_data = {
+                                    "chat_id": id,
+                                    "user_email": "test3@example.com",
+                                    "timestamp": 1234349495,
+                                    "messages": [
+                                        {
+                                        "role": "user",
+                                        "content": "some content",
+                                        "image": "base64"
+                                        },
+                                        {
+                                        "role": "assistant",
+                                        "content": "some content from peer"
+                                        }
+                                    ]
+                                }
+        await self.connector.store_chat(sample_chat_data)
+        sample_chat_data_updated = {
+                                    "chat_id": id,
+                                    "user_email": "test3@example.com",
+                                    "timestamp": 4534534324,
+                                    "messages": [
+                                        {
+                                        "role": "user",
+                                        "content": "some content",
+                                        "image": "base64"
+                                        },
+                                        {
+                                        "role": "assistant",
+                                        "content": "some content from peer"
+                                        },
+                                        {
+                                        "role": "user",
+                                        "content": "some content 2",
+                                        "image": ""
+                                        },
+                                        {
+                                        "role": "assistant",
+                                        "content": "some content from peer answer"
+                                        }
+                                    ]
+                                }
+        await self.connector.store_chat(sample_chat_data_updated)
+        result = await self.connector.get_chat_by_id(id)
+        expected = { "chat_id": "randomUUID11", "user_email": "test3@example.com", "timestamp": Decimal('4534534324'), "messages": [ { "role": "user", "content": "some content", "image": "base64" }, { "role": "assistant", "content": "some content from peer" }, { "role": "user", "content": "some content 2", "image": "" }, { "role": "assistant", "content": "some content from peer answer" } ] }
+        self.assertDictEqual(result, expected)
+        await self.connector.delete_chat_by_id(id)
 
     async def test_delete_chat_by_id(self):
         id = 'randomUUID10'
