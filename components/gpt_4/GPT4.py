@@ -28,13 +28,17 @@ class GPT4:
     def remove_socket_id(self, websocket_id: str) -> None:
         self.map_messages.pop(websocket_id, None)
         self.map_ws_id_to_timestamp.pop(websocket_id, None)
+        logger.debug(f"Removed info to socket id {websocket_id}")
+        logger.debug("Messages:" + json.dumps(self.map_messages, indent=4))
+        logger.debug("Ws_id to timestamp:" + json.dumps(self.map_ws_id_to_timestamp, indent=4))
 
     def append_to_msg_history_as_assistant(self, websocket_id: str, message: str):
         self.map_messages[websocket_id].append({"role": "assistant", "content": message})
 
     def get_messages_info(self, ws_id: str) -> dict:
-        logger.debug("Retrieved messages. " + json.dumps(self.map_messages, indent=4))
         if ws_id in self.map_messages and ws_id in self.map_ws_id_to_timestamp:
+            logger.debug("Retrieved message" + json.dumps(self.map_messages[ws_id], indent=4))
+            logger.debug("Retrieved ws_id to timestamp" + json.dumps(self.map_ws_id_to_timestamp[ws_id], indent=4))
             return {
                 "messages": self._from_gpt4_format_to_own_format(self.map_messages[ws_id]),
                 "timestamp": self.map_ws_id_to_timestamp[ws_id]
@@ -44,7 +48,8 @@ class GPT4:
     def set_messages_info(self, ws_id: str, timestamp: int, chats: list):
         self.map_messages[ws_id] = self._from_own_format_to_gpt4_format(chats)
         self.map_ws_id_to_timestamp[ws_id] = timestamp
-        logger.debug("Set messages. " + json.dumps(self.map_messages, indent=4))
+        logger.debug("Set new message" + json.dumps(self.map_messages[ws_id], indent=4))
+        logger.debug("Set new ws_id to timestamp " + json.dumps(self.map_ws_id_to_timestamp[ws_id], indent=4))
 
     def _from_own_format_to_gpt4_format(self, chats: list) -> list:
         output_list = []
