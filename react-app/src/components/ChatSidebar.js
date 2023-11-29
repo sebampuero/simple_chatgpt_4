@@ -8,8 +8,8 @@ const ChatSidebar = ({ chats, onChatClick, onDeleteChat }) => {
       <ul>
         {chats.map((chat) => (
           <li key={chat.chat_id}>
-          <span class="chat-row-title" onClick={() => onChatClick(chat.chat_id, chat.timestamp)}>{chat.title}</span>
-          <button  onClick={() => onDeleteChat(chat.chat_id, chat.timestamp)}><i class="fa-solid fa-trash"></i></button>
+          <span class="chat-row-title" onClick={() => onChatClick(chat.chat_id)}>{chat.title}</span>
+          <button  onClick={() => onDeleteChat(chat.chat_id)}><i class="fa-solid fa-trash"></i></button>
         </li>
         ))}
       </ul>

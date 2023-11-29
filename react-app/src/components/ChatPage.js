@@ -7,16 +7,15 @@ const ChatPage = ({ email }) => {
   const [optionsVisible, setOptionsVisible] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [chats, setChats] = useState([]);
+  const [currentChatId, setCurrentChatId] = useState("");
+  const [socket, setSocket] = useState(null);
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [isPromptLoading, setIsPromptLoading] = useState(false);
+  const [imgBase64Data, setImageBase64Data] = useState('');
+  const [imageDataURL, setImageDataURL] = useState(null);
 
   const MAX_IMG_WIDTH = 450;
   const MAX_IMG_HEIGHT = 450;
-  let currentChatId = "";
-  let currentChatTimestamp = 0;
-  const socket = null;
-  let imgBase64Data = "";
-  let imageDataURL = null;
 
   const loadChats = () => {
     fetch(process.env.PUBLIC_URL + "/user/" + email, {
@@ -53,7 +52,7 @@ const ChatPage = ({ email }) => {
       const socketUrl = process.env.NODE_ENV === 'production'
       ? process.env.REACT_APP_PROD_WS_URL
       : process.env.REACT_APP_WS_URL;
-      socket = new WebSocket(socketUrl);
+      const socket = new WebSocket(socketUrl);
 
       socket.addEventListener('open', () => {
         console.log('WebSocket connection opened');      
@@ -71,20 +70,22 @@ const ChatPage = ({ email }) => {
       socket.addEventListener('close', (event) => {
         console.log('WebSocket connection closed:', event);
       });
+
+      setSocket(socket);
     }
   }
 
   const closeSocket = () => {
     if (socket) {
       socket.close()
-      socket = null;
+      setSocket(null)
     }
   }
 
   useEffect(() => {
     loadChats()
     createSocket()
-  }, []);
+  }, [currentChatId, socket]); // needed here because rendering is needed every time a new chat is selected
 
   const displayMessage = (messageContent, messageType) => {
     const newMessage = {
@@ -96,7 +97,7 @@ const ChatPage = ({ email }) => {
     setChatMessages((prevMessages) => [...prevMessages, newMessage]);
   };
   const retrieveMessagesForNewOpenedChat = (socketId) => {
-    fetch(process.env.PUBLIC_URL + `chat/${currentChatId}/${currentChatTimestamp}/${socketId}`, {
+    fetch(process.env.PUBLIC_URL + `chat/${currentChatId}/${socketId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -133,8 +134,8 @@ const ChatPage = ({ email }) => {
     const messageObj = JSON.parse(message)
     if (messageObj.content === "END") {
       setIsPromptLoading(false);
-      imgBase64Data = "";
-      imageDataURL = null;
+      setImageBase64Data('');
+      setImageDataURL(null);
       return
     }
     setChatMessages((prevMessages) => {
@@ -181,7 +182,7 @@ const ChatPage = ({ email }) => {
         ctx.drawImage(img, 0, 0, width, height);
 
         canvas.toBlob(blob => {
-          imageDataURL = URL.createObjectURL(blob);
+          setImageDataURL(URL.createObjectURL(blob));
           const reader = new FileReader();
           reader.onload = function () {
             resolve(reader.result.split(',')[1]);
@@ -201,13 +202,13 @@ const ChatPage = ({ email }) => {
       reader.onload = function (e) {
         resizeImageAndConvertToBase64(e.target.result, MAX_IMG_WIDTH, MAX_IMG_HEIGHT)
         .then(base64Data => {
-          imgBase64Data = base64Data;
+          setImageBase64Data(base64Data);
         })
         .catch(error => {
           console.error('Error:', error);
           alert("There was an error uploading the image");
-          imgBase64Data = "";
-          imageDataURL = null;
+          setImageBase64Data('');
+          setImageDataURL(null);
         });
       };
       reader.readAsArrayBuffer(file);
@@ -234,10 +235,9 @@ const ChatPage = ({ email }) => {
     setOptionsVisible(!optionsVisible);
   }
 
-  const switchChat = (chatId, timestamp) => {
-    console.log("Switching chat to " + chatId + " " + timestamp)
-    currentChatId = chatId;
-    currentChatTimestamp = timestamp;
+  const switchChat = (chatId) => {
+    console.log("Switching chat to " + chatId)
+    setCurrentChatId(chatId);
     closeSocket();
     createSocket();
   };
@@ -246,8 +246,8 @@ const ChatPage = ({ email }) => {
     setSidebarVisible(!sidebarVisible);
   };
 
-  const deleteChat = (chatId, timestamp) => {
-    fetch(process.env.PUBLIC_URL + `/chat/${chatId}/${timestamp}`, {
+  const deleteChat = (chatId) => {
+    fetch(process.env.PUBLIC_URL + `/chat/${chatId}`, {
       method: "DELETE"
     })
       .then((response) => { 
