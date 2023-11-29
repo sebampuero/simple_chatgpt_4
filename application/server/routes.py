@@ -24,20 +24,20 @@ async def get_chats_for_user(request: Request, email: str):
     chats = await DDBRepository().get_chats_by_email(email)
     return sanicjson({"body": chats})
 
-async def load_new_chat(request: Request, id: str, timestamp: str, socket_id: str):
+async def load_new_chat(request: Request, id: str, socket_id: str):
     if id is None or id.strip() == '':
         return HTTPResponse(status=400)
-    chat_data = await DDBRepository().get_chat_by_id(id, int(timestamp))
+    chat_data = await DDBRepository().get_chat_by_id(id)
     if chat_data is None:
         return HTTPResponse(status=404)
     gpt4 = GPT4.getInstance()
     gpt4.set_messages(socket_id, chat_data['messages'])
     return sanicjson({"body": chat_data})
 
-async def delete_chat(request: Request, id: str, timestamp: str):
+async def delete_chat(request: Request, id: str):
     if id.strip() == '':
         return HTTPResponse(status=400)
-    await DDBRepository().delete_chat_by_id(id, int(timestamp))
+    await DDBRepository().delete_chat_by_id(id)
     return HTTPResponse(status=204)
 
 async def login(request: Request):

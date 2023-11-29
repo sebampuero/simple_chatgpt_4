@@ -9,10 +9,10 @@ class Repository(Protocol):
     async def get_chats_by_email(self, email: str) -> dict:
         pass
 
-    async def get_chat_by_id(self, id: str, timestamp: int = None) -> dict:
+    async def get_chat_by_id(self, id: str) -> dict:
         pass
 
-    async def delete_chat_by_id(self, id: str, timestamp: int = None):
+    async def delete_chat_by_id(self, id: str):
         pass
 
     async def get_user(self, email: str) -> User:
