@@ -136,6 +136,7 @@ const ChatPage = ({ email }) => {
       setIsPromptLoading(false);
       setImageBase64Data('');
       setImageDataURL(null);
+      //TODO: add option to format message when gpt sends code surrounded by `code`
       return
     }
     setChatMessages((prevMessages) => {
