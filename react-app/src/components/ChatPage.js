@@ -97,7 +97,7 @@ const ChatPage = ({ email }) => {
     setChatMessages((prevMessages) => [...prevMessages, newMessage]);
   };
   const retrieveMessagesForNewOpenedChat = (socketId) => {
-    fetch(process.env.PUBLIC_URL + `chat/${currentChatId}/${socketId}`, {
+    fetch(process.env.PUBLIC_URL + `/chat/${currentChatId}/${socketId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
