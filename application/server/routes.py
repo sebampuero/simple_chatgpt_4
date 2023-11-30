@@ -7,10 +7,7 @@ from components.repository.DDBRepository import DDBRepository
 import logging, json, openai
 from datetime import datetime
 
-CHANGING_CHAT = "chat_change"
-
 logger = logging.getLogger(__name__)
-# Register routes
 
 async def serve_index(request: Request):
     return await file("static/index.html")
@@ -45,7 +42,6 @@ async def login(request: Request):
     Checks if user's email is authenticated
     """
     try:
-        # Assuming the request body is in JSON format
         body = request.json
         email = body.get('email')
     except Exception as e:
@@ -56,17 +52,10 @@ async def login(request: Request):
         return HTTPResponse(status=200)
     logger.info(f"Bad email entered by {request.headers.get('X-Forwarded-For', '').split(',')[0].strip()}: {email}")
     return HTTPResponse(status=401)
-
-async def chat(request: Request, ws: Websocket):
-    """
-    Main websocket endpoint
-    """ #TODO: dismantle in separate methods
-    client_ip = request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
-    socket_id = str(id(ws))
+   
+async def _handle_prompting(ws: Websocket, socket_id: str, client_ip: str):
     user_email = ""
     chat_id = ""
-    logger.info(f"Client connected via WS: {client_ip} and socket_id {socket_id}")
-    await ws.send(json.dumps({"socket_id": socket_id, "type": "INIT"}))
     while True:
         message_timestamp = datetime.timestamp(datetime.now())
         gpt4 = GPT4.getInstance()
@@ -106,13 +95,21 @@ async def chat(request: Request, ws: Websocket):
             gpt4.append_to_msg_history_as_assistant(socket_id, assistant_msg)
         except openai.error.RateLimitError:
             logger.error(f"Rate limit exceeded", exc_info=True)
-            await ws.send("Se alcanzo el limite de $8 mensuales para uso de GPT-4")
+            await ws.send(json.dumps({"content": "Usage limit exceeded", "timestamp": int(message_timestamp), "type": "CONTENT"}))
         except openai.error.APIError:
             logger.error(exc_info=True)
-            await ws.send("Hubo un error con al API de GPT4")
-        except openai.error.APIConnectionError:
-            logger.error(exc_info=True)
-            await ws.send("No se pudo conectar con GPT4, vuelve a intentar mas tarde")
+            await ws.send(json.dumps({"content": "GPT4 had an error generating response for the prompt", "timestamp": int(message_timestamp), "type": "CONTENT"}))
         except:
             logger.error(exc_info=True)
-            await  ws.send("Error, vuelve a intentar mas tarde")
+            await  ws.send(json.dumps({"content": "General error, try again later", "timestamp": int(message_timestamp), "type": "CONTENT"}))
+
+async def chat(request: Request, ws: Websocket):
+    """
+    Main websocket endpoint
+    """
+    client_ip = request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
+    socket_id = str(id(ws))
+    logger.info(f"Client connected via WS: {client_ip} and socket_id {socket_id}")
+    await ws.send(json.dumps({"socket_id": socket_id, "type": "INIT"}))
+    _handle_prompting(ws, socket_id, client_ip)
+    
