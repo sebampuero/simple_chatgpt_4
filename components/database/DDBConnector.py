@@ -5,22 +5,11 @@ from boto3.dynamodb.conditions import Key
 logger = logging.getLogger(__name__)
 
 class DDBConnector:
-    __instance = None
 
     def __init__(self, chats_table: str, users_table: str):
-        if DDBConnector.__instance is not None:
-            raise Exception("Singleton class. Use getInstance() method to get an instance.")
-        else:
-            self.chats_table = chats_table
-            self.users_table = users_table
-            self.session = aioboto3.Session()
-            DDBConnector.__instance = self
-
-    @staticmethod
-    def getInstance(chats_table: str, users_table: str):
-        if DDBConnector.__instance is None:
-            DDBConnector(chats_table, users_table)
-        return DDBConnector.__instance
+        self.chats_table = chats_table
+        self.users_table = users_table
+        self.session = aioboto3.Session()
 
     async def get_chats_by_email(self, email: str) -> dict:
         async with self.session.resource('dynamodb', region_name='eu-central-1') as client:

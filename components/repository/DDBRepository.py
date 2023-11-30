@@ -14,7 +14,7 @@ class DDBRepository(Repository):
         if not chats_table and not users_table:
             chats_table = os.getenv('DDB_CHATS_TABLE')
             users_table = os.getenv('DDB_USERS_TABLE')
-        self.ddb_connector =  DDBConnector.getInstance(chats_table=chats_table, users_table=users_table)
+        self.ddb_connector =  DDBConnector(chats_table=chats_table, users_table=users_table)
 
     async def get_chats_by_email(self, email: str) -> dict:
         chats = await self.ddb_connector.get_chats_by_email(email)

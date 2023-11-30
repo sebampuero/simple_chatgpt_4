@@ -9,7 +9,7 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
     def setUp(self):
         self.chats_table = "chats_test"
         self.users_table = "authorized_users"
-        self.connector = DDBConnector.getInstance(chats_table=self.chats_table, users_table=self.users_table)
+        self.connector = DDBConnector(chats_table=self.chats_table, users_table=self.users_table)
 
         self.sample_user_data = {'email': 'test@example.com'}
         self.sample_user_data2 = {'email': 'test2@example.com'}
