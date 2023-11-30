@@ -38,7 +38,8 @@ class DDBConnector:
         async with self.session.resource('dynamodb', region_name='eu-central-1') as client:
             table = await client.Table(self.chats_table)
             try:
-                await table.delete_item(Key={'chat_id': id, 'timestamp': timestamp})
+                response = await table.delete_item(Key={'chat_id': id, 'timestamp': timestamp})
+                logger.debug(f"Deleting ID {id}. Response: {response}")
             except Exception as e:
                 logger.error(f"Error deleting chat with id {id} {e}")
 
@@ -56,6 +57,7 @@ class DDBConnector:
         async with self.session.resource('dynamodb', region_name='eu-central-1') as client:
             table = await client.Table(self.chats_table)
             try:
-                await table.put_item(Item=chat)
+                response = await table.put_item(Item=chat)
+                logger.debug(f"Created chat {chat}. Response: {response}")
             except Exception as e:
                 logger.error(f"Error saving chat {chat} {e}")
