@@ -37,7 +37,7 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
         const chats = resp.body
         chats.forEach(obj => {
           let userContent = obj.messages.find(msg => msg.role === 'user')?.content;
-          obj.title = userContent.substring(0,10) + "..."; // very basic and naive way to show main idea of a chat
+          obj.title = userContent.substring(0,15) + "..."; // very basic and naive way to show main idea of a chat
         })
         setChats(chats)
       })
@@ -92,7 +92,7 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
       timestamp: Date.now(), 
       content: messageContent,
       role: messageType,
-      img: imageDataURL
+      image: imageDataURL
     };
     setChatMessages((prevMessages) => [...prevMessages, newMessage]);
   };
@@ -248,7 +248,17 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
     closeSocket();
     createSocket();
     setSidebarVisible(!sidebarVisible);
+    setOptionsVisible(!optionsVisible);
   };
+
+  const newChat = () => {
+    setChatMessages([]);
+    setCurrentChatId("");
+    closeSocket();
+    createSocket();
+    setSidebarVisible(!sidebarVisible);
+    setOptionsVisible(!optionsVisible);
+  }
 
   const toggleSidebar = () => {
     setSidebarVisible(!sidebarVisible);
@@ -306,8 +316,11 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
 
       <div id="options-container" className={optionsVisible ? 'show' : 'hidden'}>
         <div id="options-header">Options</div>
-        <button id="toggle-sidebar-button" style={{marginTop: "5px", marginBottom: "5px"}} onClick={toggleSidebar}>
+        <button id="toggle-sidebar-button" style={{marginTop: "5px", marginBottom: "5px", marginRight: "2px", marginLeft: "2px"}} onClick={toggleSidebar}>
           {sidebarVisible ? 'Hide chats' : 'Show chats'}
+        </button>
+        <button id="new-chat-button" style={{marginTop: "5px", marginBottom: "5px", marginRight: "2px", marginLeft: "2px"}} onClick={newChat}>
+          New chat
         </button>
         <div id="image-upload-container">
           <input

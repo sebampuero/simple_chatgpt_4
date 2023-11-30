@@ -17,7 +17,7 @@
   /* Add a media query for mobile devices to make the sidebar take 100% width */
 @media only screen and (max-width: 768px) {
   #chat-sidebar {
-    width: 40%;
+    width: 50%;
   }
 }
   

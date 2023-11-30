@@ -4,6 +4,7 @@ from boto3.dynamodb.conditions import Key
 
 logger = logging.getLogger(__name__)
 
+#TODO: async needs to be pushed. Maybe use https://pypi.org/project/asgiref/ ? evaluate how does it work
 class DDBConnectorSync:
 
     def __init__(self, chats_table: str, users_table: str):

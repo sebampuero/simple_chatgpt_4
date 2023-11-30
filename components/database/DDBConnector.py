@@ -4,6 +4,7 @@ from boto3.dynamodb.conditions import Key
 
 logger = logging.getLogger(__name__)
 
+#TODO: aioboto3 has problems maintining consistency when doing async writes (put_item), that is why this class is not currently used
 class DDBConnector:
 
     def __init__(self, chats_table: str, users_table: str):
