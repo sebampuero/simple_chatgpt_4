@@ -247,6 +247,7 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
     setCurrentChatTimestamp(timestamp);
     closeSocket();
     createSocket();
+    setSidebarVisible(!sidebarVisible);
   };
 
   const toggleSidebar = () => {
