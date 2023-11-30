@@ -1,42 +1,26 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { GoogleLogin } from '@react-oauth/google';
 
-const EmailForm = ({ onSubmit }) => {
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(e.target.elements['email'].value);
-  };
+const EmailForm = ({ onSignIn }) => {
+
+  const handleSignIn = (credentialResponse) => {
+    const jwt_decoded = JSON.parse(atob(credentialResponse.credential.split('.')[1]));
+    console.log("Logged in with email " + jwt_decoded.email)
+    onSignIn(jwt_decoded);
+  }
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-      <form
-        id="email-form"
-        action=""
-        method="POST"
-        onSubmit={handleSubmit}
-        className="col-12 col-md-6"
-      >
-        <div className="container">
-          <div className="row justify-content-center">
-            <div className="col-xs-12 text-center">
-              <h2>Email address</h2>
-              <div className="form-group">
-                <input
-                  type="email"
-                  className="form-control"
-                  id="email"
-                  name="email"
-                  placeholder="Email address"
-                  required
-                />
-              </div>
-              <button type="submit" className="btn btn-primary">
-                Send
-              </button>
-            </div>
-          </div>
-        </div>
-      </form>
+      <GoogleLogin
+        onSuccess={credentialResponse => {
+          handleSignIn(credentialResponse)
+        }}
+        onError={() => {
+          console.log('Login Failed');
+          alert("Authentication failed.")
+        }}
+      />;
     </div>
   );
 };
