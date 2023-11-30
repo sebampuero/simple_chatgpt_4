@@ -6,7 +6,20 @@
     padding: 10px;
     border-right: 1px solid #ddd;
     overflow-y: auto; /* Add this line to make the list scrollable */
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 2;
   }
+
+  /* Add a media query for mobile devices to make the sidebar take 100% width */
+@media only screen and (max-width: 768px) {
+  #chat-sidebar {
+    width: 40%;
+  }
+}
   
   #chat-sidebar h3 {
     margin-bottom: 10px;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ChatSidebar from './ChatSidebar';
 import './ChatPage.css';
 
-const ChatPage = ({ email }) => {
+const ChatPage = ({ email }) => { //TODO: this component could be separated in more other components (messageinput, options dialog, etc)
   const [messageInput, setMessageInput] = useState('');
   const [optionsVisible, setOptionsVisible] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
@@ -10,7 +10,7 @@ const ChatPage = ({ email }) => {
   const [currentChatId, setCurrentChatId] = useState("");
   const [currentChatTimestamp, setCurrentChatTimestamp] = useState(0);
   const [socket, setSocket] = useState(null);
-  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [sidebarVisible, setSidebarVisible] = useState(false);
   const [isPromptLoading, setIsPromptLoading] = useState(false);
   const [imgBase64Data, setImageBase64Data] = useState('');
   const [imageDataURL, setImageDataURL] = useState(null);
@@ -114,7 +114,12 @@ const ChatPage = ({ email }) => {
       })
       .then((resp) => {
         const chat = resp.body
-        setChatMessages(chat.messages) //TODO: when receiving messages with images in base64 format, they need to be encoded to imageDataURL to be displayed in HTML
+        setChatMessages(() => {
+          chat.messages.forEach(obj => {
+            if(obj.image) obj.image = `data:image/jpg;base64,${obj.image}`
+          })
+          return chat.messages
+        })
       })
       .catch((error) => {
         console.error("Error: ", error);
@@ -274,8 +279,8 @@ const ChatPage = ({ email }) => {
         <div id="chat-messages">
         {chatMessages.map((message) => (
             <div className={`message-bubble ${message.role === 'user' ? 'user-message' : 'peer-message'}`}>
-              {message.img && message.img !== null && (
-                <img src={message.img} alt="GPT4-V image prompt" />
+              {message.image && message.image !== null && (
+                <img src={message.image} alt="GPT4-V image prompt" />
               )}
               <span>{message.content}</span>
             </div>

@@ -52,10 +52,18 @@ async def login(request: Request):
         return HTTPResponse(status=200)
     logger.info(f"Bad email entered by {request.headers.get('X-Forwarded-For', '').split(',')[0].strip()}: {email}")
     return HTTPResponse(status=401)
-   
-async def _handle_prompting(ws: Websocket, socket_id: str, client_ip: str):
+    
+
+async def chat(request: Request, ws: Websocket):
+    """
+    Main websocket endpoint
+    """
+    client_ip = request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
+    socket_id = str(id(ws))
     user_email = ""
     chat_id = ""
+    logger.info(f"Client connected via WS: {client_ip} and socket_id {socket_id}")
+    await ws.send(json.dumps({"socket_id": socket_id, "type": "INIT"}))
     while True:
         message_timestamp = datetime.timestamp(datetime.now())
         gpt4 = GPT4.getInstance()
@@ -102,14 +110,4 @@ async def _handle_prompting(ws: Websocket, socket_id: str, client_ip: str):
         except:
             logger.error(exc_info=True)
             await  ws.send(json.dumps({"content": "General error, try again later", "timestamp": int(message_timestamp), "type": "CONTENT"}))
-
-async def chat(request: Request, ws: Websocket):
-    """
-    Main websocket endpoint
-    """
-    client_ip = request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
-    socket_id = str(id(ws))
-    logger.info(f"Client connected via WS: {client_ip} and socket_id {socket_id}")
-    await ws.send(json.dumps({"socket_id": socket_id, "type": "INIT"}))
-    _handle_prompting(ws, socket_id, client_ip)
     
