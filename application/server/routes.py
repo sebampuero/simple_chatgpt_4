@@ -1,62 +1,58 @@
-from sanic import redirect, Websocket, Request, Sanic
-from sanic.response import html
-from jinja2 import Template
+from sanic import Websocket, Request
+from sanic.response import HTTPResponse, file
+from sanic.response import json as sanicjson
 from components.login.Login import Login
 from components.gpt_4.GPT4 import GPT4
-from components.chat_code_repository.CodeUseSupport import CodeUseSupport
-import logging, os, json, openai
+from components.repository.DDBRepository import DDBRepository
+import logging, json, openai
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
-# Register routes
 
-async def index(request: Request):
-    """
-    Returns main page
-    """
-    err = request.args["error"][0] if "error" in request.args else "No"
-    app = Sanic.get_app("chatgpt4")
-    html_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../static/index.html'))
-    with open(html_file_path, 'r') as f:
-        html_content = Template(f.read())
-    context = {
-        "subdirectory": app.ctx.sub_directory,
-        "error": err
-    }
-    return html(html_content.render(context))
+async def serve_index(request: Request):
+    return await file("static/index.html")
 
-async def passwd_code(request: Request):
-    """
-    Checks if password code is correct and redirects to chat page if so
-    """
-    # get code, check its valid, and then redirect to chat, if not valid, redirect to index
-    app = Sanic.get_app("chatgpt4")
-    body = request.form
-    code = body.get('password-code')
-    login_supp = Login()
-    if login_supp.check_code_is_correct(code):
-        return redirect(app.url_for("chat_page", code=code))
-    logger.info(f"Bad code entered by {request.headers.get('X-Forwarded-For', '').split(',')[0].strip()}: {code}")
-    url = app.url_for("index", error="Yes")
-    return redirect(url)
+async def serve_static(request: Request, filename):
+    return await file(f"static/{filename}")
 
+async def get_chats_for_user(request: Request, email: str):
+    if email.strip() == '':
+        return HTTPResponse(status=400)
+    chats = await DDBRepository().get_chats_by_email(email)
+    return sanicjson({"body": chats})
 
-async def chat_page(request: Request, code: str):
+async def load_new_chat(request: Request, id: str, timestamp: str, socket_id: str):
+    if id is None or id.strip() == '':
+        return HTTPResponse(status=400)
+    chat_data = await DDBRepository().get_chat_by_id(id, int(timestamp))
+    if chat_data is None:
+        return HTTPResponse(status=404)
+    gpt4 = GPT4.getInstance()
+    gpt4.set_messages_info(socket_id, int(timestamp), chat_data['messages'])
+    return sanicjson({"body": chat_data})
+
+async def delete_chat(request: Request, id: str, timestamp: str):
+    if id.strip() == '':
+        return HTTPResponse(status=400)
+    await DDBRepository().delete_chat_by_id(id, int(timestamp))
+    return HTTPResponse(status=204)
+
+async def login(request: Request):
     """
-    Serves the GPT-4 chat app in case the correct code is given. If not, request is redirected to <passwd_code>
+    Checks if user's email is authenticated
     """
-    login_supp = Login()
-    app = Sanic.get_app("chatgpt4")
-    if login_supp.check_code_is_correct(code):
-        html_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../static/chat.html'))
-        with open(html_file_path, 'r') as f:
-            html_content = Template(f.read())
-        context = {
-            "connection_code": code,
-            "ws_connection": app.ctx.ws_connection
-        }
-        return html(html_content.render(context))
-    logger.debug("Redirecting to Index because of bad code")
-    return redirect(app.url_for("index"))
+    try:
+        body = request.json
+        email = body.get('email')
+    except Exception as e:
+        logger.error(f"Error parsing JSON: {e}")
+        return HTTPResponse(status=400)
+    login_supp = Login(DDBRepository())
+    if await login_supp.check_user_is_authorized(email):
+        return HTTPResponse(status=200)
+    logger.info(f"Bad email entered by {request.headers.get('X-Forwarded-For', '').split(',')[0].strip()}: {email}")
+    return HTTPResponse(status=401)
+    
 
 async def chat(request: Request, ws: Websocket):
     """
@@ -64,62 +60,54 @@ async def chat(request: Request, ws: Websocket):
     """
     client_ip = request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
     socket_id = str(id(ws))
+    user_email = ""
+    chat_id = ""
     logger.info(f"Client connected via WS: {client_ip} and socket_id {socket_id}")
+    await ws.send(json.dumps({"socket_id": socket_id, "type": "INIT"}))
     while True:
+        message_timestamp = datetime.timestamp(datetime.now())
         gpt4 = GPT4.getInstance()
-        code_use_support = CodeUseSupport.getInstance()
         try:
             input_raw = await ws.recv()
         except:
             logger.error(f"Unexpected exception, most probably {client_ip} closed the websocket connection",exc_info=True)
+            await DDBRepository().store_chat(gpt4.get_messages_info(socket_id), user_email, chat_id)
             gpt4.remove_socket_id(socket_id)
             break
         if not input_raw:
             logger.info(f"{client_ip} closed the connection")
+            await DDBRepository().store_chat(gpt4.get_messages_info(socket_id), user_email, chat_id)
             gpt4.remove_socket_id(socket_id)
             break
         try:
             input_json = json.loads(input_raw)
         except json.JSONDecodeError:
-            await ws.send("Error")
-            logger.debug(f"Client IP {client_ip} did send bad WS packet {input_raw}")
+            logger.debug(f"Client IP {client_ip} sent unsupported command")
             await ws.close()
             break
-        if "code" not in input_json:
+        if "email" not in input_json:
             await ws.close()
             break
-        if input_json["msg"] == "RESET":
-            gpt4.reset_history(socket_id)
-            await ws.send("Historial de mensajes vaciado")
-            await ws.send("END")
-            continue
-        code_use_support.update_chat_code_date_if_needed(input_json["code"])
-        if code_use_support.max_use_reached(input_json["code"]):
-            await ws.send("Uso maximo por hoy alcanzado")
-            await ws.send("END")
-            continue
-        logger.debug(input_json)
-        code_use_support.incr_code_use_count(input_json["code"])
+        logger.debug("Input JSON from WS: " + json.dumps(input_json, indent=4))
+        user_email = input_json['email']
+        chat_id = input_json['chat_id']
         response_generator = await gpt4.prompt(socket_id, input_json)
         assistant_msg = ""
         try:
             async for response_chunk in response_generator:
                 delta = response_chunk["choices"][0]["delta"]
                 if "content" in delta:
-                    await ws.send(delta["content"])
+                    await ws.send(json.dumps({"content": delta["content"], "timestamp": int(message_timestamp), "type": "CONTENT"}))
                     assistant_msg += delta["content"]
+            await ws.send(json.dumps({"content": "END", "timestamp": int(message_timestamp), "type": "CONTENT"}))
             gpt4.append_to_msg_history_as_assistant(socket_id, assistant_msg)
         except openai.error.RateLimitError:
             logger.error(f"Rate limit exceeded", exc_info=True)
-            await ws.send("Se alcanzo el limite de $8 mensuales para uso de GPT-4")
+            await ws.send(json.dumps({"content": "Usage limit exceeded", "timestamp": int(message_timestamp), "type": "CONTENT"}))
         except openai.error.APIError:
             logger.error(exc_info=True)
-            await ws.send("Hubo un error con al API de GPT4")
-        except openai.error.APIConnectionError:
-            logger.error(exc_info=True)
-            await ws.send("No se pudo conectar con GPT4, vuelve a intentar mas tarde")
+            await ws.send(json.dumps({"content": "GPT4 had an error generating response for the prompt", "timestamp": int(message_timestamp), "type": "CONTENT"}))
         except:
             logger.error(exc_info=True)
-            await  ws.send("Error, vuelve a intentar mas tarde")
-        finally:
-            await ws.send("END")
+            await  ws.send(json.dumps({"content": "General error, try again later", "timestamp": int(message_timestamp), "type": "CONTENT"}))
+    

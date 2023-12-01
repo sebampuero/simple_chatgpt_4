@@ -1,15 +1,12 @@
 from logging.handlers import RotatingFileHandler
 from application.server.routes import *
 from sanic import Sanic
-from components.database.Database import Database
-from psycopg2 import OperationalError
-import logging, os, sys
+import logging, os
 
 ENV = os.getenv("ENV")
 SUB_DIRECTORY = os.getenv("SUBDIRECTORY")
 DOMAIN = os.getenv("DOMAIN")
 PORT = 9191 if ENV == "PROD" else 9292
-DB = os.getenv("DB")
 
 log_file = 'log.log' if ENV == "PROD" else "test.log"
 formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
@@ -17,22 +14,17 @@ handler = RotatingFileHandler(os.path.abspath(os.path.join(os.path.dirname(__fil
 handler.setFormatter(formatter)
 logger = logging.getLogger()
 logger.addHandler(handler)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG) if os.getenv("ENV") == "DEV" else logger.setLevel(logging.INFO)
 
 app = Sanic("chatgpt4")
-app.add_route(index, f"{SUB_DIRECTORY}/")
-app.add_route(passwd_code, f"{SUB_DIRECTORY}/password-code", methods=["POST"])
-app.add_route(chat_page, f"{SUB_DIRECTORY}/chat/<code>")
+app.add_route(login, f"{SUB_DIRECTORY}/login", methods=["POST"])
+app.add_route(serve_index, f"{SUB_DIRECTORY}/", methods=["GET"])
+app.add_route(serve_static, f"{SUB_DIRECTORY}/<filename:path>", methods=["GET"])
+app.add_route(load_new_chat, f"{SUB_DIRECTORY}/chat/<id>/<timestamp>/<socket_id>", methods=["GET"])
+app.add_route(delete_chat, f"{SUB_DIRECTORY}/chat/<id>/<timestamp>", methods=["DELETE"])
+app.add_route(get_chats_for_user, f"{SUB_DIRECTORY}/user/<email>", methods=["GET"])
 app.add_websocket_route(chat, f"{SUB_DIRECTORY}/ws")
 
-try:
-    db_name = DB
-    db = Database(db_name, 'pguser', 'pgpassword')
-except OperationalError:
-    logger.error("Database not running", exc_info=True)
-    sys.exit()
-
-app.ctx.db = db
 app.ctx.sub_directory = SUB_DIRECTORY
 app.ctx.domain = DOMAIN
 app.ctx.ws_connection = f"wss://{DOMAIN}/{SUB_DIRECTORY}/ws" if ENV == "PROD" \
