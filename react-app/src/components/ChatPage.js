@@ -247,8 +247,8 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
     setCurrentChatTimestamp(timestamp);
     closeSocket();
     createSocket();
-    setSidebarVisible(!sidebarVisible);
-    setOptionsVisible(!optionsVisible);
+    setSidebarVisible(false);
+    setOptionsVisible(false);
   };
 
   const newChat = () => {
@@ -256,8 +256,8 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
     setCurrentChatId("");
     closeSocket();
     createSocket();
-    setSidebarVisible(!sidebarVisible);
-    setOptionsVisible(!optionsVisible);
+    setSidebarVisible(false);
+    setOptionsVisible(false);
   }
 
   const toggleSidebar = () => {
