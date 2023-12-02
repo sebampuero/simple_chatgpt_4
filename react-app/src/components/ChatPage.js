@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ChatSidebar from './ChatSidebar';
 import './ChatPage.css';
+import Cookies from 'js-cookie';
 
 const ChatPage = ({ email }) => { //TODO: this component could be separated in more other components (messageinput, options dialog, etc)
   const [messageInput, setMessageInput] = useState('');
@@ -19,19 +20,17 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
   const MAX_IMG_HEIGHT = 450;
 
   const loadChats = () => {
+    const token = Cookies.get('jwt');
     fetch(process.env.PUBLIC_URL + "/user/" + email, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": token
       }
     })
       .then((response) => { 
-        if(response.status === 400){
-          throw new Error("Bad request sent")
-        }
-        if(response.status === 200){
-          return response.json();
-        }
+        if(response.status === 200) return response.json();
+        throw new Error(response.status)
       })
       .then((resp) => {
         const chats = resp.body
@@ -43,16 +42,19 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
       })
       .catch((error) => {
         console.error("Error:", error);
-        alert("There was a problem loading your chats history!")
+        if (error === 401) alert("Please reload the page and log in again")
+        else if (error === 400) alert("There was a problem loading your chats!")
+        else alert("There was an error, please try again later")
       });
   }
 
   const createSocket = () => {
     if(!socket){
+      const token = Cookies.get('jwt');
       const socketUrl = process.env.NODE_ENV === 'production'
       ? process.env.REACT_APP_PROD_WS_URL
       : process.env.REACT_APP_WS_URL;
-      const socket = new WebSocket(socketUrl);
+      const socket = new WebSocket(`${socketUrl}?token=${token}`);
 
       socket.addEventListener('open', () => {
         console.log('WebSocket connection opened');      
@@ -97,20 +99,17 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
     setChatMessages((prevMessages) => [...prevMessages, newMessage]);
   };
   const retrieveMessagesForNewOpenedChat = (socketId) => {
+    const token = Cookies.get('jwt');
     fetch(process.env.PUBLIC_URL + `/chat/${currentChatId}/${currentChatTimestamp}/${socketId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": token
       }
     })
       .then((response) => { 
-        if (response.status === 400){
-          throw new Error("Bad request")
-        }
-        if (response.status === 404){
-          throw new Error("Chat not found " + currentChatId)
-        }
-        return response.json();
+        if (response.status === 200) return response.json();
+        else throw new Error(response.status)
       })
       .then((resp) => {
         const chat = resp.body
@@ -123,7 +122,9 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
       })
       .catch((error) => {
         console.error("Error: ", error);
-        alert("There was a problem loading the chat, please refresh the page!")
+        if (error === 401) alert("Please reload the page and log back in")
+        else if (error === 404) alert("Could not find that")
+        else alert("There was an error, please try again later")
       });
   }
   const processMessageType = (data) => {
@@ -265,15 +266,16 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
   };
 
   const deleteChat = (chatId, timestamp) => {
+    const token = Cookies.get('jwt');
     fetch(process.env.PUBLIC_URL + `/chat/${chatId}/${timestamp}`, {
-      method: "DELETE"
+      method: "DELETE",
+      headers: {
+        "Authorization": token
+      }
     })
       .then((response) => { 
-        if(response.status === 204){
-          setChats((prevChats) => prevChats.filter((chat) => chat.chat_id !== chatId));
-        }else{
-          throw new Error("Could not delete chat with ID " + chatId)
-        }
+        if(response.status === 204) setChats((prevChats) => prevChats.filter((chat) => chat.chat_id !== chatId));
+        else throw new Error("Could not delete chat with ID " + chatId)
       })
       .catch((error) => {
         console.error("Error:", error);

@@ -7,10 +7,24 @@ from components.repository.DDBRepository import DDBRepository
 from components.login.JWTManager import JWTManager
 import logging, json, openai
 from datetime import datetime
+from functools import wraps
 import aiohttp
 import os
 
 logger = logging.getLogger(__name__)
+
+def authorize():
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(request: Request, *args, **kwargs):
+            token = request.headers.get('Authorization')
+            if not token:
+                return HTTPResponse(status=401)
+            if not JWTManager().validate_jwt(token):
+                return HTTPResponse(status=401)
+            return await func(request, *args, **kwargs)
+        return wrapper
+    return decorator
 
 async def serve_index(request: Request):
     return await file("static/index.html")
@@ -18,12 +32,14 @@ async def serve_index(request: Request):
 async def serve_static(request: Request, filename):
     return await file(f"static/{filename}")
 
+@authorize()
 async def get_chats_for_user(request: Request, email: str):
     if email.strip() == '':
         return HTTPResponse(status=400)
     chats = await DDBRepository().get_chats_by_email(email)
     return sanicjson({"body": chats})
 
+@authorize()
 async def load_new_chat(request: Request, id: str, timestamp: str, socket_id: str):
     if id is None or id.strip() == '':
         return HTTPResponse(status=400)
@@ -34,6 +50,7 @@ async def load_new_chat(request: Request, id: str, timestamp: str, socket_id: st
     gpt4.set_messages_info(socket_id, int(timestamp), chat_data['messages'])
     return sanicjson({"body": chat_data})
 
+@authorize()
 async def delete_chat(request: Request, id: str, timestamp: str):
     if id.strip() == '':
         return HTTPResponse(status=400)
@@ -57,10 +74,11 @@ async def login_code(request: Request):
     async with aiohttp.ClientSession() as session:
         async with session.post('https://oauth2.googleapis.com/token', data=data) as response: #TODO: remove hardcoded token URL
             tokens = await response.json()
-    decoded_id_token = JWTManager().decode_google_jwt(tokens['id_token'])
+    jwt_manager = JWTManager()
+    decoded_id_token = jwt_manager.decode_google_jwt(tokens['id_token'])
     logger.debug(f"Authenticated: {decoded_id_token}")
     if await Login(DDBRepository()).check_user_is_authorized(decoded_id_token['email']):
-        return sanicjson({"email": decoded_id_token['email']}) #TODO: send a self generated JWT too and implement auth middleware
+        return sanicjson({"email": decoded_id_token['email'], "jwt": jwt_manager.generate_jwt(decoded_id_token)})
     return HTTPResponse(status=401)
 
 async def chat(request: Request, ws: Websocket):
@@ -68,6 +86,12 @@ async def chat(request: Request, ws: Websocket):
     Main websocket endpoint
     """
     client_ip = request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
+    token = request.args.get('token')
+    if token:
+        if not JWTManager().validate_jwt(token):
+            await ws.close()
+    else:
+        await ws.close()
     socket_id = str(id(ws))
     user_email = ""
     chat_id = ""

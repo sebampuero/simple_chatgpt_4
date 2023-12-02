@@ -20,7 +20,7 @@ const EmailForm = ({ onSignIn }) => {
         throw new Error("Not authorized")
       })
       .then((respJson) => {
-        onSignIn(respJson.email);
+        onSignIn(respJson);
       })
       .catch((error) => {
         console.log(error);

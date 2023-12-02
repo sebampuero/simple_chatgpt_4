@@ -2,13 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import EmailForm from './components/EmailForm';
 import ChatPage from './components/ChatPage';
+import Cookies from 'js-cookie';
 
 function App() {
   const [isEmailAuthorized, setIsEmailAuthorized] = useState(false);
   const [email, setEmail] = useState(null);
 
-  const handleSignIn = (email) => {
-    setEmail(email);
+  useEffect(() => {
+    const token = Cookies.get('jwt');
+    if (token) {
+      const tokenInfos = JSON.parse(atob(token.split('.')[1]));
+      setEmail(tokenInfos.email);
+      setIsEmailAuthorized(true);
+    }
+  }, []);
+
+  const handleSignIn = (respJson) => {
+    Cookies.set('jwt', respJson.jwt)
+    setEmail(respJson.email);
     setIsEmailAuthorized(true);
   }
 
