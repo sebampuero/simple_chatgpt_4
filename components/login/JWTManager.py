@@ -31,12 +31,11 @@ class JWTManager:
     def validate_jwt(self, jwt_str: str):
         secret = os.getenv("JWT_SECRET")
         try:
-            decoded = jwt.decode(jwt_str, secret, algorithms="HS256")
-            if int(datetime.now().timestamp()) > decoded['exp']:
-                logger.info("Token expired.")
-                return False
-            logger.info(f"Valid token: {decoded}")
+            jwt.decode(jwt_str, secret, algorithms="HS256")
             return True
+        except jwt.exceptions.ExpiredSignatureError:
+            logger.info("Expired.", exc_info=True)
+            return False
         except jwt.exceptions.InvalidSignatureError:
             logger.info(f"JWT token was tampered with, signature is invalid. {jwt_str}")
             return False

@@ -42,8 +42,8 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
       })
       .catch((error) => {
         console.error("Error:", error);
-        if (error === 401) alert("Please reload the page and log in again")
-        else if (error === 400) alert("There was a problem loading your chats!")
+        if (error.message === "401") alert("Please reload the page and log in again")
+        else if (error.message === "400") alert("There was a problem loading your chats!")
         else alert("There was an error, please try again later")
       });
   }
@@ -122,8 +122,8 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
       })
       .catch((error) => {
         console.error("Error: ", error);
-        if (error === 401) alert("Please reload the page and log back in")
-        else if (error === 404) alert("Could not find that")
+        if (error.message === "401") alert("Please reload the page and log back in")
+        else if (error.message === "404") alert("Could not find that")
         else alert("There was an error, please try again later")
       });
   }

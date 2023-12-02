@@ -12,8 +12,14 @@ function App() {
     const token = Cookies.get('jwt');
     if (token) {
       const tokenInfos = JSON.parse(atob(token.split('.')[1]));
-      setEmail(tokenInfos.email);
-      setIsEmailAuthorized(true);
+      const timestampInMilliseconds = new Date().getTime();
+      const timestampInSeconds = Math.floor(timestampInMilliseconds / 1000);
+      if (!(timestampInSeconds > tokenInfos.exp)){
+        setEmail(tokenInfos.email);
+        setIsEmailAuthorized(true);
+      }else{
+        Cookies.remove('jwt')
+      }
     }
   }, []);
 
