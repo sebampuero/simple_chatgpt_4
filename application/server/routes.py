@@ -5,7 +5,7 @@ from components.login.Login import Login
 from components.gpt_4.GPT4 import GPT4
 from components.repository.DDBRepository import DDBRepository
 from components.login.JWTManager import JWTManager
-import logging, json, openai
+import logging, json
 from datetime import datetime
 from functools import wraps
 import aiohttp
@@ -134,13 +134,7 @@ async def chat(request: Request, ws: Websocket):
                     assistant_msg += delta["content"]
             await ws.send(json.dumps({"content": "END", "timestamp": int(message_timestamp), "type": "CONTENT"}))
             gpt4.append_to_msg_history_as_assistant(socket_id, assistant_msg)
-        except openai.error.RateLimitError:
-            logger.error(f"Rate limit exceeded", exc_info=True)
-            await ws.send(json.dumps({"content": "Usage limit exceeded", "timestamp": int(message_timestamp), "type": "CONTENT"}))
-        except openai.error.APIError:
+        except Exception as e:
             logger.error(exc_info=True)
-            await ws.send(json.dumps({"content": "GPT4 had an error generating response for the prompt", "timestamp": int(message_timestamp), "type": "CONTENT"}))
-        except:
-            logger.error(exc_info=True)
-            await  ws.send(json.dumps({"content": "General error, try again later", "timestamp": int(message_timestamp), "type": "CONTENT"}))
+            await  ws.send(json.dumps({"content": str(e), "timestamp": int(message_timestamp), "type": "CONTENT"}))
     

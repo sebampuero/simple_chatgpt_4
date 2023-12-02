@@ -103,14 +103,24 @@ class GPT4:
         ]
         self.map_messages[websocket_id].append({"role": "user", "content": content})
         logger.debug(f"Sending prompt with {self.map_messages[websocket_id]}")
-        response = await openai.ChatCompletion.acreate(
+        try:
+            response = await openai.ChatCompletion.acreate(
                 model="gpt-4-vision-preview",
                 messages=self.map_messages[websocket_id],
-                max_tokens=2000,
+                max_tokens=3000,
                 temperature=0.5,
                 top_p=0,
                 frequency_penalty=0,
                 presence_penalty=1,
                 stream=True
             )  
-        return response
+            return response
+        except openai.error.RateLimitError:
+            logger.error(f"Rate limit exceeded", exc_info=True)
+            raise Exception("Usage limit exceeded")
+        except openai.error.APIError:
+            logger.error(exc_info=True)
+            raise Exception("GPT4 had an error generating response for the prompt")
+        except:
+            logger.error(exc_info=True)
+            raise Exception("Try again later")
