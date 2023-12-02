@@ -4,8 +4,11 @@ from sanic.response import json as sanicjson
 from components.login.Login import Login
 from components.gpt_4.GPT4 import GPT4
 from components.repository.DDBRepository import DDBRepository
+from components.login.JWTManager import JWTManager
 import logging, json, openai
 from datetime import datetime
+import aiohttp
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -37,22 +40,28 @@ async def delete_chat(request: Request, id: str, timestamp: str):
     await DDBRepository().delete_chat_by_id(id, int(timestamp))
     return HTTPResponse(status=204)
 
-async def login(request: Request):
-    """
-    Checks if user's email is authenticated
-    """
+async def login_code(request: Request):
     try:
         body = request.json
-        email = body.get('email')
+        auth_code = body.get('code')
     except Exception as e:
         logger.error(f"Error parsing JSON: {e}")
         return HTTPResponse(status=400)
-    login_supp = Login(DDBRepository())
-    if await login_supp.check_user_is_authorized(email):
-        return HTTPResponse(status=200)
-    logger.info(f"Bad email entered by {request.headers.get('X-Forwarded-For', '').split(',')[0].strip()}: {email}")
+    data = {
+        'code': auth_code,
+        'client_id': os.getenv("CLIENT_ID"),
+        'client_secret': os.getenv("CLIENT_SECRET"),
+        'redirect_uri': 'postmessage',
+        'grant_type': 'authorization_code'
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.post('https://oauth2.googleapis.com/token', data=data) as response: #TODO: remove hardcoded token URL
+            tokens = await response.json()
+    decoded_id_token = JWTManager().decode_google_jwt(tokens['id_token'])
+    logger.debug(f"Authenticated: {decoded_id_token}")
+    if await Login(DDBRepository()).check_user_is_authorized(decoded_id_token['email']):
+        return sanicjson({"email": decoded_id_token['email']}) #TODO: send a self generated JWT too and implement auth middleware
     return HTTPResponse(status=401)
-    
 
 async def chat(request: Request, ws: Websocket):
     """

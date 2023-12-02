@@ -17,7 +17,7 @@ logger.addHandler(handler)
 logger.setLevel(logging.DEBUG) if os.getenv("ENV") == "DEV" else logger.setLevel(logging.INFO)
 
 app = Sanic("chatgpt4")
-app.add_route(login, f"{SUB_DIRECTORY}/login", methods=["POST"])
+app.add_route(login_code, f"{SUB_DIRECTORY}/login-code", methods=["POST"])
 app.add_route(serve_index, f"{SUB_DIRECTORY}/", methods=["GET"])
 app.add_route(serve_static, f"{SUB_DIRECTORY}/<filename:path>", methods=["GET"])
 app.add_route(load_new_chat, f"{SUB_DIRECTORY}/chat/<id>/<timestamp>/<socket_id>", methods=["GET"])
