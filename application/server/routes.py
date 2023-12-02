@@ -4,10 +4,27 @@ from sanic.response import json as sanicjson
 from components.login.Login import Login
 from components.gpt_4.GPT4 import GPT4
 from components.repository.DDBRepository import DDBRepository
-import logging, json, openai
+from components.login.JWTManager import JWTManager
+import logging, json
 from datetime import datetime
+from functools import wraps
+import aiohttp
+import os
 
 logger = logging.getLogger(__name__)
+
+def authorize():
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(request: Request, *args, **kwargs):
+            token = request.headers.get('Authorization')
+            if not token:
+                return HTTPResponse(status=401)
+            if not JWTManager().validate_jwt(token):
+                return HTTPResponse(status=401)
+            return await func(request, *args, **kwargs)
+        return wrapper
+    return decorator
 
 async def serve_index(request: Request):
     return await file("static/index.html")
@@ -15,12 +32,14 @@ async def serve_index(request: Request):
 async def serve_static(request: Request, filename):
     return await file(f"static/{filename}")
 
+@authorize()
 async def get_chats_for_user(request: Request, email: str):
     if email.strip() == '':
         return HTTPResponse(status=400)
     chats = await DDBRepository().get_chats_by_email(email)
     return sanicjson({"body": chats})
 
+@authorize()
 async def load_new_chat(request: Request, id: str, timestamp: str, socket_id: str):
     if id is None or id.strip() == '':
         return HTTPResponse(status=400)
@@ -31,34 +50,48 @@ async def load_new_chat(request: Request, id: str, timestamp: str, socket_id: st
     gpt4.set_messages_info(socket_id, int(timestamp), chat_data['messages'])
     return sanicjson({"body": chat_data})
 
+@authorize()
 async def delete_chat(request: Request, id: str, timestamp: str):
     if id.strip() == '':
         return HTTPResponse(status=400)
     await DDBRepository().delete_chat_by_id(id, int(timestamp))
     return HTTPResponse(status=204)
 
-async def login(request: Request):
-    """
-    Checks if user's email is authenticated
-    """
+async def login_code(request: Request):
     try:
         body = request.json
-        email = body.get('email')
+        auth_code = body.get('code')
     except Exception as e:
         logger.error(f"Error parsing JSON: {e}")
         return HTTPResponse(status=400)
-    login_supp = Login(DDBRepository())
-    if await login_supp.check_user_is_authorized(email):
-        return HTTPResponse(status=200)
-    logger.info(f"Bad email entered by {request.headers.get('X-Forwarded-For', '').split(',')[0].strip()}: {email}")
+    data = {
+        'code': auth_code,
+        'client_id': os.getenv("CLIENT_ID"),
+        'client_secret': os.getenv("CLIENT_SECRET"),
+        'redirect_uri': 'postmessage',
+        'grant_type': 'authorization_code'
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.post('https://oauth2.googleapis.com/token', data=data) as response: #TODO: remove hardcoded token URL
+            tokens = await response.json()
+    jwt_manager = JWTManager()
+    decoded_id_token = jwt_manager.decode_google_jwt(tokens['id_token'])
+    logger.debug(f"Authenticated: {decoded_id_token}")
+    if await Login(DDBRepository()).check_user_is_authorized(decoded_id_token['email']):
+        return sanicjson({"email": decoded_id_token['email'], "jwt": jwt_manager.generate_jwt(decoded_id_token)})
     return HTTPResponse(status=401)
-    
 
 async def chat(request: Request, ws: Websocket):
     """
     Main websocket endpoint
     """
     client_ip = request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
+    token = request.args.get('token')
+    if token:
+        if not JWTManager().validate_jwt(token):
+            await ws.close()
+    else:
+        await ws.close()
     socket_id = str(id(ws))
     user_email = ""
     chat_id = ""
@@ -101,13 +134,7 @@ async def chat(request: Request, ws: Websocket):
                     assistant_msg += delta["content"]
             await ws.send(json.dumps({"content": "END", "timestamp": int(message_timestamp), "type": "CONTENT"}))
             gpt4.append_to_msg_history_as_assistant(socket_id, assistant_msg)
-        except openai.error.RateLimitError:
-            logger.error(f"Rate limit exceeded", exc_info=True)
-            await ws.send(json.dumps({"content": "Usage limit exceeded", "timestamp": int(message_timestamp), "type": "CONTENT"}))
-        except openai.error.APIError:
+        except Exception as e:
             logger.error(exc_info=True)
-            await ws.send(json.dumps({"content": "GPT4 had an error generating response for the prompt", "timestamp": int(message_timestamp), "type": "CONTENT"}))
-        except:
-            logger.error(exc_info=True)
-            await  ws.send(json.dumps({"content": "General error, try again later", "timestamp": int(message_timestamp), "type": "CONTENT"}))
+            await  ws.send(json.dumps({"content": str(e), "timestamp": int(message_timestamp), "type": "CONTENT"}))
     
