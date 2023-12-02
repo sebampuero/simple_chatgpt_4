@@ -119,8 +119,8 @@ class GPT4:
             logger.error(f"Rate limit exceeded", exc_info=True)
             raise Exception("Usage limit exceeded")
         except openai.error.APIError:
-            logger.error(exc_info=True)
+            logger.error("API Error", exc_info=True)
             raise Exception("GPT4 had an error generating response for the prompt")
         except:
-            logger.error(exc_info=True)
+            logger.error("General error", exc_info=True)
             raise Exception("Try again later")
