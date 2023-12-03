@@ -235,6 +235,8 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
       };
       socket.send(JSON.stringify(message));
       setMessageInput('');
+    }else{
+      alert("The connection to the server is closed, please reload the page.")
     }
     displayMessage(messageInput, 'user');
     setIsPromptLoading(true);
