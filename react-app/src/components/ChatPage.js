@@ -37,7 +37,7 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
         chats.sort((a, b) => b.timestamp - a.timestamp);
         chats.forEach(obj => {
           let userContent = obj.messages.find(msg => msg.role === 'user')?.content;
-          obj.title = userContent.substring(0,15) + "..."; // very basic and naive way to show main idea of a chat
+          obj.title = userContent.substring(0,20) + "..."; // very basic and naive way to show main idea of a chat
         })
         setChats(chats)
       })
