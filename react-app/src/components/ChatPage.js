@@ -210,6 +210,7 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
       reader.onload = function (e) {
         resizeImageAndConvertToBase64(e.target.result, MAX_IMG_WIDTH, MAX_IMG_HEIGHT)
         .then(base64Data => {
+          alert("Image loaded!")
           setImageBase64Data(base64Data);
         })
         .catch(error => {
@@ -256,6 +257,8 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
   const newChat = () => {
     setChatMessages([]);
     setCurrentChatId("");
+    setImageBase64Data("");
+    setImageDataURL(null);
     closeSocket();
     createSocket();
     setSidebarVisible(false);
@@ -308,6 +311,7 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
           style={{ resize: 'none' }}
           value={messageInput}
           onChange={(e) => setMessageInput(e.target.value)}
+          onFocus={() => setSidebarVisible(false)}
         ></textarea>
         <button id="send-button" onClick={sendMessage} disabled={isPromptLoading}>
           <i className="fa fa-arrow-right"></i>
@@ -319,12 +323,16 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
 
       <div id="options-container" className={optionsVisible ? 'show' : 'hidden'}>
         <div id="options-header">Options</div>
-        <button id="toggle-sidebar-button" style={{marginTop: "5px", marginBottom: "5px", marginRight: "2px", marginLeft: "2px"}} onClick={toggleSidebar}>
-          {sidebarVisible ? 'Hide chats' : 'Show chats'}
-        </button>
-        <button id="new-chat-button" style={{marginTop: "5px", marginBottom: "5px", marginRight: "2px", marginLeft: "2px"}} onClick={newChat}>
-          New chat
-        </button>
+        <div>
+          <button id="toggle-sidebar-button" className="custom-file-upload" onClick={toggleSidebar}>
+            {sidebarVisible ? 'Hide chats' : 'Show chats'}
+          </button>
+        </div>
+        <div>
+          <button id="new-chat-button" className="custom-file-upload" onClick={newChat}>
+            New chat
+          </button>
+        </div>
         <div id="image-upload-container">
           <input
             type="file"
@@ -332,6 +340,9 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
             accept="image/*"
             onChange={(e) => handleImageUpload(e)}
           />
+          <label htmlFor="image-input" className="custom-file-upload">
+            Upload Image
+          </label>
         </div>
       </div>
     </div>
