@@ -17,6 +17,7 @@ Example:
             "Action": [
                 "dynamodb:CreateTable",
                 "dynamodb:PutItem",
+                "dynamodb:DeleteItem",
                 "dynamodb:Query",
                 "dynamodb:Scan",
                 "dynamodb:DescribeTable"
