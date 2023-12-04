@@ -6,7 +6,7 @@ Simple chatGPT clone that uses the OpenAI GPT-4 model API. Sign in via Google. C
 ## Setup
 
 First install the aws-cli with `sudo pip3 install awscli`  
-Then, run `aws configure` to set up your AWS credentials. Make sure you have the correct policies set in place (Creation of tables, put, query and scan privileges)  
+Then, run `aws configure` to set up your AWS credentials. Make sure you have the correct policies set in place for your AWS user or role (Creation of tables, put, query and scan privileges)  
 Example:  
 ```json
 {
