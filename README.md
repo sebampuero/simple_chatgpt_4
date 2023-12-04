@@ -40,6 +40,7 @@ and install the dependencies
 `pip install -r requirements.txt`
 
 Configure a new Google project that uses the Google+ API. Generate a pair of Client ID and secret. https://console.cloud.google.com/apis/api/plus.googleapis.com  
+For this flow to work, a domain needs to be registered (free domain under https://www.getfreedomain.name/ for example). A certificate for TLS communication can be automatically managed by Certbot: https://letsencrypt.org/getting-started/  
 Create a `.env` file and store your `OPENAPI_APIKEY`, `CLIENT_ID` (Google Oauth), `CLIENT_SECRET` (Google Oauth) and `JWT_SECRET` (for session authorization) there.
 
 Start development with `start_dev.sh` or production with `start_prd.sh`
