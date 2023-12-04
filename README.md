@@ -30,7 +30,8 @@ Example:
 }
 ```
 
-Then, run `setup.sh` to create the tables in DynamoDB. It will ask for the name of the chats table and authorized table. Place those in the `start_prd.sh` file, too.
+Then, run `setup.sh` to create the tables in DynamoDB. It will ask for the name of the chats table and authorized table. Place those in the `start_prd.sh` file, too.  
+Execute the bash script `add_authorized_email.sh` to add your Google email to the authorized users table. Add other emails if you want to share with other people.
 
 Activate the virtual environment in python:  
 `source venv/bin/activate`  
