@@ -42,3 +42,7 @@ Configure a new Google project that uses the Google+ API. Generate a pair of Cli
 Create a `.env` file and store your `OPENAPI_APIKEY`, `CLIENT_ID` (Google Oauth), `CLIENT_SECRET` (Google Oauth) and `JWT_SECRET` (for session authorization) there.
 
 Start development with `start_dev.sh` or production with `start_prd.sh`
+
+## Screenshots
+ <img src="https://sebampuerom.de/nc/apps/files_sharing/publicpreview/mLrp2NTnfHBDMbQ?file=/&fileId=2709404&x=2560&y=1440&a=true&etag=a786d25e5b1def359b7f949ab2e197d3" alt="Example Screenshot" width="400"/>
+ <img src="https://sebampuerom.de/nc/apps/files_sharing/publicpreview/pKX7StGfDozRirM?file=/&fileId=2709397&x=2560&y=1440&a=true&etag=42e1c03a67d9f9d03348eac67573018f" alt="Example Screenshot" width="400"/>
