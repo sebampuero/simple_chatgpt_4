@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect  } from 'react';
 import ChatSidebar from './ChatSidebar';
 import './ChatPage.css';
 import Cookies from 'js-cookie';
@@ -37,7 +37,7 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
         chats.sort((a, b) => b.timestamp - a.timestamp);
         chats.forEach(obj => {
           let userContent = obj.messages.find(msg => msg.role === 'user')?.content;
-          obj.title = userContent.substring(0,20) + "..."; // very basic and naive way to show main idea of a chat
+          obj.title = userContent.substring(0,25) + "..."; // very basic and naive way to show main idea of a chat
         })
         setChats(chats)
       })
@@ -297,7 +297,7 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
       <div id="content-container" style={{ flex: 1 }}>
         <div id="chat-messages">
         {chatMessages.map((message) => (
-            <div className={`message-bubble ${message.role === 'user' ? 'user-message' : 'peer-message'}`}>
+            <div key={message.timestamp} className={`message-bubble ${message.role === 'user' ? 'user-message' : 'peer-message'}`}>
               {message.image && message.image !== null && (
                 <img src={message.image} alt="GPT4-V image prompt" />
               )}
@@ -314,9 +314,19 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
           value={messageInput}
           onChange={(e) => setMessageInput(e.target.value)}
           onFocus={() => setSidebarVisible(false)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              sendMessage(); 
+            }
+          }}
         ></textarea>
         <button id="send-button" onClick={sendMessage} disabled={isPromptLoading}>
-          <i className="fa fa-arrow-right"></i>
+          {isPromptLoading ? (
+            <i className="fa fa-spinner fa-spin"></i>
+          ) : (
+            <i className="fa fa-arrow-right"></i>
+          )}
         </button>
         <button id="reset-button" onClick={showOptions}>
           <i className="fas fa-bars"></i>
