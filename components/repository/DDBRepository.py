@@ -37,6 +37,9 @@ class DDBRepository(Repository):
         if user_email.strip() == '':
             logger.info("Cannot store chats without email")
             return
+        if len(chats_info) == 0:
+            logger.info("No chats to store")
+            return
         new_chat = {
             'chat_id': uuid.uuid4().hex if chat_id == '' else chat_id,
             'timestamp': chats_info['timestamp'],

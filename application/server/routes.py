@@ -136,5 +136,6 @@ async def chat(request: Request, ws: Websocket):
             gpt4.append_to_msg_history_as_assistant(socket_id, assistant_msg)
         except Exception as e:
             logger.error(exc_info=True)
+            await DDBRepository().store_chat(gpt4.get_messages_info(socket_id), user_email, chat_id)
             await  ws.send(json.dumps({"content": str(e), "timestamp": int(message_timestamp), "type": "CONTENT"}))
     
