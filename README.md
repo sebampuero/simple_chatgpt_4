@@ -1,4 +1,4 @@
-# Basic ChatGPT using GPT-4 OpenAPI API
+# Basic Chatbot that uses different public LLMs
 
 ## Features
 Simple chatGPT clone that uses the OpenAI GPT-4 model API. Sign in via Google. Chat history and authorized google emails are stored in DynamoDB.
