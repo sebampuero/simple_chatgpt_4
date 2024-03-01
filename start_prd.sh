@@ -8,6 +8,9 @@ export OPENAI_KEY=$OPENAPI_APIKEY
 export CLIENT_ID=$CLIENT_ID
 export CLIENT_SECRET=$CLIENT_SECRET
 export JWT_SECRET=$JWT_SECRET
+export PROJECT_ID=$PROJECT_ID
 export DDB_CHATS_TABLE=chats
 export DDB_USERS_TABLE=authorized_users
+export GPT_MODEL=gpt-4-vision-preview
+export GEMINI_MODEL=gemini-1.0-pro
 python3 /home/pi/gpt-4chat/server.py

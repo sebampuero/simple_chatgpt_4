@@ -2,15 +2,17 @@ from sanic import Websocket, Request
 from sanic.response import HTTPResponse, file
 from sanic.response import json as sanicjson
 from components.login.Login import Login
-from components.gpt_4.GPT4 import GPT4
+from components.llm.GPT4 import GPT4
+from components.llm.Gemini import Gemini
 from components.repository.DDBRepository import DDBRepository
 from components.login.JWTManager import JWTManager
+from components.chat.ChatState import ChatState
 import logging, json
 from datetime import datetime
 from functools import wraps
 import aiohttp
 import os
-
+# TODO: refactor into oop
 logger = logging.getLogger(__name__)
 
 def authorize():
@@ -40,15 +42,24 @@ async def get_chats_for_user(request: Request, email: str):
     return sanicjson({"body": chats})
 
 @authorize()
-async def load_new_chat(request: Request, id: str, timestamp: str, socket_id: str):
+async def load_new_chat(request: Request, id: str, timestamp: str, new_socket_id: str, old_socket_id: str):
     if id is None or id.strip() == '':
         return HTTPResponse(status=400)
     chat_data = await DDBRepository().get_chat_by_id(id, int(timestamp))
     if chat_data is None:
         return HTTPResponse(status=404)
-    gpt4 = GPT4.getInstance()
-    gpt4.set_messages_info(socket_id, int(timestamp), chat_data['messages'])
+    chat_state = ChatState.get_instance()
+    chat_state.set_messages_with_ts(chat_data['messages'], new_socket_id, int(timestamp))
+    chat_state.remove_ws(old_socket_id)
     return sanicjson({"body": chat_data})
+
+@authorize()
+async def set_model(request: Request, socket_id: str):
+    body = request.json
+    model = body.get('model')
+    chat_state = ChatState.get_instance()
+    chat_state.set_language_model(model, socket_id)
+    return HTTPResponse(status=200)
 
 @authorize()
 async def delete_chat(request: Request, id: str, timestamp: str):
@@ -81,6 +92,11 @@ async def login_code(request: Request):
         return sanicjson({"email": decoded_id_token['email'], "jwt": jwt_manager.generate_jwt(decoded_id_token)})
     return HTTPResponse(status=401)
 
+language_models = {
+    "GPT4": GPT4(),
+    "Gemini": Gemini()
+}
+
 async def chat(request: Request, ws: Websocket):
     """
     Main websocket endpoint
@@ -90,27 +106,33 @@ async def chat(request: Request, ws: Websocket):
     if token:
         if not JWTManager().validate_jwt(token):
             await ws.close()
+            return
     else:
         await ws.close()
+        return
     socket_id = str(id(ws))
     user_email = ""
     chat_id = ""
     logger.info(f"Client connected via WS: {client_ip} and socket_id {socket_id}")
     await ws.send(json.dumps({"socket_id": socket_id, "type": "INIT"}))
+    chat_state = ChatState.get_instance()
+    chat_state.set_messages_with_ts([], socket_id, int(datetime.now().timestamp()))
+
+    async def close_connection():
+        await DDBRepository().store_chat(chat_state.get_messages_with_ts(socket_id), user_email, chat_id)
+        chat_state.remove_ws(socket_id)
+        await ws.close()
+
     while True:
         message_timestamp = datetime.timestamp(datetime.now())
-        gpt4 = GPT4.getInstance()
         try:
             input_raw = await ws.recv()
         except:
             logger.error(f"Unexpected exception, most probably {client_ip} closed the websocket connection",exc_info=True)
-            await DDBRepository().store_chat(gpt4.get_messages_info(socket_id), user_email, chat_id)
-            gpt4.remove_socket_id(socket_id)
+            await close_connection()
             break
-        if not input_raw:
-            logger.info(f"{client_ip} closed the connection")
-            await DDBRepository().store_chat(gpt4.get_messages_info(socket_id), user_email, chat_id)
-            gpt4.remove_socket_id(socket_id)
+        if not input_raw or "email" not in input_raw:
+            await close_connection()
             break
         try:
             input_json = json.loads(input_raw)
@@ -118,24 +140,24 @@ async def chat(request: Request, ws: Websocket):
             logger.debug(f"Client IP {client_ip} sent unsupported command")
             await ws.close()
             break
-        if "email" not in input_json:
-            await ws.close()
-            break
-        logger.debug("Input JSON from WS: " + json.dumps(input_json, indent=4))
         user_email = input_json['email']
         chat_id = input_json['chat_id']
-        response_generator = await gpt4.prompt(socket_id, input_json)
-        assistant_msg = ""
+        chat_state.append_message({
+            "role": "user",
+            "image": input_json['image'],
+            "content": input_json['msg']
+        }, socket_id)
         try:
-            async for response_chunk in response_generator:
-                delta = response_chunk["choices"][0]["delta"]
-                if "content" in delta:
-                    await ws.send(json.dumps({"content": delta["content"], "timestamp": int(message_timestamp), "type": "CONTENT"}))
-                    assistant_msg += delta["content"]
+            language_model = chat_state.get_language_model(socket_id)
+            response_generator = await language_models[language_model].prompt(chat_state.get_messages_with_ts(socket_id)['messages'])
+            assistant_msg = await language_models[language_model].process_response(response_generator, ws, int(message_timestamp))
             await ws.send(json.dumps({"content": "END", "timestamp": int(message_timestamp), "type": "CONTENT"}))
-            gpt4.append_to_msg_history_as_assistant(socket_id, assistant_msg)
+            chat_state.append_message({
+                "role": "assistant",
+                "content": assistant_msg
+            }, socket_id)
         except Exception as e:
-            logger.error(exc_info=True)
-            await DDBRepository().store_chat(gpt4.get_messages_info(socket_id), user_email, chat_id)
-            await  ws.send(json.dumps({"content": str(e), "timestamp": int(message_timestamp), "type": "CONTENT"}))
+            logger.error(str(e), exc_info=True)
+            await DDBRepository().store_chat(chat_state.get_messages_with_ts(socket_id), user_email, chat_id)
+            await ws.send(json.dumps({"content": str(e), "timestamp": int(message_timestamp), "type": "CONTENT"}))
     

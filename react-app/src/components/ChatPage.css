@@ -158,3 +158,6 @@
   #new-chat-button:hover {
     background-color: #e8e8e8;
   }
+  .custom-file-upload.selected {
+    background-color: gray;
+  }
