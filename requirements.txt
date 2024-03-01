@@ -6,6 +6,7 @@ aioitertools==0.11.0
 aiosignal==1.3.1
 aiounittest==1.4.2
 annotated-types==0.6.0
+anyio==4.3.0
 async-timeout==4.0.2
 attrs==22.2.0
 blis==0.7.11
@@ -22,6 +23,7 @@ confection==0.1.4
 cryptography==41.0.7
 cymem==2.0.8
 en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl
+exceptiongroup==1.2.0
 frozenlist==1.3.3
 google-api-core==2.17.1
 google-auth==2.24.0
@@ -36,8 +38,11 @@ googleapis-common-protos==1.62.0
 grpc-google-iam-v1==0.13.0
 grpcio==1.62.0
 grpcio-status==1.62.0
+h11==0.14.0
 html5tagger==1.3.0
+httpcore==1.0.4
 httptools==0.5.0
+httpx==0.25.2
 idna==3.4
 inflection==0.5.1
 Jinja2==3.1.2
@@ -45,15 +50,19 @@ jmespath==1.0.1
 jsonschema==4.17.3
 langcodes==3.3.0
 MarkupSafe==2.1.2
+mistralai==0.1.3
 multidict==6.0.4
 murmurhash==1.0.10
 numpy==1.26.2
 openai==0.28.1
+orjson==3.9.15
 packaging==23.2
+pandas==2.2.1
 preshed==3.0.9
 proto-plus==1.23.0
 protobuf==4.25.3
 psycopg2-binary==2.9.5
+pyarrow==15.0.0
 pyasn1==0.5.1
 pyasn1-modules==0.3.0
 pycparser==2.21
@@ -62,6 +71,7 @@ pydantic-core==2.14.5
 PyJWT==2.8.0
 pyrsistent==0.19.3
 python-dateutil==2.8.2
+pytz==2024.1
 requests==2.28.2
 rsa==4.9
 s3transfer==0.7.0
@@ -70,6 +80,7 @@ sanic-routing==22.8.0
 shapely==2.0.3
 six==1.16.0
 smart-open==6.4.0
+sniffio==1.3.1
 spacy-legacy==3.0.12
 spacy-loggers==1.0.5
 srsly==2.4.8
@@ -78,6 +89,7 @@ tqdm==4.65.0
 tracerite==1.1.0
 typer==0.9.0
 typing-extensions==4.8.0
+tzdata==2024.1
 ujson==5.7.0
 urllib3==1.26.15
 uvloop==0.17.0

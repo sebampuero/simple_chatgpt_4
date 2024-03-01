@@ -4,6 +4,7 @@ from sanic.response import json as sanicjson
 from components.login.Login import Login
 from components.llm.GPT4 import GPT4
 from components.llm.Gemini import Gemini
+from components.llm.Mistral import Mistral
 from components.repository.DDBRepository import DDBRepository
 from components.login.JWTManager import JWTManager
 from components.chat.ChatState import ChatState
@@ -94,7 +95,8 @@ async def login_code(request: Request):
 
 language_models = {
     "GPT4": GPT4(),
-    "Gemini": Gemini()
+    "Gemini": Gemini(),
+    "Mistral": Mistral()
 }
 
 async def chat(request: Request, ws: Websocket):

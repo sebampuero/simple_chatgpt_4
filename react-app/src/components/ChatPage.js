@@ -335,7 +335,9 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
               {message.image && message.image !== null && (
                 <img src={message.image} alt="GPT4-V image prompt" />
               )}
-              <span>{message.content}</span>
+              <span>
+                {message.content}
+              </span>
             </div>
           ))}
         </div>
@@ -406,6 +408,15 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
             onClick={() => selectModel('GPT4')}
           >
             GPT4
+          </button>
+        </div>
+        <div>
+          <button
+            id="mistral-button"
+            className={`custom-file-upload ${selectedModel === 'Mistral' ? 'selected' : ''}`}
+            onClick={() => selectModel('Mistral')}
+          >
+            Mistral
           </button>
         </div>
       </div>
