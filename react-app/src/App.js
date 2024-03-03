@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import EmailForm from './components/EmailForm';
-import ChatPage from './components/ChatPage';
+import ChatPage from './components/ChatPage';;
 
 function App() {
   const [isEmailAuthorized, setIsEmailAuthorized] = useState(false);

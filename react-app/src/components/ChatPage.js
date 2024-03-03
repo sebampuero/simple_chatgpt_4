@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef  } from 'react';
 import ChatSidebar from './ChatSidebar';
-import './ChatPage.css';
+import ChatInput from './ChatInput';
+import ChatMessages from './ChatMessages';
+import OptionsContainer from './OptionsContainer';
 
-const ChatPage = ({ email }) => { //TODO: this component could be separated in more other components (messageinput, options dialog, etc)
+const ChatPage = ({ email }) => {
   const [messageInput, setMessageInput] = useState('');
   const [optionsVisible, setOptionsVisible] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
@@ -326,106 +328,33 @@ const ChatPage = ({ email }) => { //TODO: this component could be separated in m
     localStorage.setItem('model', model);
     sendNewModel(model, currentSocketId.current);
   };
-
-  return (
-    <div id="chat-container" style={{ display: 'flex' }}>
-      {sidebarVisible && (
-        <ChatSidebar chats={chats} onChatClick={switchChat} onDeleteChat={deleteChat} />
-      )}
-      <div id="content-container" style={{ flex: 1 }}>
-        <div id="chat-messages">
-        {chatMessages.map((message) => (
-            <div key={message.timestamp} className={`message-bubble ${message.role === 'user' ? 'user-message' : 'peer-message'}`}>
-              {message.image && message.image !== null && (
-                <img src={message.image} alt="GPT4-V image prompt" />
-              )}
-              <span>
-                {message.content}
-              </span>
-            </div>
-          ))}
+  
+    return (
+      <div id="chat-container" style={{ display: 'flex' }}>
+        {sidebarVisible && <ChatSidebar chats={chats} onChatClick={switchChat} onDeleteChat={deleteChat} />}
+        <div id="content-container" style={{ flex: 1 }}>
+          <ChatMessages messages={chatMessages} />
         </div>
+        <ChatInput
+          sendMessage={sendMessage}
+          messageInput={messageInput}
+          setMessageInput={setMessageInput}
+          isPromptLoading={isPromptLoading}
+          handleImageUpload={handleImageUpload}
+          showOptions={showOptions}
+          setSidebarVisible={setSidebarVisible}
+        />
+        <OptionsContainer
+          optionsVisible={optionsVisible}
+          toggleSidebar={toggleSidebar}
+          newChat={newChat}
+          handleImageUpload={handleImageUpload}
+          selectedModel={selectedModel}
+          selectModel={selectModel}
+          sidebarVisible={sidebarVisible}
+        />
       </div>
-      <div id="chat-input">
-        <textarea
-          id="message-input"
-          rows="1"
-          style={{ resize: 'none' }}
-          value={messageInput}
-          onChange={(e) => setMessageInput(e.target.value)}
-          onFocus={() => setSidebarVisible(false)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              sendMessage(); 
-            }
-          }}
-        ></textarea>
-        <button id="send-button" onClick={sendMessage} disabled={isPromptLoading}>
-          {isPromptLoading ? (
-            <i className="fa fa-spinner fa-spin"></i>
-          ) : (
-            <i className="fa fa-arrow-right"></i>
-          )}
-        </button>
-        <button id="reset-button" onClick={showOptions}>
-          <i className="fas fa-bars"></i>
-        </button>
-      </div>
+    );
+  };
 
-      <div id="options-container" className={optionsVisible ? 'show' : 'hidden'}>
-        <div id="options-header">Options</div>
-        <div>
-          <button id="toggle-sidebar-button" className="custom-file-upload" onClick={toggleSidebar}>
-            {sidebarVisible ? 'Hide chats' : 'Show chats'}
-          </button>
-        </div>
-        <div>
-          <button id="new-chat-button" className="custom-file-upload" onClick={newChat}>
-            New chat
-          </button>
-        </div>
-        <div id="image-upload-container">
-          <input
-            type="file"
-            id="image-input"
-            accept="image/*"
-            onChange={(e) => handleImageUpload(e)}
-          />
-          <label htmlFor="image-input" className="custom-file-upload">
-            Upload Image
-          </label>
-        </div>
-        <div>
-          <button
-            id="gemini-button"
-            className={`custom-file-upload ${selectedModel === 'Gemini' ? 'selected' : ''}`}
-            onClick={() => selectModel('Gemini')}
-          >
-            Gemini
-          </button>
-        </div>
-        <div>
-          <button
-            id="gpt4-button"
-            className={`custom-file-upload ${selectedModel === 'GPT4' ? 'selected' : ''}`}
-            onClick={() => selectModel('GPT4')}
-          >
-            GPT4
-          </button>
-        </div>
-        <div>
-          <button
-            id="mistral-button"
-            className={`custom-file-upload ${selectedModel === 'Mistral' ? 'selected' : ''}`}
-            onClick={() => selectModel('Mistral')}
-          >
-            Mistral
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default ChatPage;
+  export default ChatPage;
