@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef  } from 'react';
+import './ChatPage.css';
 import ChatSidebar from './ChatSidebar';
 import ChatInput from './ChatInput';
 import ChatMessages from './ChatMessages';
@@ -176,6 +177,7 @@ const ChatPage = ({ email }) => {
           timestamp: messageObj.timestamp,
           content: messageObj.content,
           role: 'peer',
+          language_model: selectedModelRef.current
         };
         return [...prevMessages, newMessage];
       }

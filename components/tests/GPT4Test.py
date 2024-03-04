@@ -21,7 +21,7 @@ class TestGPT4(aiounittest.AsyncTestCase):
             {"role": "assistant", "content": "some content"}
         ]
 
-        result = self.instance._from_own_format_to_gpt4_format(input_data)
+        result = self.instance._from_own_format_to_model_format(input_data)
         self.assertEqual(result, expected_output)
 
 

@@ -156,7 +156,8 @@ async def chat(request: Request, ws: Websocket):
             await ws.send(json.dumps({"content": "END", "timestamp": int(message_timestamp), "type": "CONTENT"}))
             chat_state.append_message({
                 "role": "assistant",
-                "content": assistant_msg
+                "content": assistant_msg,
+                "language_model": chat_state.get_language_model(socket_id)
             }, socket_id)
         except Exception as e:
             logger.error(str(e), exc_info=True)

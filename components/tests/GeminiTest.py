@@ -23,6 +23,6 @@ class TestGemini(aiounittest.AsyncTestCase):
             Content(role="user", parts=[Part.from_text("more content")]),
             Content(role="model", parts=[Part.from_text("some content")])
         ]
-        result = self.instance._from_own_format_to_gemini_format(input_data)
+        result = self.instance._from_own_format_to_model_format(input_data)
         self.assertTrue(all(self._compare_content_objects(expected_output[i], result[i]) for i in range(len(expected_output))))
         

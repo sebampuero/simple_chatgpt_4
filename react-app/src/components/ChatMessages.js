@@ -9,8 +9,13 @@ const ChatMessages = ({ messages }) => {
              <img src={message.image} alt="GPT4-V image prompt" />
            )}
            <span>
-             {message.content}
-           </span>
+            {message.content}
+            <br></br>
+            <br></br>
+            <span style={{ fontWeight: 'bold', fontSize: '0.8em' }}>
+              {message.language_model}
+            </span>
+          </span>
          </div>
         ))}
       </div>

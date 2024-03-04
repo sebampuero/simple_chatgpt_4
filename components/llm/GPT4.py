@@ -18,7 +18,7 @@ class GPT4(BaseModel):
         output_list = []
         for item in chats:
             if item["role"] == "assistant":
-                output_list.append(item)
+                output_list.append({"role": item["role"], "content": item["content"]})
                 continue
             if item["image"] == "":
                 new_item = {"role": item["role"], "content": item["content"]}
