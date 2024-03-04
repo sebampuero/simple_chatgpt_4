@@ -10,11 +10,15 @@ const ChatMessages = ({ messages }) => {
            )}
            <span>
             {message.content}
-            <br></br>
-            <br></br>
-            <span style={{ fontWeight: 'bold', fontSize: '0.8em' }}>
-              {message.language_model}
-            </span>
+            {message.role !== 'user' && (
+              <>
+                <br></br>
+                <br></br>
+                <span style={{ fontWeight: 'bold', fontSize: '0.8em' }}>
+                  {message.language_model}
+                </span>
+              </>
+            )}
           </span>
          </div>
         ))}
