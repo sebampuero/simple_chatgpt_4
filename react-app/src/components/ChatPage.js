@@ -344,6 +344,7 @@ const ChatPage = ({ email }) => {
           isPromptLoading={isPromptLoading}
           handleImageUpload={handleImageUpload}
           showOptions={showOptions}
+          setOptionsVisible={setOptionsVisible}
           setSidebarVisible={setSidebarVisible}
         />
         <OptionsContainer

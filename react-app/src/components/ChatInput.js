@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ChatInput = ({ sendMessage, messageInput, setMessageInput, isPromptLoading, showOptions, setSidebarVisible }) => {
+const ChatInput = ({ sendMessage, messageInput, setMessageInput, isPromptLoading, showOptions, setOptionsVisible, setSidebarVisible }) => {
     return (
       <div id="chat-input">
         <textarea
@@ -9,7 +9,10 @@ const ChatInput = ({ sendMessage, messageInput, setMessageInput, isPromptLoading
           style={{ resize: 'none' }}
           value={messageInput}
           onChange={(e) => setMessageInput(e.target.value)}
-          onFocus={() => setSidebarVisible(false)}
+          onFocus={() => {
+            setSidebarVisible(false);
+            setOptionsVisible(false);
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();

@@ -1,6 +1,7 @@
 import React from 'react';
 
 const OptionsContainer = ({ optionsVisible, toggleSidebar, newChat, handleImageUpload, selectedModel, selectModel, sidebarVisible }) => {
+  
     return (
       <div id="options-container" className={optionsVisible ? 'show' : 'hidden'}>
         <div id="options-header">Options</div>
@@ -14,17 +15,19 @@ const OptionsContainer = ({ optionsVisible, toggleSidebar, newChat, handleImageU
             New chat
           </button>
         </div>
-        <div id="image-upload-container">
-          <input
-            type="file"
-            id="image-input"
-            accept="image/*"
-            onChange={(e) => handleImageUpload(e)}
-          />
-          <label htmlFor="image-input" className="custom-file-upload">
-            Upload Image
-          </label>
-        </div>
+        {selectedModel === 'GPT4' && (
+            <div id="image-upload-container">
+              <input
+                type="file"
+                id="image-input"
+                accept="image/*"
+                onChange={(e) => handleImageUpload(e)}
+              />
+              <label htmlFor="image-input" className="custom-file-upload">
+                Upload Image
+              </label>
+            </div>
+        )}
         <div>
           <button
             id="gemini-button"
