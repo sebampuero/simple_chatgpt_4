@@ -22,8 +22,8 @@ const ChatPage = ({ email }) => {
   const imgBase64Data = useRef("");
   const selectedModelRef = useRef(selectedModel);
 
-  const MAX_IMG_WIDTH = 450;
-  const MAX_IMG_HEIGHT = 450;
+  const MAX_IMG_WIDTH = 650;
+  const MAX_IMG_HEIGHT = 650;
 
   const loadChats = () => {
     const token = localStorage.getItem('jwt');

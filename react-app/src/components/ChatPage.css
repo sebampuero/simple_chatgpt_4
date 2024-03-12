@@ -17,29 +17,6 @@
     color: #ffffff;
     background-color: black;
   }
-  .message-bubble {
-    display: inline-block;
-    max-width: 80%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 15px;
-  }
-  .user-message {
-    background-color: blue;
-    color: white;
-    align-self: flex-end;
-    float: right;
-    clear: both;
-    white-space: pre-wrap;
-  }
-  .peer-message {
-    background-color: green;
-    color: white;
-    align-self: flex-start;
-    float: left;
-    clear: both;
-    white-space: pre-wrap;
-  }
   .clipboard-copy {
     margin-bottom: 10px;
     font-size: smaller;
