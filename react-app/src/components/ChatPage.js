@@ -14,6 +14,7 @@ const ChatPage = ({ email }) => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [isPromptLoading, setIsPromptLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState("Gemini");
+  const [allChatsLoaded, setAllChatsLoaded] = useState(false);
 
   const currentSocketId = useRef("");
   const currentChatId = useRef("");
@@ -21,13 +22,15 @@ const ChatPage = ({ email }) => {
   const imageDataURL = useRef(null);
   const imgBase64Data = useRef("");
   const selectedModelRef = useRef(selectedModel);
+  const lastEvalKey = useRef("");
 
+  const PAGINATION_LIMIT = 10;
   const MAX_IMG_WIDTH = 650;
   const MAX_IMG_HEIGHT = 650;
 
   const loadChats = () => {
     const token = localStorage.getItem('jwt');
-    fetch(process.env.PUBLIC_URL + "/user/" + email, {
+    fetch(process.env.PUBLIC_URL + "/user?" + `email=${email}&limit=${PAGINATION_LIMIT}` , {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -39,13 +42,48 @@ const ChatPage = ({ email }) => {
         throw new Error(response.status)
       })
       .then((resp) => {
-        const chats = resp.body
-        chats.sort((a, b) => b.timestamp - a.timestamp);
-        chats.forEach(obj => {
+        const responseChats = resp.chats
+        lastEvalKey.current = JSON.stringify(resp.lastEvalKey)
+        responseChats.forEach(obj => {
           let userContent = obj.messages.find(msg => msg.role === 'user')?.content;
           obj.title = userContent.substring(0,25) + "..."; // very basic and naive way to show main idea of a chat
         })
-        setChats(chats)
+        setChats(responseChats);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        if (error.message === "401") alert("Please reload the page and log in again")
+        else if (error.message === "400") alert("There was a problem loading your chats!")
+        else alert("There was an error, please try again later")
+      });
+  }
+
+  const loadMoreChats = () => {
+    const token = localStorage.getItem('jwt');
+    fetch(process.env.PUBLIC_URL + "/user?" + `email=${email}&last_eval_key=${lastEvalKey.current}&limit=${PAGINATION_LIMIT}` , {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token
+      }
+    })
+      .then((response) => { 
+        if(response.status === 200) return response.json();
+        throw new Error(response.status)
+      })
+      .then((resp) => {
+        const responseChats = resp.chats
+        lastEvalKey.current = JSON.stringify(resp.lastEvalKey)
+        if(lastEvalKey.current === "null"){
+          setAllChatsLoaded(true);
+        }
+        const updatedChats = [...chats];
+        responseChats.forEach(obj => {
+          let userContent = obj.messages.find(msg => msg.role === 'user')?.content;
+          obj.title = userContent.substring(0,25) + "..."; // very basic and naive way to show main idea of a chat
+          updatedChats.push(obj);
+        })
+        setChats(updatedChats);
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -63,10 +101,6 @@ const ChatPage = ({ email }) => {
       : process.env.REACT_APP_WS_URL;
       const socket = new WebSocket(`${socketUrl}?token=${token}`);
 
-      socket.addEventListener('open', () => {
-        console.log('WebSocket connection opened');      
-      });
-
       socket.addEventListener('message', (event) => {
         processMessageType(event.data)
       });
@@ -74,10 +108,6 @@ const ChatPage = ({ email }) => {
       socket.addEventListener('error', (event) => {
         console.error('WebSocket error:', event);
         alert("There was an error, try again later.");
-      });
-
-      socket.addEventListener('close', (event) => {
-        console.log('WebSocket connection closed:', event);
       });
 
       setSocket(socket);
@@ -330,10 +360,19 @@ const ChatPage = ({ email }) => {
     localStorage.setItem('model', model);
     sendNewModel(model, currentSocketId.current);
   };
+
+  const handleLoadMore = () => {
+    loadMoreChats();
+  }
   
     return (
       <div id="chat-container" style={{ display: 'flex' }}>
-        {sidebarVisible && <ChatSidebar chats={chats} onChatClick={switchChat} onDeleteChat={deleteChat} />}
+        {sidebarVisible && <ChatSidebar 
+            chats={chats} 
+            onChatClick={switchChat} 
+            onDeleteChat={deleteChat} 
+            onLoadMoreClick={handleLoadMore}
+            allChatsLoaded={allChatsLoaded}/>}
         <div id="content-container" style={{ flex: 1 }}>
           <ChatMessages messages={chatMessages} />
         </div>

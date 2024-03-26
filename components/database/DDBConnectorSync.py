@@ -1,6 +1,7 @@
 import logging
 import boto3
-from boto3.dynamodb.conditions import Key
+from datetime import datetime
+from boto3.dynamodb.conditions import Key, Attr
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,31 @@ class DDBConnectorSync:
             logger.error(f"Error querying for {email} {e}")
             return []
         return response.get('Items', [])
+
+    async def get_chats_by_email_paginated(self, email: str, last_evaluated_key: dict, limit: int) -> dict:
+        table = self.resource.Table(self.chats_table)
+        try:
+            query_params = {
+                "IndexName": 'user_email-index',
+                "KeyConditionExpression": Key('user_email').eq(email),
+                "ScanIndexForward": False
+            }
+            if last_evaluated_key:
+                query_params['ExclusiveStartKey'] = last_evaluated_key
+            if limit:
+                query_params['Limit'] = limit
+            response = table.query(**query_params)
+        except Exception as e:
+            logger.error(f"Error querying for {email} {e}")
+            return {
+                'items': [],
+                'last_eval_key': ''
+            }
+        # To continue reading from where you left off, return the LastEvaluatedKey in the response
+        return {
+            'items': response.get('Items', []),
+            'last_eval_key': response.get('LastEvaluatedKey')
+        }
 
     async def get_chat_by_id(self, id: str, timestamp: int) -> dict:
         table = self.resource.Table(self.chats_table)

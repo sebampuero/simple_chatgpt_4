@@ -1,7 +1,8 @@
 import React from 'react';
 import './ChatSidebar.css'; // Import your CSS file
 
-const ChatSidebar = ({ chats, onChatClick, onDeleteChat }) => {
+const ChatSidebar = ({ chats, onChatClick, onDeleteChat, onLoadMoreClick, allChatsLoaded }) => {
+
   const formatDate = (timestamp) => {
     const date = new Date(timestamp * 1000);
     // Format the date as "dd/mm/YYYY hh:mm AM/PM"
@@ -28,6 +29,13 @@ const ChatSidebar = ({ chats, onChatClick, onDeleteChat }) => {
             </div>
           </li>
         ))}
+        {!allChatsLoaded &&
+          <li>
+            <div>
+              <span className="chat-row-load-more" onClick={() => onLoadMoreClick()}>More <i class="fa-solid fa-chevron-down"></i></span>
+            </div>
+          </li>
+        }
       </ul>
     </div>
   );

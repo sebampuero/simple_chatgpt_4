@@ -57,6 +57,12 @@
   cursor: pointer; /* Change cursor to pointer when hovering over title */
 }
 
+.chat-row-load-more {
+  font-weight: bold; /* Optional: Make the title bold */
+  cursor: pointer; /* Change cursor to pointer when hovering over title */
+  text-align: center;
+}
+
 .sidebar {
   height: 95vh;
 }

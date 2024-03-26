@@ -36,11 +36,24 @@ async def serve_static(request: Request, filename):
     return await file(f"static/{filename}")
 
 @authorize()
-async def get_chats_for_user(request: Request, email: str):
+async def get_chats_for_user(request: Request):
+    email = request.args.get('email')
+    last_eval_key = request.args.get('last_eval_key') 
+    try:
+        limit = int(request.args.get('limit'))
+    except:
+        return HTTPResponse(status=400)
+    if last_eval_key:
+        try:
+            last_eval_key = json.loads(last_eval_key)
+        except:
+            return HTTPResponse(status=400)
     if email.strip() == '':
         return HTTPResponse(status=400)
-    chats = await DDBRepository().get_chats_by_email(email)
-    return sanicjson({"body": chats})
+    results = await DDBRepository().get_chats_by_email_paginated(email, last_eval_key, limit)
+    chats = results['chats']
+    last_eval_key = results['last_eval_key']
+    return sanicjson({"chats": chats, "lastEvalKey": last_eval_key})
 
 @authorize()
 async def load_new_chat(request: Request, id: str, timestamp: str, new_socket_id: str, old_socket_id: str):
