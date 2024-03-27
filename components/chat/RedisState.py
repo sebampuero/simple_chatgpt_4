@@ -6,7 +6,7 @@ from operator import itemgetter
 
 logger = logging.getLogger(__name__)
 
-
+# docker run -d --restart unless-stopped --name redis-gpt4 -p 6379:6379 docker.io/library/redis:7
 HOST = "192.168.0.14"
 PORT = 6379
 
