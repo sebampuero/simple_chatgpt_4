@@ -78,9 +78,19 @@ networks:
 ```
 
 ## Screenshots
- <img src="https://sebampuerom.de/nc/apps/files_sharing/publicpreview/DH3DjdaZfbi6gYB?file=/&fileId=4579556&x=2560&y=1440&a=true&etag=b1c37c703c4c393dd110660d3aad2ca4" alt="Example Screenshot" width="400"/>
- <img src="https://sebampuerom.de/nc/apps/files_sharing/publicpreview/PrKBg9Bk68e39EW?file=/&fileId=4579550&x=2560&y=1440&a=true&etag=0dbcf0d7204ed215b169bc876c533834" alt="Example Screenshot" width="400"/>
- <img src="https://sebampuerom.de/nc/apps/files_sharing/publicpreview/JjFqP5ECFF2KY9N?file=/&fileId=4579546&x=2560&y=1440&a=true&etag=03b526cc4bcc704a67924031233d054c" alt="Example Screenshot" width="400"/>
+ <table>
+  <tr>
+    <td>
+      <img src="https://sebampuerom.de/nc/apps/files_sharing/publicpreview/DH3DjdaZfbi6gYB?file=/&fileId=4579556&x=2560&y=1440&a=true&etag=b1c37c703c4c393dd110660d3aad2ca4" alt="Example Screenshot" width="400"/>
+    </td>
+    <td>
+      <img src="https://sebampuerom.de/nc/apps/files_sharing/publicpreview/PrKBg9Bk68e39EW?file=/&fileId=4579550&x=2560&y=1440&a=true&etag=0dbcf0d7204ed215b169bc876c533834" alt="Example Screenshot" width="400"/>
+    </td>
+    <td>
+      <img src="https://sebampuerom.de/nc/apps/files_sharing/publicpreview/JjFqP5ECFF2KY9N?file=/&fileId=4579546&x=2560&y=1440&a=true&etag=03b526cc4bcc704a67924031233d054c" alt="Example Screenshot" width="400"/>
+    </td>
+  </tr>
+</table>
 
 ## TODO
 More tests      
