@@ -1,0 +1,140 @@
+#chat-container {
+    height: 100vh;
+    padding: 10px;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    overflow: hidden;
+  }
+  #chat-messages {
+    overflow-y: scroll;
+    max-height: 90vh;
+  }
+  .code-style {
+    background-color: black;
+    border-radius: 15px;
+  }
+  .code-snippet {
+    color: #ffffff;
+    background-color: black;
+  }
+  .clipboard-copy {
+    margin-bottom: 10px;
+    font-size: smaller;
+    font-weight: bold;
+    color: rgb(158, 249, 255);
+    cursor: pointer;
+  }
+  #chat-input {
+    display: flex;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: white;
+    padding: 5px;
+    border-top: 1px solid #ccc;
+  }
+  #message-input {
+    flex: 1;
+    padding: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    font-size: 16px;
+    word-wrap: break-word;
+  }
+  #send-button {
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+  #send-button[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  .spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #4CAF50;
+    animation: spin 1s linear infinite;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    margin-right: 5px;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  #reset-button {
+    padding: 10px;
+    background-color: rgb(190, 190, 190);
+    border: black;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+  #reset-button i {
+    font-size: 1.2em;
+  }
+  #options-container {
+    position: absolute;
+    top: 45%;
+    right: 5%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    z-index: 3;
+  }
+  #options-header {
+    font-weight: bold;
+    font-size: 14px;
+    border-bottom: 1px solid black;
+    margin-bottom: 5px;
+    padding: 5px;
+  }
+  .hidden {
+    display: none;
+  }
+  .show {
+    display: block;
+  }
+  .option {
+    cursor: pointer;
+    padding: 5px;
+  }
+  #image-input {
+    display: none; /* Hide the default file input */
+  }
+  
+  .custom-file-upload,
+  #toggle-sidebar-button,
+  #new-chat-button {
+    border: 1px solid #ccc;
+    padding: 6px 12px;
+    cursor: pointer;
+    margin-top: 5px;
+    margin-bottom: 5px; /* Adjusted margins for consistency */
+    background-color: #f8f8f8;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    white-space: nowrap; /* Prevents text from wrapping and expanding the button */
+  }
+  
+  .custom-file-upload:hover,
+  #toggle-sidebar-button:hover,
+  #new-chat-button:hover {
+    background-color: #e8e8e8;
+  }
+  .custom-file-upload.selected {
+    background-color: gray;
+  }
