@@ -3,7 +3,7 @@ import boto3
 from boto3.dynamodb.conditions import Key, Attr
 from components.elasticsearch.ElasticClient import ElasticClient
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("ChatGPT")
 
 #TODO: async needs to be pushed. Maybe use https://pypi.org/project/asgiref/ ? evaluate how does it work
 class DDBConnectorSync:

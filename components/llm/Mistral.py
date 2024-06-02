@@ -9,7 +9,7 @@ from typing import List, Any, Generator
 MODEL = os.getenv("MISTRAL_MODEL")
 API_KEY = os.getenv("MISTRAL_API_KEY")
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("ChatGPT")
 
 class Mistral(BaseModel):
     

@@ -11,7 +11,7 @@ from typing import List, Any, Generator
 vertexai.init(project=os.getenv("PROJECT_ID"), location="us-central1")
 MODEL = os.getenv("GEMINI_MODEL")
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("ChatGPT")
 
 class Gemini(BaseModel):
     

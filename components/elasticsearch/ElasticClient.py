@@ -4,7 +4,7 @@ from typing import Any
 import os
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("ChatGPT")
 
 HOST = os.getenv("ES_HOST")
 PORT = os.getenv("ES_PORT")
@@ -59,7 +59,10 @@ class ElasticClient:
                 "timestamp": result['_source']['timestamp'],
                 "messages": result['_source']['messages']
             })
-        return results
+        return self.sort_by_timestamp(results, asc=True)
+    
+    def sort_by_timestamp(self, chats: list, *, asc: bool) -> list:
+        return sorted(chats, key=lambda x: int(x['timestamp']), reverse=asc)
 
     def search_documents(self, keyword: str, email_address: str) -> ObjectApiResponse[Any]:
         query = {

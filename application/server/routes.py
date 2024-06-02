@@ -15,7 +15,7 @@ from functools import wraps
 import aiohttp
 import os
 # TODO: refactor into oop
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("ChatGPT")
 
 def authorize():
     def decorator(func):

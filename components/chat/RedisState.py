@@ -4,10 +4,10 @@ import logging
 import json
 from operator import itemgetter 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("ChatGPT")
 
 
-HOST = "192.168.0.14"
+HOST = "192.168.0.21"
 PORT = 6379
 
 class RedisState():

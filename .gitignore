@@ -2,6 +2,7 @@
 db/
 venv/
 *.log
+*.log.*
 __pycache__/
 node_modules/
 static/

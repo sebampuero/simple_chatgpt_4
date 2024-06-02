@@ -2,7 +2,7 @@ import json
 import logging
 from .RedisState import RedisState
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("ChatGPT")
 
 class ChatState:
     __instance = None

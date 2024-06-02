@@ -7,7 +7,7 @@ from sanic import Websocket
 from .BaseModel import BaseModel
 from typing import List, Any, Generator
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("ChatGPT")
 
 openai.api_key = os.getenv("OPENAI_KEY")
 MODEL = os.getenv("GPT_MODEL")

@@ -1,21 +1,21 @@
-from logging.handlers import RotatingFileHandler
+import logging.config
+import pathlib
 from application.server.routes import *
 from sanic import Sanic
-import logging, os
 
 ENV = os.getenv("ENV")
 SUB_DIRECTORY = os.getenv("SUBDIRECTORY")
 DOMAIN = os.getenv("DOMAIN")
 PORT = 9191 if ENV == "PROD" else 9292
 
-log_file = 'log.log' if ENV == "PROD" else "test.log"
-formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-handler = RotatingFileHandler(os.path.abspath(os.path.join(os.path.dirname(__file__), log_file)))
-handler.setFormatter(formatter)
-logger = logging.getLogger()
-logger.addHandler(handler)
-logger.setLevel(logging.DEBUG) if os.getenv("ENV") == "DEV" else logger.setLevel(logging.INFO)
+def setup_logging():
+    config_file = pathlib.Path("log_config.json")
+    with open(config_file) as f_in:
+        config = json.load(f_in)
 
+    logging.config.dictConfig(config)
+
+setup_logging()
 app = Sanic("chatgpt4")
 app.add_route(login_code, f"{SUB_DIRECTORY}/login-code", methods=["POST"])
 app.add_route(serve_index, f"{SUB_DIRECTORY}/", methods=["GET"])

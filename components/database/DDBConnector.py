@@ -2,7 +2,7 @@ import logging
 import aioboto3
 from boto3.dynamodb.conditions import Key
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("ChatGPT")
 
 #TODO: aioboto3 has problems maintining consistency when doing async writes (put_item), that is why this class is not currently used
 class DDBConnector:
