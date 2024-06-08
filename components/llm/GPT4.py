@@ -1,4 +1,5 @@
 import openai
+from openai import AsyncOpenAI
 import os
 import logging
 import json
@@ -9,8 +10,7 @@ from typing import List, Any, Generator
 
 logger = logging.getLogger("ChatGPT")
 
-openai.api_key = os.getenv("OPENAI_KEY")
-MODEL = os.getenv("GPT_MODEL")
+MODEL = os.getenv("GPT_MODEL", "gpt4-o")
 
 class GPT4(BaseModel):
 
@@ -30,34 +30,30 @@ class GPT4(BaseModel):
             output_list.append(new_item)
         return output_list
 
-    async def prompt(self, messages: list)-> Generator[Any, Any, None]:
+    async def prompt(self, messages: list):
         prompt_input = self._from_own_format_to_model_format(messages)
         try:
-            response = await openai.ChatCompletion.acreate(
-                model=MODEL,
+            aclient = AsyncOpenAI(api_key=os.getenv("OPENAI_KEY"))
+            response = await aclient.chat.completions.create(model=MODEL,
                 messages=prompt_input,
                 max_tokens=4000,
                 temperature=0.5,
                 top_p=0,
                 frequency_penalty=0,
                 presence_penalty=1,
-                stream=True
-            )  
+                stream=True)  
             return response
-        except openai.error.RateLimitError:
+        except openai.RateLimitError:
             logger.error(f"Rate limit exceeded", exc_info=True)
             raise Exception("Usage limit exceeded")
-        except openai.error.APIError:
+        except openai.APIError:
             logger.error("API Error", exc_info=True)
             raise Exception("GPT4 had an error generating response for the prompt")
-        except openai.error.InvalidRequestError as e:
-            logger.error("Invalid request Error", exc_info=True)
-            raise Exception(f"Request was wrong, try again later: {str(e)}")
         except:
             logger.error("General error", exc_info=True)
             raise Exception("General error. Try again later.")
 
     def _extract_content(self, response_chunk: Any) -> str:
-        if "content" in response_chunk["choices"][0]["delta"]:
-            return response_chunk["choices"][0]["delta"]["content"]
+        if response_chunk.choices[0].delta.content:
+            return response_chunk.choices[0].delta.content
         return ""

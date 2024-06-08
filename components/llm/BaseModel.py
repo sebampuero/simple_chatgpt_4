@@ -12,7 +12,7 @@ class BaseModel(abc.ABC):
     async def prompt(self, messages: list) -> Generator[Any, Any, None]:
         pass
 
-    async def process_response(self, response_generator: Generator[Any, Any, None], ws: Websocket, message_timestamp: int) -> str:
+    async def process_response(self, response_generator, ws: Websocket, message_timestamp: int) -> str:
         assistant_msg = ""
         async for response_chunk in response_generator:
             content = self._extract_content(response_chunk)
