@@ -13,8 +13,8 @@ export MISTRAL_API_KEY=$MISTRAL_API_KEY
 export DDB_CHATS_TABLE=chats
 export DDB_USERS_TABLE=authorized_users
 export GPT_MODEL=gpt-4o-2024-05-13
-export GEMINI_MODEL=gemini-1.0-pro
+export GEMINI_MODEL=gemini-1.5-pro-001
 export MISTRAL_MODEL=mistral-large-latest
-export ES_HOST=192.168.0.9
+export ES_HOST=192.168.0.7
 export ES_PORT=9200
 python3 /home/ubuntu/gpt4/server.py
