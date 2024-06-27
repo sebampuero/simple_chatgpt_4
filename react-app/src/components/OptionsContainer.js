@@ -55,6 +55,15 @@ const OptionsContainer = ({ optionsVisible, toggleSidebar, newChat, handleImageU
             Mistral
           </button>
         </div>
+        <div>
+          <button
+            id="mistral-button"
+            className={`custom-file-upload ${selectedModel === 'Claude' ? 'selected' : ''}`}
+            onClick={() => selectModel('Claude')}
+          >
+            Mistral
+          </button>
+        </div>
       </div>
     );
   };
