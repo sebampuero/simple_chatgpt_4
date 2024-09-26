@@ -1,0 +1,14 @@
+services:
+  chatgpt:
+    image: gpt4:latest
+    container_name: gpt4
+    env_file:
+      - .env
+    networks:
+      - chatgpt
+    ports:
+      - 10.8.0.7:9191:9191
+    restart: unless-stopped
+
+networks:
+  chatgpt:
