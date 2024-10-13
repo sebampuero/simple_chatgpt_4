@@ -13,17 +13,15 @@
     "handlers": {
       "stderr": {
         "class": "logging.StreamHandler",
-        "level": "WARNING",
+        "level": "DEBUG",
         "formatter": "simple",
         "stream": "ext://sys.stderr"
       },
-      "file": {
-        "class": "logging.handlers.RotatingFileHandler",
-        "level": "INFO",
-        "formatter": "detailed",
-        "filename": "log.log",
-        "maxBytes": 100000,
-        "backupCount": 3
+      "stdout": {
+          "class": "logging.StreamHandler",
+          "level": "DEBUG",
+          "formatter": "detailed",
+          "stream": "ext://sys.stdout"
       }
     },
     "loggers": {
@@ -31,7 +29,14 @@
         "level": "INFO",
         "handlers": [
           "stderr",
-          "file"
+          "stdout"
+        ]
+      },
+      "ChatGPT": {
+        "level": "INFO",
+        "handlers": [
+          "stderr",
+          "stdout"
         ]
       }
     }

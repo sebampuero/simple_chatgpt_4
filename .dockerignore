@@ -1,2 +1,5 @@
 react-app/
 *.log*
+log.log
+.gitignore
+.git

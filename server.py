@@ -7,12 +7,17 @@ ENV = os.getenv("ENV")
 SUB_DIRECTORY = os.getenv("SUBDIRECTORY")
 DOMAIN = os.getenv("DOMAIN")
 PORT = 9191 if ENV == "PROD" else 9292
+ROOT_LOG_LEVEL = os.getenv("ROOT_LOG_LEVEL", "INFO").upper()
+APP_LOG_LEVEL = os.getenv("APP_LOG_LEVEL", "INFO").upper()
 
 def setup_logging():
     config_file = pathlib.Path("log_config.json")
     with open(config_file) as f_in:
         config = json.load(f_in)
-
+    print(f"Running APP LOG LEVEL {APP_LOG_LEVEL}")
+    print(f"Running ROOT LOG LEVEL {ROOT_LOG_LEVEL}")
+    config["loggers"]["root"]["level"] = ROOT_LOG_LEVEL
+    config["loggers"]["ChatGPT"]["level"] = APP_LOG_LEVEL
     logging.config.dictConfig(config)
 
 setup_logging()
