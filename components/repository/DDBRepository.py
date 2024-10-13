@@ -20,8 +20,18 @@ class DDBRepository(Repository):
         chats = await self.ddb_connector.get_chats_by_email(email)
         return self.convert_decimal_to_int(chats)
 
-    async def get_chats_by_email_paginated(self, email: str, last_eval_key: dict, limit: int) -> dict:
-        results = await self.ddb_connector.get_chats_by_email_paginated(email, last_eval_key, limit)
+    async def get_chats_by_email_paginated(
+            self, 
+            email: str, 
+            *, 
+            last_eval_key: dict, 
+            limit: int, 
+            load_images: bool = False) -> dict:
+        results = await self.ddb_connector.get_chats_by_email_paginated(
+            email, 
+            last_evaluated_key=last_eval_key, 
+            limit=limit, 
+            load_images=load_images)
         chats = self.convert_decimal_to_int(results['items'])
         return {
             'chats': chats,

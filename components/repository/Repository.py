@@ -9,6 +9,9 @@ class Repository(Protocol):
     async def get_chats_by_email(self, email: str) -> dict:
         pass
 
+    async def get_chats_by_email_paginated(self, email: str, *, last_eval_key: dict, limit: int, load_images: bool = False) -> dict:
+        pass
+
     async def get_chat_by_id(self, id: str,  timestamp: int = None) -> dict:
         pass
 

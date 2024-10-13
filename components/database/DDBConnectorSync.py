@@ -26,7 +26,13 @@ class DDBConnectorSync:
             return []
         return response.get('Items', [])
 
-    async def get_chats_by_email_paginated(self, email: str, last_evaluated_key: dict, limit: int) -> dict:
+    async def get_chats_by_email_paginated(
+            self, 
+            email: str, 
+            *, 
+            last_evaluated_key: dict, 
+            limit: int, 
+            load_images: bool = False) -> dict:
         table = self.resource.Table(self.chats_table)
         try:
             query_params = {
@@ -39,6 +45,11 @@ class DDBConnectorSync:
             if limit:
                 query_params['Limit'] = limit
             response = table.query(**query_params)
+            if not load_images:
+                items = response.get('Items', [])
+                for item in items:
+                    for message in item['messages']:
+                        message.pop('image', None)
         except Exception as e:
             logger.error(f"Error querying for {email} {e}")
             return {

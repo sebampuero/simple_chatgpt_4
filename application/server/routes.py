@@ -52,7 +52,10 @@ async def get_chats_for_user(request: Request):
             return HTTPResponse(status=400)
     if email.strip() == '':
         return HTTPResponse(status=400)
-    results = await DDBRepository().get_chats_by_email_paginated(email, last_eval_key, limit)
+    results = await DDBRepository().get_chats_by_email_paginated(
+        email, 
+        last_eval_key=last_eval_key, 
+        limit=limit)
     chats = results['chats']
     last_eval_key = results['last_eval_key']
     return sanicjson({"chats": chats, "lastEvalKey": last_eval_key})
