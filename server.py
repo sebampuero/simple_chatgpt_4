@@ -23,8 +23,6 @@ def setup_logging():
 setup_logging()
 app = Sanic("chatgpt4")
 app.add_route(login_code, f"{SUB_DIRECTORY}/login-code", methods=["POST"])
-app.add_route(serve_index, f"{SUB_DIRECTORY}/", methods=["GET"])
-app.add_route(serve_static, f"{SUB_DIRECTORY}/<filename:path>", methods=["GET"])
 app.add_route(load_new_chat, f"{SUB_DIRECTORY}/chat/<id>/<timestamp>/<new_socket_id>/<old_socket_id>", methods=["GET"])
 app.add_route(delete_chat, f"{SUB_DIRECTORY}/chat/<id>/<timestamp>", methods=["DELETE"])
 app.add_route(get_chats_for_user, f"{SUB_DIRECTORY}/user", methods=["GET"])

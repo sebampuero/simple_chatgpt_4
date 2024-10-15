@@ -31,12 +31,6 @@ def authorize():
         return wrapper
     return decorator
 
-async def serve_index(request: Request):
-    return await file("static/index.html")
-
-async def serve_static(request: Request, filename):
-    return await file(f"static/{filename}")
-
 @authorize()
 async def get_chats_for_user(request: Request):
     email = request.args.get('email')
