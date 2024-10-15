@@ -24,7 +24,6 @@
   align-self: flex-end;
   float: right;
   clear: both;
-  white-space: pre-wrap;
 }
 .peer-message {
   background-color: darkblue;
@@ -32,7 +31,6 @@
   align-self: flex-start;
   float: left;
   clear: both;
-  white-space: pre-wrap;
 }
 
 .modal {
