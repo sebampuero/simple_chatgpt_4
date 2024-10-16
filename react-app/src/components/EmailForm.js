@@ -8,7 +8,7 @@ const EmailForm = ({ onSignIn }) => {
   const handleSignIn = useGoogleLogin({
     flow: 'auth-code',
     onSuccess: ({ code }) => {
-      fetch(process.env.PUBLIC_URL + "/login-code", {
+      fetch(`${process.env.PUBLIC_URL}/api/login-code`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",

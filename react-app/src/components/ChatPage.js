@@ -65,7 +65,7 @@ const ChatPage = ({ email }) => {
 
   const loadChatsByKeywords = (keywords) => {
     const token = localStorage.getItem('jwt');
-    fetch(process.env.PUBLIC_URL + "/search_for_chat" , {
+    fetch(`${process.env.PUBLIC_URL}/api/search_for_chat` , {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -92,7 +92,7 @@ const ChatPage = ({ email }) => {
 
   const loadChats = () => {
     const token = localStorage.getItem('jwt');
-    fetch(process.env.PUBLIC_URL + "/user?" + `email=${email}&limit=${PAGINATION_LIMIT}` , {
+    fetch(`${process.env.PUBLIC_URL}/api/user?email=${email}&limit=${PAGINATION_LIMIT}` , {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -117,7 +117,7 @@ const ChatPage = ({ email }) => {
 
   const loadMoreChats = () => {
     const token = localStorage.getItem('jwt');
-    fetch(process.env.PUBLIC_URL + "/user?" + `email=${email}&last_eval_key=${lastEvalKey.current}&limit=${PAGINATION_LIMIT}` , {
+    fetch(`${process.env.PUBLIC_URL}/api/user?email=${email}&last_eval_key=${lastEvalKey.current}&limit=${PAGINATION_LIMIT}` , {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -195,7 +195,7 @@ const ChatPage = ({ email }) => {
   };
   const retrieveMessagesForNewOpenedChat = (newSocketId) => {
     const token = localStorage.getItem('jwt');
-    fetch(process.env.PUBLIC_URL + `/chat/${currentChatId.current}/${currentChatTimestamp.current}/${newSocketId}/${currentSocketId.current}`, {
+    fetch(`${process.env.PUBLIC_URL}/api/chat/${currentChatId.current}/${currentChatTimestamp.current}/${newSocketId}/${currentSocketId.current}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -372,7 +372,7 @@ const ChatPage = ({ email }) => {
 
   const deleteChat = (chatId, timestamp) => {
     const token = localStorage.getItem('jwt');
-    fetch(process.env.PUBLIC_URL + `/chat/${chatId}/${timestamp}`, {
+    fetch(`${process.env.PUBLIC_URL}/api/chat/${chatId}/${timestamp}`, {
       method: "DELETE",
       headers: {
         "Authorization": token
@@ -390,7 +390,7 @@ const ChatPage = ({ email }) => {
 
   const sendNewModel = (model, socket_id) => {
     const token = localStorage.getItem('jwt');
-    fetch(process.env.PUBLIC_URL + `/model/${socket_id}`, {
+    fetch(`${process.env.PUBLIC_URL}/api/model/${socket_id}`, {
       method: "POST",
       headers: {
         "Authorization": token
