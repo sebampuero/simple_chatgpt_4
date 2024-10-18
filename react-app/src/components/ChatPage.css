@@ -138,3 +138,9 @@
   .custom-file-upload.selected {
     background-color: gray;
   }
+
+  @media (max-width: 767px) {
+    #chat-messages {
+      max-width: 65%;
+    }
+  }
