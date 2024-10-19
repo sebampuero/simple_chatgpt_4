@@ -9,6 +9,9 @@
     overflow-y: scroll;
     max-height: 90vh;
   }
+div#content-container {
+    max-width: 100%;
+}
   .code-style {
     background-color: black;
     border-radius: 15px;
@@ -137,10 +140,4 @@
   }
   .custom-file-upload.selected {
     background-color: gray;
-  }
-
-  @media (max-width: 767px) {
-    #chat-messages {
-      max-width: 65%;
-    }
   }
