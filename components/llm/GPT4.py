@@ -36,11 +36,11 @@ class GPT4(BaseModel):
             aclient = AsyncOpenAI(api_key=os.getenv("OPENAI_KEY"))
             response = await aclient.chat.completions.create(model=MODEL,
                 messages=prompt_input,
-                max_tokens=4000,
-                temperature=0.5,
-                top_p=0,
+                max_completion_tokens=4000,
+                temperature=1,
+                top_p=1,
                 frequency_penalty=0,
-                presence_penalty=1,
+                presence_penalty=0,
                 stream=True)  
             return response
         except openai.RateLimitError:
