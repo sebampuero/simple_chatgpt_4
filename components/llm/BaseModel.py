@@ -1,9 +1,11 @@
 import abc
 import json
 from sanic import Websocket
-from typing import List, Any, Dict, Awaitable, Generator
+from typing import Any, Generator
+
 
 class BaseModel(abc.ABC):
+
     @abc.abstractmethod
     def _from_own_format_to_model_format(self, chats: list) -> list:
         pass

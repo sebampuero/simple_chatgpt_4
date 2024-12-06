@@ -2,15 +2,12 @@ import openai
 from openai import AsyncOpenAI
 import os
 import logging
-import json
-from datetime import datetime
-from sanic import Websocket
 from .BaseModel import BaseModel
-from typing import List, Any, Generator
+from typing import Any
 
 logger = logging.getLogger("ChatGPT")
-
 MODEL = os.getenv("GPT_MODEL", "gpt4-o")
+
 
 class GPT4(BaseModel):
 
@@ -44,7 +41,7 @@ class GPT4(BaseModel):
                 stream=True)  
             return response
         except openai.RateLimitError:
-            logger.error(f"Rate limit exceeded", exc_info=True)
+            logger.error("Rate limit exceeded", exc_info=True)
             raise Exception("Usage limit exceeded")
         except openai.APIError:
             logger.error("API Error", exc_info=True)

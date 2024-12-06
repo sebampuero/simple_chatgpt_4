@@ -232,6 +232,8 @@ const ChatPage = ({ email }) => {
       currentSocketId.current = msg.socket_id
     }else if(msg.type === "CONTENT"){
       handleReceivedMessage(data)
+    }else if(msg.type == "ERROR"){
+      alert("There was an error, please reload the page.")
     }
   }
 

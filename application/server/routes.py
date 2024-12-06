@@ -18,6 +18,7 @@ import os
 # TODO: refactor into oop
 logger = logging.getLogger("ChatGPT")
 
+
 def authorize():
     def decorator(func):
         @wraps(func)
@@ -31,18 +32,19 @@ def authorize():
         return wrapper
     return decorator
 
+
 @authorize()
 async def get_chats_for_user(request: Request):
     email = request.args.get('email')
-    last_eval_key = request.args.get('last_eval_key') 
+    last_eval_key = request.args.get('last_eval_key')
     try:
         limit = int(request.args.get('limit'))
-    except:
+    except Exception:
         return HTTPResponse(status=400)
     if last_eval_key:
         try:
             last_eval_key = json.loads(last_eval_key)
-        except:
+        except Exception:
             return HTTPResponse(status=400)
     if email.strip() == '':
         return HTTPResponse(status=400)
@@ -142,17 +144,20 @@ async def chat(request: Request, ws: Websocket):
     chat_state.set_messages_with_ts([], socket_id, int(datetime.now().timestamp()))
 
     async def close_connection():
-        await DDBRepository().store_chat(chat_state.get_messages_with_ts(socket_id), user_email, chat_id)
         chat_state.remove_ws(socket_id)
         await ws.close()
+
+    async def store_chat():
+        await DDBRepository().store_chat(chat_state.get_messages_with_ts(socket_id), user_email, chat_id)    
 
     while True:
         message_timestamp = datetime.timestamp(datetime.now())
         try:
             input_raw = await ws.recv()
         except:
-            logger.error(f"Unexpected exception, most probably {client_ip} closed the websocket connection",exc_info=True)
+            logger.error(f"Unexpected exception, most probably {client_ip} closed the websocket connection", exc_info=True)
             await close_connection()
+            await store_chat()
             break
         if not input_raw or "email" not in input_raw:
             await close_connection()
@@ -182,6 +187,6 @@ async def chat(request: Request, ws: Websocket):
             }, socket_id)
         except Exception as e:
             logger.error(str(e), exc_info=True)
-            await DDBRepository().store_chat(chat_state.get_messages_with_ts(socket_id), user_email, chat_id)
-            await ws.send(json.dumps({"content": str(e), "timestamp": int(message_timestamp), "type": "CONTENT"}))
+            await store_chat()
+            await ws.send(json.dumps({"type": "ERROR"}))
     
