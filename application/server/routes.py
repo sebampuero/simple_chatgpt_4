@@ -3,7 +3,6 @@ from sanic.response import HTTPResponse, file
 from sanic.response import json as sanicjson
 from components.login.Login import Login
 from components.llm.GPT4 import GPT4
-from components.llm.Gemini import Gemini
 from components.llm.Mistral import Mistral
 from components.llm.Claude import Claude
 from components.repository.DDBRepository import DDBRepository
@@ -117,7 +116,6 @@ async def login_code(request: Request):
 
 language_models = {
     "GPT4": GPT4(),
-    "Gemini": Gemini(),
     "Mistral": Mistral(),
     "Claude": Claude()
 }

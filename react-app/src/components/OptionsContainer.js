@@ -29,13 +29,6 @@ const OptionsContainer = ({ optionsVisible, toggleSidebar, newChat, handleImageU
             </div>
         )}
         <div>
-          <button
-            id="gemini-button"
-            className={`custom-file-upload ${selectedModel === 'Gemini' ? 'selected' : ''}`}
-            onClick={() => selectModel('Gemini')}
-          >
-            Gemini
-          </button>
         </div>
         <div>
           <button

@@ -1,7 +1,7 @@
 # Basic Chatbot that uses different public LLMs
 
 ## Features
-Simple chatGPT clone that uses the OpenAI, Gemini and Mistral APIs. Sign in via Google. Chat history and authorized google emails are stored in DynamoDB.
+Simple chatGPT clone that uses the OpenAI, Gemini, Mistral and Anthropic APIs. Sign in via Google. Chat history and authorized google emails are stored in DynamoDB.
 
 ## Setup
 

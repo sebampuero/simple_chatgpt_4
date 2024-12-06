@@ -13,7 +13,7 @@ const ChatPage = ({ email }) => {
   const [socket, setSocket] = useState(null);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [isPromptLoading, setIsPromptLoading] = useState(false);
-  const [selectedModel, setSelectedModel] = useState("Gemini");
+  const [selectedModel, setSelectedModel] = useState("Mistral");
   const [allChatsLoaded, setAllChatsLoaded] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
