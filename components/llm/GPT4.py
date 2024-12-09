@@ -6,7 +6,6 @@ from .BaseModel import BaseModel
 from typing import Any
 
 logger = logging.getLogger("ChatGPT")
-MODEL = os.getenv("GPT_MODEL", "gpt4-o")
 
 
 class GPT4(BaseModel):
@@ -31,7 +30,7 @@ class GPT4(BaseModel):
         prompt_input = self._from_own_format_to_model_format(messages)
         try:
             aclient = AsyncOpenAI(api_key=os.getenv("OPENAI_KEY"))
-            response = await aclient.chat.completions.create(model=MODEL,
+            response = await aclient.chat.completions.create(model=self.model,
                 messages=prompt_input,
                 max_completion_tokens=4000,
                 temperature=1,

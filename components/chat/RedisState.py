@@ -15,13 +15,21 @@ class RedisState():
     def __init__(self):
         self.r = redis.Redis(host=HOST, port=PORT, db=0, charset="utf-8", decode_responses=True)
 
-    def set_language_model(self, model: str, ws_id: str):
+    def set_language_model_category(self, model: str, category: str, ws_id: str):
         try:
             self.r.hset(f"ws:{ws_id}", mapping={
-                "model": model
+                "model": model,
+                "category": category
             })
         except redis.exceptions.RedisError as e:
             logger.error(f"Error setting language model: {e}")
+
+    def get_language_category(self, ws_id: str) -> str:
+        try:
+            return self.r.hget(f"ws:{ws_id}", "category")
+        except redis.exceptions.RedisError as e:
+            logger.error(f"Error getting language category: {e}")
+            return ""
 
     def get_language_model(self, ws_id: str) -> str:
         try:

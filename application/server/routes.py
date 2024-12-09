@@ -1,5 +1,5 @@
 from sanic import Websocket, Request
-from sanic.response import HTTPResponse, file
+from sanic.response import HTTPResponse
 from sanic.response import json as sanicjson
 from components.login.Login import Login
 from components.llm.GPT4 import GPT4
@@ -19,6 +19,7 @@ logger = logging.getLogger("ChatGPT")
 
 
 def authorize():
+    # TODO: use sanic middlewares instead of custom solution
     def decorator(func):
         @wraps(func)
         async def wrapper(request: Request, *args, **kwargs):
@@ -31,6 +32,13 @@ def authorize():
         return wrapper
     return decorator
 
+
+@authorize()
+async def get_available_models(request: Request):
+    # TODO: temporary solution, this would query the LLM APIs later
+    with open('models_data.json', 'r') as file:
+        models_data = json.load(file)
+    return sanicjson(models_data)
 
 @authorize()
 async def get_chats_for_user(request: Request):
@@ -79,9 +87,12 @@ async def load_new_chat(request: Request, id: str, timestamp: str, new_socket_id
 async def set_model(request: Request, socket_id: str):
     body = request.json
     model = body.get('model')
+    category = body.get('category')
     chat_state = ChatState.get_instance()
-    chat_state.set_language_model(model, socket_id)
-    return HTTPResponse(status=200)
+    if chat_state:
+        chat_state.set_language_model_category(model, category, socket_id)
+        return HTTPResponse(status=200)
+    return HTTPResponse(status=500)
 
 @authorize()
 async def delete_chat(request: Request, id: str, timestamp: str):
@@ -114,7 +125,7 @@ async def login_code(request: Request):
         return sanicjson({"email": decoded_id_token['email'], "jwt": jwt_manager.generate_jwt(decoded_id_token)})
     return HTTPResponse(status=401)
 
-language_models = {
+language_categories = {
     "GPT4": GPT4(),
     "Mistral": Mistral(),
     "Claude": Claude()
@@ -154,8 +165,8 @@ async def chat(request: Request, ws: Websocket):
             input_raw = await ws.recv()
         except:
             logger.error(f"Unexpected exception, most probably {client_ip} closed the websocket connection", exc_info=True)
-            await close_connection()
             await store_chat()
+            await close_connection()
             break
         if not input_raw or "email" not in input_raw:
             await close_connection()
@@ -174,9 +185,13 @@ async def chat(request: Request, ws: Websocket):
             "content": input_json['msg']
         }, socket_id)
         try:
-            language_model = chat_state.get_language_model(socket_id)
-            response_generator = await language_models[language_model].prompt(chat_state.get_messages_with_ts(socket_id)['messages'])
-            assistant_msg = await language_models[language_model].process_response(response_generator, ws, int(message_timestamp))
+            category = chat_state.get_language_category(socket_id)
+            llm = chat_state.get_language_model(socket_id)
+            category_instance = language_categories[category]
+            category_instance.set_model(llm)
+            logger.debug(f"Using model: {llm} and category {category}")
+            response_generator = await category_instance.prompt(chat_state.get_messages_with_ts(socket_id)['messages'])
+            assistant_msg = await category_instance.process_response(response_generator, ws, int(message_timestamp))
             await ws.send(json.dumps({"content": "END", "timestamp": int(message_timestamp), "type": "CONTENT"}))
             chat_state.append_message({
                 "role": "assistant",

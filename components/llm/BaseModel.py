@@ -1,10 +1,17 @@
 import abc
 import json
+import logging
 from sanic import Websocket
 from typing import Any, Generator
 
+logger = logging.getLogger("ChatGPT")
+
 
 class BaseModel(abc.ABC):
+
+    def set_model(self, model: str):
+        logger.debug(f"Set model {model} for instance {self}")
+        self.model = model
 
     @abc.abstractmethod
     def _from_own_format_to_model_format(self, chats: list) -> list:

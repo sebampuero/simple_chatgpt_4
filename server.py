@@ -28,6 +28,7 @@ app.add_route(delete_chat, f"{SUB_DIRECTORY}/api/chat/<id>/<timestamp>", methods
 app.add_route(get_chats_for_user, f"{SUB_DIRECTORY}/api/user", methods=["GET"])
 app.add_route(set_model, f"{SUB_DIRECTORY}/api/model/<socket_id>", methods=["POST"])
 app.add_route(search_for_chat, f"{SUB_DIRECTORY}/api/search_for_chat", methods=["POST"])
+app.add_route(get_available_models, f"{SUB_DIRECTORY}/api/models", methods=["GET"])
 app.add_websocket_route(chat, f"{SUB_DIRECTORY}/ws")
 
 app.ctx.sub_directory = SUB_DIRECTORY

@@ -3,7 +3,6 @@ import logging
 from .BaseModel import BaseModel
 from typing import Any
 from anthropic import AsyncAnthropic
-MODEL = os.getenv("CLAUDE_MODEL", "claude-3-5-sonnet-20240620")
 
 logger = logging.getLogger("ChatGPT")
 
@@ -25,7 +24,7 @@ class Claude(BaseModel):
             response = await model.messages.create(
                 max_tokens=4000,
                 messages=prompt,
-                model=MODEL,
+                model=self.model,
                 stream=True,
             )
             return response
