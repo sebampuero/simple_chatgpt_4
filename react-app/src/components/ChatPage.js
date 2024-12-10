@@ -14,6 +14,7 @@ const ChatPage = ({ email }) => {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [isPromptLoading, setIsPromptLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState("mistral-small-latest");
+  const [selectedCategory, setSelectedCategory] = useState("Mistral");
   const [allChatsLoaded, setAllChatsLoaded] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -23,7 +24,7 @@ const ChatPage = ({ email }) => {
   const imageDataURL = useRef(null);
   const imgBase64Data = useRef("");
   const selectedModelRef = useRef(selectedModel);
-  const categoryRef = useRef("Mistral");
+  const categoryRef = useRef(selectedCategory);
   const lastEvalKey = useRef("");
 
   const PAGINATION_LIMIT = 10;
@@ -46,7 +47,7 @@ const ChatPage = ({ email }) => {
     const category = localStorage.getItem('category')
     if (model && category) {
       setSelectedModel(model)
-      categoryRef.current = category
+      setSelectedCategory(category)
     }
     if (!socket){
       createSocket()
@@ -55,7 +56,8 @@ const ChatPage = ({ email }) => {
 
   useEffect(() => {
     selectedModelRef.current = selectedModel;
-  }, [selectedModel]);
+    categoryRef.current = selectedCategory;
+  }, [selectedModel, selectedCategory]);
 
   const searchChats = (query) => {
     if (query) {
@@ -407,12 +409,20 @@ const ChatPage = ({ email }) => {
     });
   }
 
-  const selectModel = (model, category) => {
-    categoryRef.current = category;
-    setSelectedModel(model);
-    localStorage.setItem('model', model);
+  const selectCategory = (category, defaultModel) => {
+    setSelectedCategory(category)
+    setSelectedModel(defaultModel)
+    categoryRef.current = category
+    selectedModelRef.current = defaultModel
     localStorage.setItem('category', category);
-    sendNewModel(model, category, currentSocketId.current);
+    localStorage.setItem('model', defaultModel)
+  }
+
+  const selectModel = (model) => {
+    setSelectedModel(model);
+    selectedModelRef.current = model
+    localStorage.setItem('model', model);
+    sendNewModel(model, categoryRef.current, currentSocketId.current);
   };
 
   const handleLoadMore = () => {
@@ -451,7 +461,9 @@ const ChatPage = ({ email }) => {
           newChat={newChat}
           handleImageUpload={handleImageUpload}
           selectedModel={selectedModel}
+          selectedCategory={selectedCategory}
           selectModel={selectModel}
+          selectCategory={selectCategory}
           sidebarVisible={sidebarVisible}
         />
       </div>

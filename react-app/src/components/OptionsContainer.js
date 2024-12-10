@@ -7,7 +7,9 @@ const OptionsContainer = ({
   newChat, 
   handleImageUpload, //TODO: re add this later
   selectedModel, 
+  selectedCategory,
   selectModel, 
+  selectCategory,
   sidebarVisible }) => {
     
   const [models, setModels] = useState({});
@@ -35,39 +37,48 @@ const OptionsContainer = ({
       alert("There was an error loading the models, please reload the page.")
     });
   }
+
+  const handleModelSelect = (model) => {
+    selectModel(model);
+  };
   
   return (
-    <div id="options-container" className={optionsVisible ? 'show' : 'hidden'}>
-      <div>
-        <button id="toggle-sidebar-button" className="custom-file-upload" onClick={toggleSidebar}>
-          {sidebarVisible ? 'Hide chats' : 'Show chats'}
-        </button>
-      </div>
-      <div>
-        <button id="new-chat-button" className="custom-file-upload" onClick={newChat}>
-          New chat
-        </button>
-      </div>
-      <div>
-      </div>
-
-      {Object.entries(models).map(([category, llms]) => (
-        <div key={category}>
-          <p>{category}</p>
-          <div className="llms">
-            {llms.map((llm) => (
+    optionsVisible && (
+      <div id="options-dialog" className="dialog">
+        <div className="dialog-content">
+          <button id="toggle-sidebar-button" className="dialog-button" onClick={toggleSidebar}>
+            {sidebarVisible ? 'Hide chats' : 'Show chats'}
+          </button>
+          <button id="new-chat-button" className="dialog-button" onClick={newChat}>
+            New chat
+          </button>
+          <div className="dialog-categories">
+            {Object.keys(models).map((category) => (
               <button
-                id={`${llm.toLowerCase()}-button`}
-                className={`custom-file-upload ${selectedModel === llm ? 'selected' : ''}`}
-                onClick={() => selectModel(llm, category)}
+                key={category}
+                className={`dialog-button ${selectedCategory === category ? 'selected' : ''}`}
+                onClick={() => selectCategory(category, models[category][0])}
               >
-                {llm}
+                {category}
               </button>
             ))}
           </div>
+          {selectedCategory && (
+            <div className="dialog-models">
+              {models[selectedCategory].map((model) => (
+                <button
+                  key={model}
+                  className={`dialog-button ${selectedModel === model ? 'selected' : ''}`}
+                  onClick={() => handleModelSelect(model)}
+                >
+                  {model}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-      ))}
-    </div>
+      </div>
+    )
   );
 };
 
