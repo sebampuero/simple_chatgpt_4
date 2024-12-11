@@ -8,6 +8,7 @@ from components.llm.Claude import Claude
 from components.repository.DDBRepository import DDBRepository
 from components.login.JWTManager import JWTManager
 from components.chat.ChatState import ChatState
+from constants.WebsocketConstants import WebsocketConstants
 
 logger = logging.getLogger("ChatGPT")
 
@@ -31,7 +32,7 @@ async def chat(request: Request, ws: Websocket):
     user_email = ""
     chat_id = ""
     logger.info(f"Client connected via WS: {client_ip} and socket_id {socket_id}")
-    await ws.send(json.dumps({"socket_id": socket_id, "type": "INIT"}))
+    await ws.send(json.dumps({"socket_id": socket_id, "type": WebsocketConstants.INIT}))
     chat_state = ChatState.get_instance()
     chat_state.set_messages_with_ts([], socket_id, int(datetime.now().timestamp()))
 
@@ -75,7 +76,7 @@ async def chat(request: Request, ws: Websocket):
             logger.debug(f"Using model: {llm} and category {category}")
             response_generator = await category_instance.prompt(chat_state.get_messages_with_ts(socket_id)['messages'])
             assistant_msg = await category_instance.process_response(response_generator, ws, int(message_timestamp))
-            await ws.send(json.dumps({"content": "", "timestamp": int(message_timestamp), "type": "CONTENT"}))
+            await ws.send(json.dumps({"content": WebsocketConstants.END, "timestamp": int(message_timestamp), "type": WebsocketConstants.CONTENT}))
             chat_state.append_message({
                 "role": "assistant",
                 "content": assistant_msg,
@@ -84,4 +85,4 @@ async def chat(request: Request, ws: Websocket):
         except Exception as e:
             logger.error(str(e), exc_info=True)
             await store_chat()
-            await ws.send(json.dumps({"type": "ERROR"}))
+            await ws.send(json.dumps({"type": WebsocketConstants.ERROR}))

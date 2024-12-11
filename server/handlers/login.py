@@ -1,11 +1,14 @@
 from sanic import Request
 from sanic.response import HTTPResponse, json as sanicjson
-import logging
-import os
-import aiohttp
 from components.login.Login import Login
 from components.repository.DDBRepository import DDBRepository
 from components.login.JWTManager import JWTManager
+from config import config as appconfig
+from constants.GoogleServicesConstants import GoogleServicesConstants
+
+import logging
+import aiohttp
+
 
 logger = logging.getLogger("ChatGPT")
 
@@ -18,13 +21,13 @@ async def login_code(request: Request):
         return HTTPResponse(status=400)
     data = {
         'code': auth_code,
-        'client_id': os.getenv("CLIENT_ID"),
-        'client_secret': os.getenv("CLIENT_SECRET"),
+        'client_id': appconfig.GOOGLE_OAUTH_CLIENT_ID,
+        'client_secret': appconfig.GOOGLE_OAUTH_CLIENT_SECRET,
         'redirect_uri': 'postmessage',
         'grant_type': 'authorization_code'
     }
     async with aiohttp.ClientSession() as session:
-        async with session.post('https://oauth2.googleapis.com/token', data=data) as response:
+        async with session.post(GoogleServicesConstants.OAUTH_TOKEN_URL, data=data) as response:
             tokens = await response.json()
     jwt_manager = JWTManager()
     decoded_id_token = jwt_manager.decode_google_jwt(tokens['id_token'])

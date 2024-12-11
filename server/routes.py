@@ -2,7 +2,6 @@ from sanic import Blueprint
 from server.handlers.login import login_code
 from server.handlers.chat import load_new_chat, delete_chat, get_chats_for_user, set_model, search_for_chat
 from server.handlers.models import get_available_models
-from server.handlers.ws import chat
 
 bp = Blueprint('routes')
 
