@@ -17,5 +17,5 @@ COPY . /app
 
 EXPOSE 9191
 
-CMD ["poetry", "run", "python", "server.py"]
+CMD ["poetry", "run", "python", "main.py"]
 
