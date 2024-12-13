@@ -1,12 +1,11 @@
-import os
 import logging
-from sanic import Websocket
 from .BaseModel import BaseModel
 from mistralai.async_client  import MistralAsyncClient
 from mistralai.models.chat_completion import ChatMessage
 from typing import Any, Generator
+from config import config as appconfig
 
-API_KEY = os.getenv("MISTRAL_API_KEY")
+API_KEY = appconfig.MISTRAL_API_KEY
 
 logger = logging.getLogger("ChatGPT")
 

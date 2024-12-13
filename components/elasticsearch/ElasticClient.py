@@ -1,13 +1,13 @@
 from elasticsearch import Elasticsearch
 from elastic_transport import ObjectApiResponse
 from typing import Any
-import os
 import logging
+from config import config as appconfig
 
 logger = logging.getLogger("ChatGPT")
 
-HOST = os.getenv("ES_HOST")
-PORT = os.getenv("ES_PORT")
+HOST = appconfig.ELASTIC_SEARCH_HOST
+PORT = appconfig.ELASTIC_SEARCH_PORT
 
 class ElasticClient:
     def __init__(self, index = None):

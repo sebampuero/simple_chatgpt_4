@@ -1,9 +1,9 @@
 import openai
 from openai import AsyncOpenAI
-import os
 import logging
 from .BaseModel import BaseModel
 from typing import Any
+from config import config as appconfig
 
 logger = logging.getLogger("ChatGPT")
 
@@ -29,7 +29,7 @@ class GPT4(BaseModel):
     async def prompt(self, messages: list):
         prompt_input = self._from_own_format_to_model_format(messages)
         try:
-            aclient = AsyncOpenAI(api_key=os.getenv("OPENAI_KEY"))
+            aclient = AsyncOpenAI(api_key=appconfig.OPENAI_KEY)
             response = await aclient.chat.completions.create(model=self.model,
                 messages=prompt_input,
                 max_completion_tokens=4000,
