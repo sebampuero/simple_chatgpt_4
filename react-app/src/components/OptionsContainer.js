@@ -12,7 +12,8 @@ const OptionsContainer = ({
   selectCategory,
   sidebarVisible }) => {
     
-  const [models, setModels] = useState({});
+  const [categoriesWithModels, setCategoriesWithModels] = useState({});
+  const [canHandleImage, setCanHandleImage] = useState(false);
 
   useEffect(() => {
     loadModels();
@@ -26,20 +27,23 @@ const OptionsContainer = ({
         "Authorization": token
       }
     })
-    .then((response) => { 
+    .then((response) => {
       if(response.status === 200) return response.json();
       throw new Error(response.status)
     })
     .then((resp) => {
-      setModels(resp);
+      setCategoriesWithModels(resp);
+      console.log("Loaded categoriesWithModels: ", resp);
     }).catch((error) => {
-      console.error("Error loading models:", error);
-      alert("There was an error loading the models, please reload the page.")
+      console.error("Error loading categoriesWithModels:", error);
+      alert("There was an error loading the categoriesWithModels, please reload the page.")
     });
   }
 
-  const handleModelSelect = (model) => {
+  const handleModelSelect = (category, model) => {
     selectModel(model);
+    const selectedModel = categoriesWithModels[category].models.find(m => m.name === model);
+    setCanHandleImage(selectedModel.handles_image);
   };
   
   return (
@@ -52,26 +56,39 @@ const OptionsContainer = ({
           <button id="new-chat-button" className="dialog-button" onClick={newChat}>
             New chat
           </button>
+          canHandleImage && (
+            <div id="image-upload-container">
+              <input
+                type="file"
+                id="image-input"
+                accept="image/*"
+                onChange={(e) => handleImageUpload(e)}
+              />
+              <label htmlFor="image-input" className="custom-file-upload">
+                Upload Image
+              </label>
+            </div>
+          )
           <div className="dialog-categories">
-            {Object.keys(models).map((category) => (
+            {Object.keys(categoriesWithModels).map((category) => (
               <button
                 key={category}
                 className={`dialog-button ${selectedCategory === category ? 'selected' : ''}`}
-                onClick={() => selectCategory(category, models[category][0])}
+                onClick={() => selectCategory(category, categoriesWithModels[category].models[0].name)}
               >
                 {category}
               </button>
             ))}
           </div>
           {selectedCategory && (
-            <div className="dialog-models">
-              {models[selectedCategory].map((model) => (
+            <div className="dialog-categoriesWithModels">
+              {categoriesWithModels[selectedCategory].models.map((model) => (
                 <button
-                  key={model}
-                  className={`dialog-button ${selectedModel === model ? 'selected' : ''}`}
-                  onClick={() => handleModelSelect(model)}
+                  key={model.name}
+                  className={`dialog-button ${selectedModel === model.name ? 'selected' : ''}`}
+                  onClick={() => handleModelSelect(selectedCategory, model.name)}
                 >
-                  {model}
+                  {model.name}
                 </button>
               ))}
             </div>

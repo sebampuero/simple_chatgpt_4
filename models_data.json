@@ -1,18 +1,54 @@
 {
-    "GPT4": [
-        "gpt-4o",
-        "o1-preview",
-        "o1-mini"
-    ],
-    "Mistral": [
-        "mistral-large-latest",
-        "pixtral-large-latest",
-        "mistral-small-latest",
-        "codestral-latest"
-    ],
-    "Claude": [
-        "claude-3-5-sonnet-latest",
-        "claude-3-5-haiku-latest",
-        "claude-3-opus-latest"
-    ]
+    "GPT4": {
+        "models": [
+            {
+                "name": "gpt-4o",
+                "handles_image": true
+            },
+            {
+                "name": "o1-preview",
+                "handles_image": false
+            },
+            {
+                "name": "o1-mini",
+                "handles_image": false
+            }
+        ]
+    },
+    "Mistral": {
+        "models": [
+            {
+                "name": "mistral-large-latest",
+                "handles_image": false
+            },
+            {
+                "name": "pixtral-large-latest",
+                "handles_image": false
+            },
+            {
+                "name": "mistral-small-latest",
+                "handles_image": false
+            },
+            {
+                "name": "codestral-latest",
+                "handles_image": false
+            }
+        ]
+    },
+    "Claude": {
+        "models": [
+            {
+                "name": "claude-3-5-sonnet-latest",
+                "handles_image": false
+            },
+            {
+                "name": "claude-3-5-haiku-latest",
+                "handles_image": false
+            },
+            {
+                "name": "claude-3-opus-latest",
+                "handles_image": false
+            }
+        ]
+    }
 }

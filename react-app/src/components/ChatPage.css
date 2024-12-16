@@ -117,27 +117,3 @@ div#content-container {
   #image-input {
     display: none; /* Hide the default file input */
   }
-  
-  .custom-file-upload,
-  #toggle-sidebar-button,
-  #new-chat-button {
-    border: 1px solid #ccc;
-    padding: 6px 12px;
-    cursor: pointer;
-    margin-top: 5px;
-    margin-bottom: 5px; /* Adjusted margins for consistency */
-    background-color: #f8f8f8;
-    border-radius: 4px;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    white-space: nowrap; /* Prevents text from wrapping and expanding the button */
-  }
-  
-  .custom-file-upload:hover,
-  #toggle-sidebar-button:hover,
-  #new-chat-button:hover {
-    background-color: #e8e8e8;
-  }
-  .custom-file-upload.selected {
-    background-color: gray;
-  }
