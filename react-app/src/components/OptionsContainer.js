@@ -56,7 +56,7 @@ const OptionsContainer = ({
           <button id="new-chat-button" className="dialog-button" onClick={newChat}>
             New chat
           </button>
-          canHandleImage && (
+          {canHandleImage && (
             <div id="image-upload-container">
               <input
                 type="file"
@@ -68,13 +68,16 @@ const OptionsContainer = ({
                 Upload Image
               </label>
             </div>
-          )
+          )}
           <div className="dialog-categories">
             {Object.keys(categoriesWithModels).map((category) => (
               <button
                 key={category}
                 className={`dialog-button ${selectedCategory === category ? 'selected' : ''}`}
-                onClick={() => selectCategory(category, categoriesWithModels[category].models[0].name)}
+                onClick={() => {
+                  selectCategory(category, categoriesWithModels[category].models[0].name);
+                  handleModelSelect(category, categoriesWithModels[category].models[0].name)
+                }}
               >
                 {category}
               </button>
