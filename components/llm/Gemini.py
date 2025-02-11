@@ -9,7 +9,6 @@ from .BaseModel import BaseModel
 from typing import List, Any, Generator
 
 vertexai.init(project=os.getenv("PROJECT_ID"), location="us-central1")
-MODEL = os.getenv("GEMINI_MODEL")
 
 logger = logging.getLogger("ChatGPT")
 
@@ -24,10 +23,10 @@ class Gemini(BaseModel):
                 output.append(Content(role="user", parts=[Part.from_text(item["content"])]))
         return output
 
-    async def prompt(self, messages: list)-> Generator[Any, Any, None]:
+    async def prompt(self, messages: list) -> Generator[Any, Any, None]:
         try:
             prompt = self._from_own_format_to_model_format(messages)
-            model = GenerativeModel(MODEL)
+            model = GenerativeModel(self.model)
             response = await model.generate_content_async(prompt, stream=True)
             return  response
         except Exception as e:

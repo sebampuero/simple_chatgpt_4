@@ -1,0 +1,36 @@
+[flake8]
+max-line-length = 88
+ignore = E203, W503
+exclude =
+    __pycache__,
+    .git,
+    .venv,
+    .env,
+    .vscode,
+    .idea,
+    .tox,
+    build,
+    dist,
+    *.egg-info,
+    *.pyc,
+    *.pyo,
+    *.pyd,
+    *.pyc,
+    *.pyo,
+    *.pyd,
+    .coverage,
+    .ipynb_checkpoints,
+    .mypy_cache,
+    .pytest_cache,
+    .cache,
+    .nox,
+    .coverage_report,
+    *.pytest_cache,
+    *.mypy_cache,
+    *.cache,
+    *.coverage,
+    *.nox,
+    *.coverage_report
+
+# Enforce docstrings
+enable-extensions = D

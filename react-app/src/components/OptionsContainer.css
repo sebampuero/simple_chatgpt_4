@@ -1,0 +1,99 @@
+.dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-width: 90%;
+    width: 400px;
+  }
+  
+  .dialog-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .dialog-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .dialog-button:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .dialog-button.selected {
+    background-color: #007bff;
+    color: #fff;
+  }
+  
+  .dialog-categories {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .dialog-select {
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+
+  .dialog-category {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .dialog-category-title {
+    font-weight: bold;
+    margin: 0;
+  }
+  
+  .dialog-llms {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  @media (max-width: 600px) {
+    .dialog {
+      min-width: 90%;
+    }
+    
+    .dialog-llms {
+      flex-direction: column;
+    }
+  }
+
+  .custom-file-upload,
+  #toggle-sidebar-button,
+  #new-chat-button {
+    border: 1px solid #ccc;
+    padding: 6px 12px;
+    cursor: pointer;
+    margin-top: 5px;
+    margin-bottom: 5px; /* Adjusted margins for consistency */
+    background-color: #f8f8f8;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    white-space: nowrap; /* Prevents text from wrapping and expanding the button */
+  }
+  
+  .custom-file-upload:hover,
+  #toggle-sidebar-button:hover,
+  #new-chat-button:hover {
+    background-color: #e8e8e8;
+  }
+  .custom-file-upload.selected {
+    background-color: gray;
+  }

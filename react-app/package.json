@@ -13,14 +13,14 @@
     "js-cookie": "^3.0.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-markdown": "^9.0.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "PUBLIC_URL=/ react-scripts -r dotenv/config start",
-    "copy-build": "node copy-build-files.js",
-    "build": "react-scripts build && npm run copy-build",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

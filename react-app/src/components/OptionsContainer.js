@@ -1,21 +1,62 @@
-import React from 'react';
+import React, { useState, useEffect  } from 'react';
+import './OptionsContainer.css'
 
-const OptionsContainer = ({ optionsVisible, toggleSidebar, newChat, handleImageUpload, selectedModel, selectModel, sidebarVisible }) => {
+const OptionsContainer = ({ 
+  optionsVisible, 
+  toggleSidebar, 
+  newChat, 
+  handleImageUpload, //TODO: re add this later
+  selectedModel, 
+  selectedCategory,
+  selectModel, 
+  selectCategory,
+  sidebarVisible }) => {
+    
+  const [categoriesWithModels, setCategoriesWithModels] = useState({});
+  const [canHandleImage, setCanHandleImage] = useState(false);
+
+  useEffect(() => {
+    loadModels();
+  }, []);
+
+  const loadModels = () => {
+    const token = localStorage.getItem('jwt');
+    fetch(`${process.env.PUBLIC_URL}/api/models`, {
+      method: "GET",
+      headers: {
+        "Authorization": token
+      }
+    })
+    .then((response) => {
+      if(response.status === 200) return response.json();
+      throw new Error(response.status)
+    })
+    .then((resp) => {
+      setCategoriesWithModels(resp);
+      console.log("Loaded categoriesWithModels: ", resp);
+    }).catch((error) => {
+      console.error("Error loading categoriesWithModels:", error);
+      alert("There was an error loading the categoriesWithModels, please reload the page.")
+    });
+  }
+
+  const handleModelSelect = (category, model) => {
+    selectModel(model);
+    const selectedModel = categoriesWithModels[category].models.find(m => m.name === model);
+    setCanHandleImage(selectedModel.handles_image);
+  };
   
-    return (
-      <div id="options-container" className={optionsVisible ? 'show' : 'hidden'}>
-        <div id="options-header">Options</div>
-        <div>
-          <button id="toggle-sidebar-button" className="custom-file-upload" onClick={toggleSidebar}>
+  return (
+    optionsVisible && (
+      <div id="options-dialog" className="dialog">
+        <div className="dialog-content">
+          <button id="toggle-sidebar-button" className="dialog-button" onClick={toggleSidebar}>
             {sidebarVisible ? 'Hide chats' : 'Show chats'}
           </button>
-        </div>
-        <div>
-          <button id="new-chat-button" className="custom-file-upload" onClick={newChat}>
+          <button id="new-chat-button" className="dialog-button" onClick={newChat}>
             New chat
           </button>
-        </div>
-        {selectedModel === 'GPT4' && (
+          {canHandleImage && (
             <div id="image-upload-container">
               <input
                 type="file"
@@ -27,45 +68,38 @@ const OptionsContainer = ({ optionsVisible, toggleSidebar, newChat, handleImageU
                 Upload Image
               </label>
             </div>
-        )}
-        <div>
-          <button
-            id="gemini-button"
-            className={`custom-file-upload ${selectedModel === 'Gemini' ? 'selected' : ''}`}
-            onClick={() => selectModel('Gemini')}
-          >
-            Gemini
-          </button>
-        </div>
-        <div>
-          <button
-            id="gpt4-button"
-            className={`custom-file-upload ${selectedModel === 'GPT4' ? 'selected' : ''}`}
-            onClick={() => selectModel('GPT4')}
-          >
-            GPT4
-          </button>
-        </div>
-        <div>
-          <button
-            id="mistral-button"
-            className={`custom-file-upload ${selectedModel === 'Mistral' ? 'selected' : ''}`}
-            onClick={() => selectModel('Mistral')}
-          >
-            Mistral
-          </button>
-        </div>
-        <div>
-          <button
-            id="mistral-button"
-            className={`custom-file-upload ${selectedModel === 'Claude' ? 'selected' : ''}`}
-            onClick={() => selectModel('Claude')}
-          >
-            Claude
-          </button>
+          )}
+          <div className="dialog-categories">
+            {Object.keys(categoriesWithModels).map((category) => (
+              <button
+                key={category}
+                className={`dialog-button ${selectedCategory === category ? 'selected' : ''}`}
+                onClick={() => {
+                  selectCategory(category, categoriesWithModels[category].models[0].name);
+                  handleModelSelect(category, categoriesWithModels[category].models[0].name)
+                }}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+          {selectedCategory && (
+            <div className="dialog-categoriesWithModels">
+              {categoriesWithModels[selectedCategory].models.map((model) => (
+                <button
+                  key={model.name}
+                  className={`dialog-button ${selectedModel === model.name ? 'selected' : ''}`}
+                  onClick={() => handleModelSelect(selectedCategory, model.name)}
+                >
+                  {model.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-    );
-  };
+    )
+  );
+};
 
   export default OptionsContainer;

@@ -1,13 +1,11 @@
-import os
 import logging
-from sanic import Websocket
 from .BaseModel import BaseModel
 from mistralai.async_client  import MistralAsyncClient
 from mistralai.models.chat_completion import ChatMessage
-from typing import List, Any, Generator
+from typing import Any, Generator
+from config import config as appconfig
 
-MODEL = os.getenv("MISTRAL_MODEL")
-API_KEY = os.getenv("MISTRAL_API_KEY")
+API_KEY = appconfig.MISTRAL_API_KEY
 
 logger = logging.getLogger("ChatGPT")
 
@@ -26,7 +24,7 @@ class Mistral(BaseModel):
         try:
             prompt = self._from_own_format_to_model_format(messages)
             client = MistralAsyncClient(api_key=API_KEY)
-            response = client.chat_stream(model=MODEL, messages=prompt)
+            response = client.chat_stream(model=self.model, messages=prompt)
             return  response
         except Exception as e:
             logger.error(f"There was an error {str(e)}", exc_info=True)

@@ -1,16 +1,12 @@
 import openai
 from openai import AsyncOpenAI
-import os
 import logging
-import json
-from datetime import datetime
-from sanic import Websocket
 from .BaseModel import BaseModel
-from typing import List, Any, Generator
+from typing import Any
+from config import config as appconfig
 
 logger = logging.getLogger("ChatGPT")
 
-MODEL = os.getenv("GPT_MODEL", "gpt4-o")
 
 class GPT4(BaseModel):
 
@@ -33,18 +29,18 @@ class GPT4(BaseModel):
     async def prompt(self, messages: list):
         prompt_input = self._from_own_format_to_model_format(messages)
         try:
-            aclient = AsyncOpenAI(api_key=os.getenv("OPENAI_KEY"))
-            response = await aclient.chat.completions.create(model=MODEL,
+            aclient = AsyncOpenAI(api_key=appconfig.OPENAI_KEY)
+            response = await aclient.chat.completions.create(model=self.model,
                 messages=prompt_input,
-                max_tokens=4000,
-                temperature=0.5,
-                top_p=0,
+                max_completion_tokens=4000,
+                temperature=1,
+                top_p=1,
                 frequency_penalty=0,
-                presence_penalty=1,
+                presence_penalty=0,
                 stream=True)  
             return response
         except openai.RateLimitError:
-            logger.error(f"Rate limit exceeded", exc_info=True)
+            logger.error("Rate limit exceeded", exc_info=True)
             raise Exception("Usage limit exceeded")
         except openai.APIError:
             logger.error("API Error", exc_info=True)

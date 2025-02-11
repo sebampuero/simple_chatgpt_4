@@ -20,9 +20,12 @@ class ChatState:
             ChatState()
         return ChatState.__instance
 
-    def set_language_model(self, model: str, ws_id: str):
-        self.redis.set_language_model(model, ws_id)
+    def set_language_model_category(self, model: str, category: str, ws_id: str):
+        self.redis.set_language_model_category(model, category, ws_id)
 
+    def get_language_category(self, ws_id: str) -> str:
+        return self.redis.get_language_category(ws_id)
+    
     def get_language_model(self, ws_id: str) -> str:
         return self.redis.get_language_model(ws_id)
 

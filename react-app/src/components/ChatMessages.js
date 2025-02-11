@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import './ChatMessages.css';
 
 const ChatMessages = ({ messages }) => {
@@ -23,7 +24,7 @@ const ChatMessages = ({ messages }) => {
             <img src={message.image} alt="GPT4-V image prompt" onClick={() => openModal(message.image)} />
           )}
           <span>
-            {message.content}
+            <ReactMarkdown>{message.content}</ReactMarkdown>
             {message.role !== 'user' && (
               <>
                 <br></br>

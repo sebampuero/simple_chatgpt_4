@@ -24,15 +24,13 @@
   align-self: flex-end;
   float: right;
   clear: both;
-  white-space: pre-wrap;
 }
 .peer-message {
-  background-color: green;
+  background-color: darkblue;
   color: white;
   align-self: flex-start;
   float: left;
   clear: both;
-  white-space: pre-wrap;
 }
 
 .modal {

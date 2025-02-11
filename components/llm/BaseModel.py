@@ -1,9 +1,19 @@
 import abc
 import json
+import logging
 from sanic import Websocket
-from typing import List, Any, Dict, Awaitable, Generator
+from typing import Any, Generator
+from constants.WebsocketConstants import WebsocketConstants
+
+logger = logging.getLogger("ChatGPT")
+
 
 class BaseModel(abc.ABC):
+
+    def set_model(self, model: str):
+        logger.debug(f"Set model {model} for instance {self}")
+        self.model = model
+
     @abc.abstractmethod
     def _from_own_format_to_model_format(self, chats: list) -> list:
         pass
@@ -17,7 +27,7 @@ class BaseModel(abc.ABC):
         async for response_chunk in response_generator:
             content = self._extract_content(response_chunk)
             if content:
-                await ws.send(json.dumps({"content": content, "timestamp": message_timestamp, "type": "CONTENT"}))
+                await ws.send(json.dumps({"content": content, "timestamp": message_timestamp, "type": WebsocketConstants.CONTENT}))
                 assistant_msg += content
         return assistant_msg
 
