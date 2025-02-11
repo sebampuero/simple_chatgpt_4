@@ -10,7 +10,7 @@ services:
     networks:
       - chatgpt
     ports:
-      - 10.8.0.7:9191:9191
+      - 10.8.0.3:9191:9191
     restart: unless-stopped
 
 networks:
