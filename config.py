@@ -18,11 +18,19 @@ class Config:
         self.JWT_SECRET = os.getenv("JWT_SECRET")
         self.DDB_CHATS_TABLE = os.getenv("DDB_CHATS_TABLE", "chats")
         self.DDB_USERS_TABLE = os.getenv("DDB_USERS_TABLE", "authorized_users")
+        self.PUBLIC_CERTS_URL = os.getenv("PUBLIC_CERTS_URL", "https://www.googleapis.com/oauth2/v3/certs")
+        self.JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+        self.ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
+        self.REFRESH_TOKEN_EXPIRE_MINUTES = os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES", "1440")
+        self.ACCESS_TOKEN_SECRET = os.getenv("ACCESS_TOKEN_SECRET")
+        self.REFRESH_TOKEN_SECRET = os.getenv("REFRESH_TOKEN_SECRET")
+        self.OAUTH_TOKEN_URL = os.getenv("OAUTH_TOKEN_URL", "https://oauth2.googleapis.com/token")
         assert self.GOOGLE_OAUTH_CLIENT_ID
         assert self.GOOGLE_OAUTH_CLIENT_SECRET
         assert self.OPENAI_KEY
         assert self.MISTRAL_API_KEY
-        assert self.JWT_SECRET
+        assert self.ACCESS_TOKEN_SECRET
+        assert self.REFRESH_TOKEN_SECRET
 
 
 config = Config()

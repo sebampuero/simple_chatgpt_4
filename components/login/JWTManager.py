@@ -9,13 +9,12 @@ logger = logging.getLogger("ChatGPT")
 
 class JWTManager:
 
-    PUBLIC_CERTS_URL = os.getenv("PUBLIC_CERTS_URL", "https://www.googleapis.com/oauth2/v3/certs")
-    JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
-    ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
-    REFRESH_TOKEN_EXPIRE_MINUTES = os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES", "1440")
-    ACCESS_TOKEN_SECRET = os.getenv("ACCESS_TOKEN_SECRET")
-    REFRESH_TOKEN_SECRET = os.getenv("REFRESH_TOKEN_SECRET")
-
+    PUBLIC_CERTS_URL = appconfig.PUBLIC_CERTS_URL
+    JWT_ALGORITHM = appconfig.JWT_ALGORITHM
+    ACCESS_TOKEN_EXPIRE_MINUTES = appconfig.ACCESS_TOKEN_EXPIRE_MINUTES
+    REFRESH_TOKEN_EXPIRE_MINUTES = appconfig.REFRESH_TOKEN_EXPIRE_MINUTES
+    ACCESS_TOKEN_SECRET = appconfig.ACCESS_TOKEN_SECRET
+    REFRESH_TOKEN_SECRET = appconfig.REFRESH_TOKEN_SECRET
 
     def decode_google_jwt(self, token: str):
         logger.debug(f"Trying to decode google token {token}")

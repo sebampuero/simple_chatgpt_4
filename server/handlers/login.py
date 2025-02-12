@@ -27,7 +27,7 @@ async def login_code(request: Request):
         'grant_type': 'authorization_code'
     }
     async with aiohttp.ClientSession() as session:
-        async with session.post(GoogleServicesConstants.OAUTH_TOKEN_URL, data=data) as response:
+        async with session.post(appconfig.OAUTH_TOKEN_URL, data=data) as response:
             tokens = await response.json()
     jwt_manager = JWTManager()
     decoded_id_token = jwt_manager.decode_google_jwt(tokens['id_token'])
@@ -35,3 +35,10 @@ async def login_code(request: Request):
     if await Login(DDBRepository()).check_user_is_authorized(decoded_id_token['email']):
         return sanicjson({"email": decoded_id_token['email'], "jwt": jwt_manager.generate_jwt(decoded_id_token)})
     return HTTPResponse(status=401)
+
+async def refresh_token(request: Request):
+    pass
+    # get token from Cookie
+    # validate the token
+    # if valid: create a new access token as https only cookie
+    # if not valid: return 401
