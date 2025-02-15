@@ -1,10 +1,21 @@
-from sanic import Sanic
-from constants.AppConstants import AppConstants
+import logging
+from sanic import Request
+from sanic.response import HTTPResponse
+from components.login.JWTManager import JWTManager
+from config import config as appconfig
 
-app = Sanic.get_app(AppConstants.APP_NAME)
+logger = logging.getLogger("ChatGPT")
 
-@app.on_request
-async def example(request):
-	print("I execute before the handler.")
-	#TODO: readd authentication middleware for endpoints, 
-	# use a list of allowed unauthenticated endpoint, such as /login
+NO_AUTH_NEEDED = [
+	f"/{appconfig.SUB_DIRECTORY}/api/login-code", 
+	f"/{appconfig.SUB_DIRECTORY}/ws"
+]
+
+async def authenticate_requests(request: Request):
+	if request.path not in NO_AUTH_NEEDED:
+		logger.debug(f"Proceeding to authenticate route: {request.path} because not in {NO_AUTH_NEEDED}")
+		token = request.headers.get('Authorization')
+		if not token:
+			return HTTPResponse(status=401)
+		if not JWTManager().validate_jwt(token):
+			return HTTPResponse(status=401)

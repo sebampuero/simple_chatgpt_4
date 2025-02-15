@@ -1,8 +1,7 @@
 import jwt
 from jwt import PyJWKClient
-import os
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from config import config as appconfig
 
 logger = logging.getLogger("ChatGPT")
@@ -29,7 +28,7 @@ class JWTManager:
         return data
     
     def generate_jwt(self, id_token: dict):
-        secret = self.ACCESS_TOKEN_SECRET
+        secret = appconfig.JWT_SECRET
         exp = int(datetime.now().timestamp()) + 86400 * 7
         encoded = jwt.encode({"authenticated": True, "email": id_token['email'], "exp": exp}, secret, algorithm=self.JWT_ALGORITHM)
         return encoded
@@ -80,7 +79,7 @@ class JWTManager:
 
 
     def validate_jwt(self, jwt_str: str):
-        secret = appconfig.MISTRAL_API_KEY
+        secret = appconfig.JWT_SECRET
         try:
             jwt.decode(jwt_str, secret, algorithms="HS256")
             return True

@@ -4,6 +4,7 @@ from config import config
 from server.logging import setup_logging
 from config import config as appconfig
 from constants.AppConstants import AppConstants
+from middleware.authentication import authenticate_requests, response_test
 
 from server.handlers.ws import chat
 
@@ -11,6 +12,7 @@ setup_logging(appconfig.ROOT_LOG_LEVEL, config.APP_LOG_LEVEL)
 app = Sanic(AppConstants.APP_NAME)
 app.blueprint(bp, url_prefix=appconfig.SUB_DIRECTORY + '/api')
 app.add_websocket_route(chat, f"{appconfig.SUB_DIRECTORY}/ws")
+app.register_middleware(authenticate_requests, "request")
 
 app.ctx.sub_directory = appconfig.SUB_DIRECTORY
 app.ctx.domain = appconfig.DOMAIN
