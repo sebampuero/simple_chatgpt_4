@@ -6,7 +6,6 @@ from components.llm.GPT4 import GPT4
 from components.llm.Mistral import Mistral
 from components.llm.Claude import Claude
 from components.repository.DDBRepository import DDBRepository
-from components.login.JWTManager import JWTManager
 from components.chat.ChatState import ChatState
 from constants.WebsocketConstants import WebsocketConstants
 
@@ -20,14 +19,6 @@ language_categories = {
 
 async def chat(request: Request, ws: Websocket):
     client_ip = request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
-    token = request.args.get('token')
-    if token:
-        if not JWTManager().validate_jwt(token):
-            await ws.close()
-            return
-    else:
-        await ws.close()
-        return
     socket_id = str(id(ws))
     user_email = ""
     chat_id = ""

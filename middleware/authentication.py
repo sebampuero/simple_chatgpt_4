@@ -1,7 +1,7 @@
 import logging
 from sanic import Request
 from sanic.response import HTTPResponse
-from components.login.JWTManager import JWTManager
+from components.login.JWTManager import *
 from config import config as appconfig
 
 logger = logging.getLogger("ChatGPT")
@@ -17,5 +17,5 @@ async def authenticate_requests(request: Request):
 		token = request.headers.get('Authorization')
 		if not token:
 			return HTTPResponse(status=401)
-		if not JWTManager().validate_jwt(token):
+		if not validate_jwt(token):
 			return HTTPResponse(status=401)

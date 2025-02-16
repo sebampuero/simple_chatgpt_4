@@ -4,7 +4,7 @@ from config import config
 from server.logging import setup_logging
 from config import config as appconfig
 from constants.AppConstants import AppConstants
-from middleware.authentication import authenticate_requests, response_test
+from middleware.authentication import authenticate_requests
 
 from server.handlers.ws import chat
 
