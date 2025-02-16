@@ -21,6 +21,7 @@ class Config:
         self.PUBLIC_CERTS_URL = os.getenv("PUBLIC_CERTS_URL", "https://www.googleapis.com/oauth2/v3/certs")
         self.JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
         self.ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
+        self.NEW_ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "120")
         self.REFRESH_TOKEN_EXPIRE_MINUTES = os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES", "1440")
         self.ACCESS_TOKEN_SECRET = os.getenv("ACCESS_TOKEN_SECRET")
         self.REFRESH_TOKEN_SECRET = os.getenv("REFRESH_TOKEN_SECRET")

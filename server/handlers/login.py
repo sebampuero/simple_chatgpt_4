@@ -51,16 +51,27 @@ async def login_code(request: Request):
 
 async def refresh_token(request: Request):
     refresh_token = request.cookies.get("refresh_token")
+
     if not refresh_token:
         return HTTPResponse(status=401)
-    try:
-        validate_token(refresh_token, 'rt')
-    except:
+    if not validate_token(refresh_token, 'rt'):
         return HTTPResponse(status=401)
-    new_access_token = generate_access_token("subject")
-    return HTTPResponse().add_cookie()
-    # get token from Cookie
-    # get subject and see if it belongs to the authorized users list
-    # validate jwt signature
-    # if valid: create a new access token as https only cookie
-    # if not valid: return 401
+    
+    subject = get_subject_refresh_token(refresh_token)
+    if not subject:
+        return HTTPResponse(status=401)
+    repo = DDBRepository()
+    if not await Login(repo).check_user_is_authorized(subject):
+        return HTTPResponse(status=401)
+    
+    user_email = repo.get_user(subject).email # trust our data, not the input's data
+    new_access_token = generate_access_token(
+        user_email, 
+        expires_delta=timedelta(minutes=appconfig.NEW_ACCESS_TOKEN_EXPIRE_MINUTES))
+    
+    return HTTPResponse().add_cookie(
+        "access_token",
+        new_access_token,
+        domain=f"{appconfig.DOMAIN}",
+        httponly=True
+    )
