@@ -15,11 +15,14 @@ function App() {
       }
     })
     .then((response) => {
-      if(response.status === 200) {
-        setIsEmailAuthorized(true);
-        setEmail(response.json().email);
-      }else if(response.status === 500){
+      if(response.status === 200) return response.json()
+      else if(response.status.toString().startsWith("50")){
         throw new Error()
+      }
+    }).then((respJson) => {
+      if (respJson) {
+        setEmail(respJson.email);
+        setIsEmailAuthorized(true);
       }
     }).catch((e) => {
       console.log("Error loading authorized email", e)
