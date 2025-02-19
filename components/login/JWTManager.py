@@ -106,5 +106,20 @@ def get_subject_refresh_token(token: str) -> str | None:
     except jwt.PyJWTError:
         logger.êrror(f"General error for subject {subject}", exc_info=True)
         return None
-    
 
+def get_subject_access_token(token: str) -> str | None:
+    try:
+        payload = jwt.decode(token, appconfig.ACCESS_TOKEN_SECRET, algorithms=[appconfig.JWT_ALGORITHM])
+        subject: str = payload.get("sub")
+        if not subject:
+            return None
+        return subject
+    except jwt.ExpiredSignatureError:
+        logger.error(f"Token expired for subject {subject}", exc_info=True)
+        return None
+    except jwt.InvalidTokenError:
+        logger.error(f"Token invalid for subject {subject}", exc_info=True)
+        return None
+    except jwt.PyJWTError:
+        logger.êrror(f"General error for subject {subject}", exc_info=True)
+        return None

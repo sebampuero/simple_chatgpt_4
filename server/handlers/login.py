@@ -1,9 +1,16 @@
 from sanic import Request
 from sanic.response import HTTPResponse, json as sanicjson
 from components.login.Login import Login
-from components.repository.DDBRepository import DDBRepository
-from components.login.JWTManager import *
+from components.login.JWTManager import (
+    get_subject_access_token,
+    generate_access_token,
+    generate_refresh_tolen,
+    get_subject_refresh_token,
+    decode_google_jwt,
+    validate_token
+)
 from config import config as appconfig
+from datetime import timedelta
 
 import logging
 import aiohttp
@@ -30,7 +37,7 @@ async def login_code(request: Request):
             tokens = await response.json()
     decoded_id_token = decode_google_jwt(tokens['id_token'])
     logger.debug(f"Authenticated: {decoded_id_token}")
-    response = sanicjson({"email": decoded_id_token['email'], "jwt": generate_jwt(decoded_id_token)})
+    response = sanicjson({"email": decoded_id_token['email']})
     at = generate_access_token(decoded_id_token['email'])
     rt = generate_refresh_tolen(decoded_id_token['email'])
     response.add_cookie(
@@ -45,7 +52,7 @@ async def login_code(request: Request):
         domain=f"{appconfig.DOMAIN}",
         httponly=True
     )
-    if await Login(DDBRepository()).check_user_is_authorized(decoded_id_token['email']):
+    if await Login().check_user_is_authorized(decoded_id_token['email']):
         return response
     return HTTPResponse(status=401)
 
@@ -60,14 +67,12 @@ async def refresh_token(request: Request):
     subject = get_subject_refresh_token(refresh_token)
     if not subject:
         return HTTPResponse(status=401)
-    repo = DDBRepository()
-    if not await Login(repo).check_user_is_authorized(subject):
+    if not await Login().check_user_is_authorized(subject):
         return HTTPResponse(status=401)
     
-    user_email = repo.get_user(subject).email # trust our data, not the input's data
     new_access_token = generate_access_token(
-        user_email, 
-        expires_delta=timedelta(minutes=appconfig.NEW_ACCESS_TOKEN_EXPIRE_MINUTES))
+        subject, 
+        expires_delta=timedelta(minutes=float(appconfig.NEW_ACCESS_TOKEN_EXPIRE_MINUTES)))
     
     return HTTPResponse().add_cookie(
         "access_token",
@@ -75,3 +80,12 @@ async def refresh_token(request: Request):
         domain=f"{appconfig.DOMAIN}",
         httponly=True
     )
+
+
+async def get_authorized_email(request: Request):
+    access_token = request.cookies.get("access_token")
+    email = get_subject_access_token(access_token)
+    if email:
+        return sanicjson({"email": email})
+    else:
+        return HTTPResponse(status=401)
