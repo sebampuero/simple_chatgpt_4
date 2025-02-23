@@ -26,6 +26,8 @@ class Config:
         self.ACCESS_TOKEN_SECRET = os.getenv("ACCESS_TOKEN_SECRET")
         self.REFRESH_TOKEN_SECRET = os.getenv("REFRESH_TOKEN_SECRET")
         self.OAUTH_TOKEN_URL = os.getenv("OAUTH_TOKEN_URL", "https://oauth2.googleapis.com/token")
+        self.REDIS_HOST = os.getenv("REDIS_HOST", "192.168.0.21")
+        self.REDIS_PORT = os.getenv("REDIS_PORT", "6379")
         assert self.GOOGLE_OAUTH_CLIENT_ID
         assert self.GOOGLE_OAUTH_CLIENT_SECRET
         assert self.OPENAI_KEY

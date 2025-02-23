@@ -1,19 +1,21 @@
 import redis
-import typing
 import logging
 import json
-from operator import itemgetter 
+
+from config import config as appconfig
 
 logger = logging.getLogger("ChatGPT")
 
 
-HOST = "192.168.0.21"
-PORT = 6379
-
 class RedisState():
 
     def __init__(self):
-        self.r = redis.Redis(host=HOST, port=PORT, db=0, charset="utf-8", decode_responses=True)
+        self.r = redis.Redis(
+            host=appconfig.REDIS_HOST, 
+            port=int(appconfig.REDIS_PORT), 
+            db=0, 
+            charset="utf-8", 
+            decode_responses=True)
 
     def set_language_model_category(self, model: str, category: str, ws_id: str):
         try:
