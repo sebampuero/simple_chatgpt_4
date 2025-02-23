@@ -41,10 +41,10 @@ function App() {
         <header className="App-header">
           <Switch>
             <Route path={`${process.env.NODE_ENV === 'production' ? process.env.PUBLIC_URL : process.env.PUBLIC_URL + '/'}`} exact>
-              {isEmailAuthorized ? (
-                <ChatPage email={email}/>
-              ) : (
+              {!isEmailAuthorized ? (
                 <EmailForm onSignIn={handleSignIn} />
+              ) : (
+                <ChatPage email={email}/>
               )}
             </Route>
           </Switch>

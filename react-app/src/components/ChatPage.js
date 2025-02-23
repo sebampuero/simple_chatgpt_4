@@ -42,7 +42,6 @@ const ChatPage = ({ email }) => {
   }, [searchTerm]);
 
   useEffect(() => {
-    loadChats()
     const model = localStorage.getItem('model')
     const category = localStorage.getItem('category')
     if (model && category) {
@@ -163,11 +162,10 @@ const ChatPage = ({ email }) => {
 
   const createSocket = () => {
     if(!socket){
-      const token = localStorage.getItem('jwt');
       const socketUrl = process.env.NODE_ENV === 'production'
       ? process.env.REACT_APP_PROD_WS_URL
       : process.env.REACT_APP_WS_URL;
-      const socket = new WebSocket(`${socketUrl}?token=${token}`);
+      const socket = new WebSocket(socketUrl);
 
       socket.addEventListener('message', (event) => {
         processMessageType(event.data)
@@ -179,6 +177,7 @@ const ChatPage = ({ email }) => {
       });
 
       setSocket(socket);
+      loadChats();
     }
   }
 
