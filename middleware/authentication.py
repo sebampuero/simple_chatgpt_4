@@ -8,7 +8,8 @@ from config import config as appconfig
 logger = logging.getLogger("ChatGPT")
 
 NO_AUTH_NEEDED = [
-	f"/{appconfig.SUB_DIRECTORY}/api/login-code", 
+	f"/{appconfig.SUB_DIRECTORY}/api/login-code",
+	f"/{appconfig.SUB_DIRECTORY}/api/refresh",
 	f"/{appconfig.SUB_DIRECTORY}/ws"
 ]
 

@@ -4,6 +4,7 @@ import ChatSidebar from './ChatSidebar';
 import ChatInput from './ChatInput';
 import ChatMessages from './ChatMessages';
 import OptionsContainer from './OptionsContainer';
+import { fetchWithToken } from '../api/api';
 
 const ChatPage = ({ email }) => {
   const [messageInput, setMessageInput] = useState('');
@@ -26,12 +27,18 @@ const ChatPage = ({ email }) => {
   const selectedModelRef = useRef(selectedModel);
   const categoryRef = useRef(selectedCategory);
   const lastEvalKey = useRef("");
+  const isInitialMount = useRef(true);
 
   const PAGINATION_LIMIT = 10;
   const MAX_IMG_WIDTH = 650;
   const MAX_IMG_HEIGHT = 650;
 
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
     const handler = setTimeout(() => {
       searchChats(searchTerm);
     }, 500);
@@ -69,7 +76,7 @@ const ChatPage = ({ email }) => {
 
   const loadChatsByKeywords = (keywords) => {
     const token = localStorage.getItem('jwt');
-    fetch(`${process.env.PUBLIC_URL}/api/search_for_chat` , {
+    fetchWithToken(`${process.env.PUBLIC_URL}/api/search_for_chat` , {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -96,7 +103,7 @@ const ChatPage = ({ email }) => {
 
   const loadChats = () => {
     const token = localStorage.getItem('jwt');
-    fetch(`${process.env.PUBLIC_URL}/api/user?email=${email}&limit=${PAGINATION_LIMIT}` , {
+    fetchWithToken(`${process.env.PUBLIC_URL}/api/user?email=${email}&limit=${PAGINATION_LIMIT}` , {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -121,7 +128,7 @@ const ChatPage = ({ email }) => {
 
   const loadMoreChats = () => {
     const token = localStorage.getItem('jwt');
-    fetch(`${process.env.PUBLIC_URL}/api/user?email=${email}&last_eval_key=${lastEvalKey.current}&limit=${PAGINATION_LIMIT}` , {
+    fetchWithToken(`${process.env.PUBLIC_URL}/api/user?email=${email}&last_eval_key=${lastEvalKey.current}&limit=${PAGINATION_LIMIT}` , {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -199,7 +206,7 @@ const ChatPage = ({ email }) => {
   };
   const retrieveMessagesForNewOpenedChat = (newSocketId) => {
     const token = localStorage.getItem('jwt');
-    fetch(`${process.env.PUBLIC_URL}/api/chat/${currentChatId.current}/${currentChatTimestamp.current}/${newSocketId}/${currentSocketId.current}`, {
+    fetchWithToken(`${process.env.PUBLIC_URL}/api/chat/${currentChatId.current}/${currentChatTimestamp.current}/${newSocketId}/${currentSocketId.current}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -377,7 +384,7 @@ const ChatPage = ({ email }) => {
 
   const deleteChat = (chatId, timestamp) => {
     const token = localStorage.getItem('jwt');
-    fetch(`${process.env.PUBLIC_URL}/api/chat/${chatId}/${timestamp}`, {
+    fetchWithToken(`${process.env.PUBLIC_URL}/api/chat/${chatId}/${timestamp}`, {
       method: "DELETE",
       headers: {
         "Authorization": token
@@ -395,7 +402,7 @@ const ChatPage = ({ email }) => {
 
   const sendNewModel = (model, category, socket_id) => {
     const token = localStorage.getItem('jwt');
-    fetch(`${process.env.PUBLIC_URL}/api/model/${socket_id}`, {
+    fetchWithToken(`${process.env.PUBLIC_URL}/api/model/${socket_id}`, {
       method: "POST",
       headers: {
         "Authorization": token

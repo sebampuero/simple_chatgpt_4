@@ -1,11 +1,12 @@
 import React, { useState, useEffect  } from 'react';
 import './OptionsContainer.css'
+import { fetchWithToken } from '../api/api';
 
 const OptionsContainer = ({ 
   optionsVisible, 
   toggleSidebar, 
   newChat, 
-  handleImageUpload, //TODO: re add this later
+  handleImageUpload,
   selectedModel, 
   selectedCategory,
   selectModel, 
@@ -21,7 +22,7 @@ const OptionsContainer = ({
 
   const loadModels = () => {
     const token = localStorage.getItem('jwt');
-    fetch(`${process.env.PUBLIC_URL}/api/models`, {
+    fetchWithToken(`${process.env.PUBLIC_URL}/api/models`, {
       method: "GET",
       headers: {
         "Authorization": token

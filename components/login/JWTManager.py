@@ -37,7 +37,7 @@ def generate_access_token(subject: str, expires_delta: int = None) -> str:
     encoded_jwt = jwt.encode(to_encode, appconfig.ACCESS_TOKEN_SECRET, appconfig.JWT_ALGORITHM)
     return encoded_jwt
 
-def generate_refresh_tolen(subject: str, expires_delta: int = None) -> str:
+def generate_refresh_token(subject: str, expires_delta: int = None) -> str:
     if expires_delta is not None:
         expires_delta = datetime.utcnow() + expires_delta
     else:

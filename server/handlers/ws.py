@@ -17,7 +17,7 @@ language_categories = {
     "Claude": Claude()
 }
 
-async def chat(request: Request, ws: Websocket):
+async def chat(request: Request, ws: Websocket): #TODO: verify tokens sent in cookies by WS too
     client_ip = request.headers.get('X-Forwarded-For', '').split(',')[0].strip()
     socket_id = str(id(ws))
     user_email = ""

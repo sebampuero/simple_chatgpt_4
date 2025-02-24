@@ -4,7 +4,7 @@ from components.login.Login import Login
 from components.login.JWTManager import (
     get_subject_access_token,
     generate_access_token,
-    generate_refresh_tolen,
+    generate_refresh_token,
     get_subject_refresh_token,
     decode_google_jwt,
     validate_token
@@ -39,7 +39,7 @@ async def login_code(request: Request):
     logger.debug(f"Authenticated: {decoded_id_token}")
     response = sanicjson({"email": decoded_id_token['email']})
     at = generate_access_token(decoded_id_token['email'])
-    rt = generate_refresh_tolen(decoded_id_token['email'])
+    rt = generate_refresh_token(decoded_id_token['email'])
     response.add_cookie(
         "access_token",
         at,
@@ -74,12 +74,14 @@ async def refresh_token(request: Request):
         subject, 
         expires_delta=timedelta(minutes=float(appconfig.NEW_ACCESS_TOKEN_EXPIRE_MINUTES)))
     
-    return HTTPResponse().add_cookie(
+    response = HTTPResponse()
+    response.add_cookie(
         "access_token",
         new_access_token,
         domain=f"{appconfig.DOMAIN}",
         httponly=True
     )
+    return response
 
 
 async def get_authorized_email(request: Request):
