@@ -22,7 +22,7 @@ class Claude(BaseModel):
             prompt = self._from_own_format_to_model_format(messages)
             model = AsyncAnthropic()
             response = await model.messages.create(
-                max_tokens=4000,
+                max_tokens=self.max_tokens,
                 messages=prompt,
                 model=self.model,
                 stream=True,

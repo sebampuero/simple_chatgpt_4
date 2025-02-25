@@ -32,7 +32,7 @@ class GPT4(BaseModel):
             aclient = AsyncOpenAI(api_key=appconfig.OPENAI_KEY)
             response = await aclient.chat.completions.create(model=self.model,
                 messages=prompt_input,
-                max_completion_tokens=4000,
+                max_completion_tokens=self.max_tokens,
                 temperature=1,
                 top_p=1,
                 frequency_penalty=0,

@@ -4,6 +4,7 @@ import logging
 from sanic import Websocket
 from typing import Any, Generator
 from constants.WebsocketConstants import WebsocketConstants
+from config import config
 
 logger = logging.getLogger("ChatGPT")
 
@@ -13,6 +14,7 @@ class BaseModel(abc.ABC):
     def set_model(self, model: str):
         logger.debug(f"Set model {model} for instance {self}")
         self.model = model
+        self.max_tokens = config.MAX_LLM_TOKENS
 
     @abc.abstractmethod
     def _from_own_format_to_model_format(self, chats: list) -> list:
