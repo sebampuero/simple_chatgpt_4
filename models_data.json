@@ -6,11 +6,11 @@
                 "handles_image": true
             },
             {
-                "name": "o1-preview",
+                "name": "o1",
                 "handles_image": false
             },
             {
-                "name": "o1-mini",
+                "name": "o3-mini",
                 "handles_image": false
             }
         ]
@@ -38,7 +38,7 @@
     "Claude": {
         "models": [
             {
-                "name": "claude-3-5-sonnet-latest",
+                "name": "claude-3-7-sonnet-latest",
                 "handles_image": false
             },
             {

@@ -16,18 +16,19 @@ function App() {
       }
     })
     .then((response) => {
-      if(response.status === 200) return response.json()
-      else if(response.status.toString().startsWith("50")){
+      if(response.status.toString().startsWith("50")){
         throw new Error()
       }
-    }).then((respJson) => {
-      if (respJson) {
-        setEmail(respJson.email);
+      if(response.status === 200) {
+        setEmail(response.json().email);
         setIsEmailAuthorized(true);
+      }else{
+        setIsEmailAuthorized(false);
       }
     }).catch((e) => {
       console.log("Error loading authorized email", e)
       alert("There was an unknown error, please try again later.")
+      setIsEmailAuthorized(false);
     })
   }, []);
 
