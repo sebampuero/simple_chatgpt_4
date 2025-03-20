@@ -44,13 +44,15 @@ async def login_code(request: Request):
         "access_token",
         at,
         domain=f"{appconfig.DOMAIN}",
-        httponly=True
+        httponly=True,
+        max_age=appconfig.ACCESS_TOKEN_EXPIRE_MINUTES * 60
     )
     response.add_cookie(
         "refresh_token",
         rt,
         domain=f"{appconfig.DOMAIN}",
-        httponly=True
+        httponly=True,
+        max_age=appconfig.REFRESH_TOKEN_EXPIRE_MINUTES * 60
     )
     if await Login().check_user_is_authorized(decoded_id_token['email']):
         return response
@@ -79,7 +81,8 @@ async def refresh_token(request: Request):
         "access_token",
         new_access_token,
         domain=f"{appconfig.DOMAIN}",
-        httponly=True
+        httponly=True,
+        max_age=appconfig.NEW_ACCESS_TOKEN_EXPIRE_MINUTES * 60
     )
     return response
 
