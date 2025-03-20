@@ -1,6 +1,6 @@
 import { fetchWithToken } from './api/api';
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import EmailForm from './components/EmailForm';
 import ChatPage from './components/ChatPage';
 
@@ -43,15 +43,18 @@ function App() {
     <Router>
       <div className="App">
         <header className="App-header">
-          <Switch>
-            <Route path={`${process.env.NODE_ENV === 'production' ? process.env.PUBLIC_URL : process.env.PUBLIC_URL + '/'}`} exact>
-              {!isEmailAuthorized ? (
-                <EmailForm onSignIn={handleSignIn} />
-              ) : (
-                <ChatPage email={email}/>
-              )}
-            </Route>
-          </Switch>
+          <Routes>
+            <Route 
+              path={`${process.env.NODE_ENV === 'production' ? process.env.PUBLIC_URL : process.env.PUBLIC_URL + '/'}`} 
+              element={
+                !isEmailAuthorized ? (
+                  <EmailForm onSignIn={handleSignIn} />
+                ) : (
+                  <ChatPage email={email}/>
+                )
+              } 
+            />
+          </Routes>
         </header>
       </div>
     </Router>
