@@ -20,11 +20,13 @@ function App() {
         throw new Error()
       }
       if(response.status === 200) {
-        setEmail(response.json().email);
-        setIsEmailAuthorized(true);
+        return response.json()
       }else{
         setIsEmailAuthorized(false);
       }
+    }).then((respJson) => {
+      setEmail(respJson.email);
+      setIsEmailAuthorized(true);
     }).catch((e) => {
       console.log("Error loading authorized email", e)
       alert("There was an unknown error, please try again later.")
