@@ -86,7 +86,7 @@ urllib3 = "2.2.2"
 uvloop = "0.20.0"
 vertexai = "1.49.0"
 websockets = "12.0"
-yarl = "1.12.0"
+yarl = "1.18.3"
 setuptools = "^77.0.3"
 
 
