@@ -21,7 +21,7 @@ const ChatMessages = ({ messages }) => {
       {messages.map((message) => (
         <div key={message.timestamp} className={`message-bubble ${message.role === 'user' ? 'user-message' : 'peer-message'}`}>
           {message.image && message.image !== null && (
-            <img src={message.image} alt="GPT4-V image prompt" onClick={() => openModal(message.image)} />
+            <img src={message.image} onClick={() => openModal(message.image)} />
           )}
           <span>
             <ReactMarkdown>{message.content}</ReactMarkdown>
@@ -41,7 +41,7 @@ const ChatMessages = ({ messages }) => {
       {showModal && (
         <div className="modal" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <img src={selectedImage} alt="Enlarged GPT4-V image prompt" />
+            <img src={selectedImage} />
           </div>
         </div>
       )}
