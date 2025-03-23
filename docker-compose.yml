@@ -2,9 +2,6 @@ services:
   chatgpt:
     image: gpt4:latest
     container_name: gpt4
-    environment:
-      - ROOT_LOG_LEVEL=INFO
-      - APP_LOG_LEVEL=DEBUG
     env_file:
       - .env
     networks:
