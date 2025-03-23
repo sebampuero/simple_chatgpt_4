@@ -921,14 +921,14 @@ protobuf = ">=3.20.2,<4.21.0 || >4.21.0,<4.21.1 || >4.21.1,<4.21.2 || >4.21.2,<4
 
 [[package]]
 name = "google-cloud-storage"
-version = "2.16.0"
+version = "2.18.1"
 description = "Google Cloud Storage API client library"
 optional = false
 python-versions = ">=3.7"
 groups = ["main"]
 files = [
-    {file = "google-cloud-storage-2.16.0.tar.gz", hash = "sha256:dda485fa503710a828d01246bd16ce9db0823dc51bbca742ce96a6817d58669f"},
-    {file = "google_cloud_storage-2.16.0-py2.py3-none-any.whl", hash = "sha256:91a06b96fb79cf9cdfb4e759f178ce11ea885c79938f89590344d079305f5852"},
+    {file = "google_cloud_storage-2.18.1-py2.py3-none-any.whl", hash = "sha256:9d8db6bde3a979cca7150511cd0e4cb363e5f69d31259d890ba1124fa109418c"},
+    {file = "google_cloud_storage-2.18.1.tar.gz", hash = "sha256:6707a6f30a05aee36faca81296419ca2907ac750af1c0457f278bc9a6fb219ad"},
 ]
 
 [package.dependencies]
@@ -940,7 +940,8 @@ google-resumable-media = ">=2.6.0"
 requests = ">=2.18.0,<3.0.0dev"
 
 [package.extras]
-protobuf = ["protobuf (<5.0.0dev)"]
+protobuf = ["protobuf (<6.0.0dev)"]
+tracing = ["opentelemetry-api (>=1.1.0)"]
 
 [[package]]
 name = "google-crc32c"
@@ -2741,4 +2742,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "868013cd2da277ec032814753f8559d7b576476576c0016cabb2da17a312f4b7"
+content-hash = "19b34cd753f702d654b1cf76a6676a673059aae15eb1661ecb951ec0f923f605"
