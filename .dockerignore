@@ -3,3 +3,4 @@ react-app/
 log.log
 .gitignore
 .git
+.venv/
