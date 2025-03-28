@@ -1,12 +1,16 @@
 import { fetchWithToken } from './api/api';
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import EmailForm from './components/EmailForm';
 import ChatPage from './components/ChatPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import Loading from './components/Loading';
 
 function App() {
-  const [isEmailAuthorized, setIsEmailAuthorized] = useState(false);
+  const [authStatus, setAuthStatus] = useState('loading'); // 'loading', 'authenticated', 'unauthenticated'
   const [email, setEmail] = useState(null);
+  
+  const basePath = process.env.NODE_ENV === 'production' ? process.env.PUBLIC_URL : process.env.PUBLIC_URL + '/';
 
   useEffect(() => {
     fetchWithToken(`${process.env.PUBLIC_URL}/api/authorized-email`, {
@@ -17,41 +21,58 @@ function App() {
     })
     .then((response) => {
       if(response.status.toString().startsWith("50")){
-        throw new Error()
+        throw new Error("Server error");
       }
       if(response.status === 200) {
-        return response.json()
-      }else{
-        setIsEmailAuthorized(false);
+        return response.json();
+      } else {
+        setAuthStatus('unauthenticated');
+        return null;
       }
-    }).then((respJson) => {
-      setEmail(respJson.email);
-      setIsEmailAuthorized(true);
-    }).catch((e) => {
-      console.log("Error loading authorized email", e)
-      alert("There was an unknown error, please try again later.")
-      setIsEmailAuthorized(false);
     })
+    .then((respJson) => {
+      if (respJson) {
+        setEmail(respJson.email);
+        setAuthStatus('authenticated');
+      }
+    })
+    .catch((e) => {
+      console.log("Error loading authorized email", e);
+      setAuthStatus('unauthenticated');
+    });
   }, []);
 
   const handleSignIn = (respJson) => {
     setEmail(respJson.email);
-    setIsEmailAuthorized(true);
+    setAuthStatus('authenticated');
+  }
+
+  if (authStatus === 'loading') {
+    return <Loading />;
   }
 
   return (
-    <Router>
+    <Router basename={basePath}>
       <div className="App">
         <header className="App-header">
           <Routes>
             <Route 
-              path={`${process.env.NODE_ENV === 'production' ? process.env.PUBLIC_URL : process.env.PUBLIC_URL + '/'}`} 
+              path="/login" 
               element={
-                !isEmailAuthorized ? (
-                  <EmailForm onSignIn={handleSignIn} />
-                ) : (
-                  <ChatPage email={email}/>
-                )
+                authStatus === 'authenticated' 
+                  ? <Navigate to="/" replace /> 
+                  : <EmailForm onSignIn={handleSignIn} />
+              } 
+            />
+            <Route 
+              path="/" 
+              element={
+                <ProtectedRoute 
+                  isAuthenticated={authStatus === 'authenticated'}
+                  redirectPath="/login"
+                >
+                  <ChatPage email={email} />
+                </ProtectedRoute>
               } 
             />
           </Routes>

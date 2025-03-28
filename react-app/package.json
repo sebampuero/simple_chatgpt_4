@@ -1,6 +1,7 @@
 {
   "name": "react-app",
   "version": "0.1.0",
+  "homepage": "/gpt4",
   "private": true,
   "dependencies": {
     "@react-oauth/google": "^0.12.1",
