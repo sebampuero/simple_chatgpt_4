@@ -353,7 +353,7 @@ const ChatPage = ({ email }) => {
     console.log("Switching chat to " + chatId)
     currentChatId.current = chatId;
     currentChatTimestamp.current = timestamp;
-    closeSocket();
+    closeSocket(); // TODO: do not close socket when changing chats, wipe state on backend only
     createSocket();
     setSidebarVisible(false);
     setOptionsVisible(false);

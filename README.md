@@ -95,4 +95,3 @@ networks:
 ## TODO
 More tests      
 Some sort of "quota" for individual users (email addresses)
-Improve cookies security
