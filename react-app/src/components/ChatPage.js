@@ -75,12 +75,10 @@ const ChatPage = ({ email }) => {
   };
 
   const loadChatsByKeywords = (keywords) => {
-    const token = localStorage.getItem('jwt');
     fetchWithToken(`${process.env.PUBLIC_URL}/api/search_for_chat` , {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": token
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({"keywords": keywords, "email_address": email})
     })
@@ -102,12 +100,10 @@ const ChatPage = ({ email }) => {
   }
 
   const loadChats = () => {
-    const token = localStorage.getItem('jwt');
     fetchWithToken(`${process.env.PUBLIC_URL}/api/user?email=${email}&limit=${PAGINATION_LIMIT}` , {
       method: "GET",
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": token
+        "Content-Type": "application/json"
       }
     })
       .then((response) => { 
@@ -119,7 +115,7 @@ const ChatPage = ({ email }) => {
         lastEvalKey.current = JSON.stringify(resp.lastEvalKey)
         responseChats.forEach(obj => {
           let userContent = obj.messages.find(msg => msg.role === 'user')?.content;
-          obj.title = userContent.substring(0,25) + "..."; // very basic and naive way to show main idea of a chat
+          obj.title = userContent.substring(0,35) + "..."; // very basic and naive way to show main idea of a chat
         })
         setChats(responseChats);
       })
@@ -127,12 +123,10 @@ const ChatPage = ({ email }) => {
   }
 
   const loadMoreChats = () => {
-    const token = localStorage.getItem('jwt');
     fetchWithToken(`${process.env.PUBLIC_URL}/api/user?email=${email}&last_eval_key=${lastEvalKey.current}&limit=${PAGINATION_LIMIT}` , {
       method: "GET",
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": token
+        "Content-Type": "application/json"
       }
     })
       .then((response) => { 
@@ -159,11 +153,11 @@ const ChatPage = ({ email }) => {
   const handleChatsLoadedError = (error) => {
     console.error("Error:", error);
     if (error.message === "401") {
-        alert("Please reload the page and log in again");
+      window.location.reload();
     } else if (error.message === "400") {
-        alert("There was a problem loading your chats!");
+      alert("There was a problem loading your chats!");
     } else {
-        alert("There was an error, please try again later");
+      alert("There was an error, please try again later");
     }
   }
 
@@ -180,7 +174,7 @@ const ChatPage = ({ email }) => {
 
       socket.addEventListener('error', (event) => {
         console.error('WebSocket error:', event);
-        alert("There was an error, try again later.");
+        alert("There was an error with the connection, try again later.");
       });
 
       setSocket(socket);
@@ -205,12 +199,10 @@ const ChatPage = ({ email }) => {
     setChatMessages((prevMessages) => [...prevMessages, newMessage]);
   };
   const retrieveMessagesForNewOpenedChat = (newSocketId) => {
-    const token = localStorage.getItem('jwt');
     fetchWithToken(`${process.env.PUBLIC_URL}/api/chat/${currentChatId.current}/${currentChatTimestamp.current}/${newSocketId}/${currentSocketId.current}`, {
       method: "GET",
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": token
+        "Content-Type": "application/json"
       }
     })
       .then((response) => { 
@@ -228,7 +220,7 @@ const ChatPage = ({ email }) => {
       })
       .catch((error) => {
         console.error("Error: ", error);
-        if (error.message === "401") alert("Please reload the page and log back in")
+        if (error.message === "401") window.location.reload()
         else if (error.message === "404") alert("Could not find Chat")
         else alert("There was an error, please try again later")
       });
@@ -383,35 +375,32 @@ const ChatPage = ({ email }) => {
   };
 
   const deleteChat = (chatId, timestamp) => {
-    const token = localStorage.getItem('jwt');
     fetchWithToken(`${process.env.PUBLIC_URL}/api/chat/${chatId}/${timestamp}`, {
-      method: "DELETE",
-      headers: {
-        "Authorization": token
-      }
+      method: "DELETE"
     })
       .then((response) => { 
         if(response.status === 204) setChats((prevChats) => prevChats.filter((chat) => chat.chat_id !== chatId));
-        else throw new Error("Could not delete chat with ID " + chatId)
+        else throw new Error(response.status)
       })
       .catch((error) => {
         console.error("Error:", error);
-        alert("There was a problem deleting the chat.")
+        if (error.message === '401') window.location.reload()
+        else alert("There was a problem deleting the chat.")
       });
   };
 
   const sendNewModel = (model, category, socket_id) => {
-    const token = localStorage.getItem('jwt');
     fetchWithToken(`${process.env.PUBLIC_URL}/api/model/${socket_id}`, {
       method: "POST",
-      headers: {
-        "Authorization": token
-      },
       body: JSON.stringify({"model": model, "category": category})
+    })
+    .then((response) => {
+      if (response.status > 399) throw new Error(response.status)
     })
     .catch((error) => {
       console.error("Error:", error);
-      alert("There was a problem setting the model, please try again.")
+      if (error.message === '401') window.location.reload();
+      else alert("There was an error setting the model, please try again later.")
     });
   }
 
