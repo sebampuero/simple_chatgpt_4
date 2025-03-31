@@ -10,7 +10,6 @@ logger = logging.getLogger("ChatGPT")
 
 
 class BaseModel(abc.ABC):
-
     def set_model(self, model: str):
         logger.debug(f"Set model {model} for instance {self}")
         self.model = model
@@ -24,12 +23,22 @@ class BaseModel(abc.ABC):
     async def prompt(self, messages: list) -> Generator[Any, Any, None]:
         pass
 
-    async def process_response(self, response_generator, ws: Websocket, message_timestamp: int) -> str:
+    async def process_response(
+        self, response_generator, ws: Websocket, message_timestamp: int
+    ) -> str:
         assistant_msg = ""
         async for response_chunk in response_generator:
             content = self._extract_content(response_chunk)
             if content:
-                await ws.send(json.dumps({"content": content, "timestamp": message_timestamp, "type": WebsocketConstants.CONTENT}))
+                await ws.send(
+                    json.dumps(
+                        {
+                            "content": content,
+                            "timestamp": message_timestamp,
+                            "type": WebsocketConstants.CONTENT,
+                        }
+                    )
+                )
                 assistant_msg += content
         return assistant_msg
 

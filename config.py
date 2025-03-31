@@ -18,14 +18,24 @@ class Config:
         self.JWT_SECRET = os.getenv("JWT_SECRET")
         self.DDB_CHATS_TABLE = os.getenv("DDB_CHATS_TABLE", "chats")
         self.DDB_USERS_TABLE = os.getenv("DDB_USERS_TABLE", "authorized_users")
-        self.PUBLIC_CERTS_URL = os.getenv("PUBLIC_CERTS_URL", "https://www.googleapis.com/oauth2/v3/certs")
+        self.PUBLIC_CERTS_URL = os.getenv(
+            "PUBLIC_CERTS_URL", "https://www.googleapis.com/oauth2/v3/certs"
+        )
         self.JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
-        self.ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
-        self.NEW_ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "120")
-        self.REFRESH_TOKEN_EXPIRE_MINUTES = os.getenv("REFRESH_TOKEN_EXPIRE_MINUTES", "1440")
+        self.ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv(
+            "ACCESS_TOKEN_EXPIRE_MINUTES", "30"
+        )
+        self.NEW_ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv(
+            "ACCESS_TOKEN_EXPIRE_MINUTES", "120"
+        )
+        self.REFRESH_TOKEN_EXPIRE_MINUTES = os.getenv(
+            "REFRESH_TOKEN_EXPIRE_MINUTES", "1440"
+        )
         self.ACCESS_TOKEN_SECRET = os.getenv("ACCESS_TOKEN_SECRET")
         self.REFRESH_TOKEN_SECRET = os.getenv("REFRESH_TOKEN_SECRET")
-        self.OAUTH_TOKEN_URL = os.getenv("OAUTH_TOKEN_URL", "https://oauth2.googleapis.com/token")
+        self.OAUTH_TOKEN_URL = os.getenv(
+            "OAUTH_TOKEN_URL", "https://oauth2.googleapis.com/token"
+        )
         self.REDIS_HOST = os.getenv("REDIS_HOST", "192.168.0.21")
         self.REDIS_PORT = os.getenv("REDIS_PORT", "6379")
         self.MAX_LLM_TOKENS = os.getenv("MAX_LLM_TOKENS", 4096)

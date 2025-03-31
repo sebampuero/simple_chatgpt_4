@@ -1,6 +1,7 @@
 import unittest
 from components.chat.ChatState import ChatState
 
+
 class TestChatState(unittest.TestCase):
     def setUp(self):
         self.chat_state = ChatState.get_instance()
@@ -14,20 +15,29 @@ class TestChatState(unittest.TestCase):
         self.assertEqual(self.chat_state.map_ws_to_model["1213548687"], "GPT4")
 
     def test_set_messages_with_ts(self):
-        messages = [{'role': 'user', 'content': 'some content', 'image': ''}, {'role': 'assistant', 'content': 'some content from peer'}]
+        messages = [
+            {"role": "user", "content": "some content", "image": ""},
+            {"role": "assistant", "content": "some content from peer"},
+        ]
         self.chat_state.set_messages_with_ts(messages, "123456", 123456)
         self.assertEqual(self.chat_state.map_ws_to_messages["123456"], messages)
         self.assertEqual(self.chat_state.map_ws_to_timestamp["123456"], 123456)
 
     def test_get_messages_with_ts(self):
-        messages = [{'role': 'user', 'content': 'some content', 'image': ''}, {'role': 'assistant', 'content': 'some content from peer'}]
+        messages = [
+            {"role": "user", "content": "some content", "image": ""},
+            {"role": "assistant", "content": "some content from peer"},
+        ]
         self.chat_state.set_messages_with_ts(messages, "ws1", 123456)
         result = self.chat_state.get_messages_with_ts("ws1")
         self.assertEqual(result["messages"], messages)
         self.assertEqual(result["timestamp"], 123456)
 
     def test_remove_ws(self):
-        messages = [{'role': 'user', 'content': 'some content', 'image': 'base64'}, {'role': 'assistant', 'content': 'some content from peer'}]
+        messages = [
+            {"role": "user", "content": "some content", "image": "base64"},
+            {"role": "assistant", "content": "some content from peer"},
+        ]
         self.chat_state.set_messages_with_ts(messages, "ws1", 123456)
         self.chat_state.set_language_model("model1", "ws1")
         self.chat_state.remove_ws("ws1")

@@ -6,8 +6,8 @@ from anthropic import AsyncAnthropic
 
 logger = logging.getLogger("ChatGPT")
 
+
 class Claude(BaseModel):
-    
     def _from_own_format_to_model_format(self, chats: list) -> list:
         output = []
         for item in chats:

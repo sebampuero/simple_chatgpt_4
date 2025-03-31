@@ -9,7 +9,6 @@ logger = logging.getLogger("ChatGPT")
 
 
 class GPT4(BaseModel):
-
     def _from_own_format_to_model_format(self, chats: list) -> list:
         output_list = []
         for item in chats:
@@ -22,7 +21,9 @@ class GPT4(BaseModel):
                 new_item = {"role": item["role"], "content": []}
                 new_item["content"].append({"type": "text", "text": item["content"]})
                 image_url = f"data:image/jpeg;base64,{item['image']}"
-                new_item["content"].append({"type": "image_url", "image_url": {"url": image_url}})
+                new_item["content"].append(
+                    {"type": "image_url", "image_url": {"url": image_url}}
+                )
             output_list.append(new_item)
         return output_list
 
@@ -30,14 +31,16 @@ class GPT4(BaseModel):
         prompt_input = self._from_own_format_to_model_format(messages)
         try:
             aclient = AsyncOpenAI(api_key=appconfig.OPENAI_KEY)
-            response = await aclient.chat.completions.create(model=self.model,
+            response = await aclient.chat.completions.create(
+                model=self.model,
                 messages=prompt_input,
                 max_completion_tokens=self.max_tokens,
                 temperature=1,
                 top_p=1,
                 frequency_penalty=0,
                 presence_penalty=0,
-                stream=True)  
+                stream=True,
+            )
             return response
         except openai.RateLimitError:
             logger.error("Rate limit exceeded", exc_info=True)

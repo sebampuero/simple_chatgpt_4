@@ -4,6 +4,7 @@ from .RedisState import RedisState
 
 logger = logging.getLogger("ChatGPT")
 
+
 class ChatState:
     __instance = None
 
@@ -25,13 +26,13 @@ class ChatState:
 
     def get_language_category(self, ws_id: str) -> str:
         return self.redis.get_language_category(ws_id)
-    
+
     def get_language_model(self, ws_id: str) -> str:
         return self.redis.get_language_model(ws_id)
 
     def append_message(self, item: dict, ws_id: str):
         self.redis.append_message(item, ws_id)
-    
+
     def set_messages_with_ts(self, messages: list, ws_id: str, timestamp: int):
         self.redis.set_messages_with_ts(messages, ws_id, timestamp)
 

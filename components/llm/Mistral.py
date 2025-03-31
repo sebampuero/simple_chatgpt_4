@@ -1,6 +1,6 @@
 import logging
 from .BaseModel import BaseModel
-from mistralai.async_client  import MistralAsyncClient
+from mistralai.async_client import MistralAsyncClient
 from mistralai.models.chat_completion import ChatMessage
 from typing import Any, Generator
 from config import config as appconfig
@@ -9,8 +9,8 @@ API_KEY = appconfig.MISTRAL_API_KEY
 
 logger = logging.getLogger("ChatGPT")
 
+
 class Mistral(BaseModel):
-    
     def _from_own_format_to_model_format(self, chats: list) -> list:
         output = []
         for item in chats:
@@ -20,12 +20,12 @@ class Mistral(BaseModel):
                 output.append(ChatMessage(role="user", content=item["content"]))
         return output
 
-    async def prompt(self, messages: list)-> Generator[Any, Any, None]:
+    async def prompt(self, messages: list) -> Generator[Any, Any, None]:
         try:
             prompt = self._from_own_format_to_model_format(messages)
             client = MistralAsyncClient(api_key=API_KEY)
             response = client.chat_stream(model=self.model, messages=prompt)
-            return  response
+            return response
         except Exception as e:
             logger.error(f"There was an error {str(e)}", exc_info=True)
             raise Exception(str(e))

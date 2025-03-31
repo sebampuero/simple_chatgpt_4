@@ -7,22 +7,19 @@ from config import config as appconfig
 logger = logging.getLogger("ChatGPT")
 
 
-class RedisState():
-
+class RedisState:
     def __init__(self):
         self.r = redis.Redis(
-            host=appconfig.REDIS_HOST, 
-            port=int(appconfig.REDIS_PORT), 
-            db=0, 
-            charset="utf-8", 
-            decode_responses=True)
+            host=appconfig.REDIS_HOST,
+            port=int(appconfig.REDIS_PORT),
+            db=0,
+            charset="utf-8",
+            decode_responses=True,
+        )
 
     def set_language_model_category(self, model: str, category: str, ws_id: str):
         try:
-            self.r.hset(f"ws:{ws_id}", mapping={
-                "model": model,
-                "category": category
-            })
+            self.r.hset(f"ws:{ws_id}", mapping={"model": model, "category": category})
         except redis.exceptions.RedisError as e:
             logger.error(f"Error setting language model: {e}")
 
@@ -44,9 +41,7 @@ class RedisState():
         try:
             msg_list = json.loads(self.r.hget(f"ws:{ws_id}", "messages"))
             msg_list.append(item)
-            self.r.hset(f"ws:{ws_id}", mapping={
-                "messages": json.dumps(msg_list)
-            })
+            self.r.hset(f"ws:{ws_id}", mapping={"messages": json.dumps(msg_list)})
         except redis.exceptions.RedisError as e:
             logger.error(f"Error appending message: {e}")
         except json.JSONDecodeError as e:
@@ -55,10 +50,10 @@ class RedisState():
     def set_messages_with_ts(self, messages: list, ws_id: str, timestamp: int):
         try:
             messages = json.dumps(messages)
-            self.r.hset(f"ws:{ws_id}", mapping={
-                "messages": messages,
-                "timestamp": str(timestamp)
-            })
+            self.r.hset(
+                f"ws:{ws_id}",
+                mapping={"messages": messages, "timestamp": str(timestamp)},
+            )
         except redis.exceptions.RedisError as e:
             logger.error(f"Error setting messages with timestamp: {e}")
         except json.JSONDecodeError as e:
@@ -68,10 +63,7 @@ class RedisState():
         try:
             messages = json.loads(self.r.hget(f"ws:{ws_id}", "messages"))
             timestamp = int(self.r.hget(f"ws:{ws_id}", "timestamp"))
-            return {
-                "messages": messages,
-                "timestamp": timestamp
-            }
+            return {"messages": messages, "timestamp": timestamp}
         except redis.exceptions.RedisError as e:
             logger.error(f"Error getting messages with timestamp: {e}")
             return {}
