@@ -1,6 +1,6 @@
 import logging
 from .BaseModel import BaseModel
-from mistralai.async_client import MistralAsyncClient
+from mistralai.async_client import MistralAsyncClient # TODO: migrate https://github.com/mistralai/client-python/blob/main/MIGRATION.md
 from mistralai.models.chat_completion import ChatMessage
 from typing import Any, Generator
 from config import config as appconfig
@@ -16,8 +16,24 @@ class Mistral(BaseModel):
         for item in chats:
             if item["role"] == "assistant":
                 output.append(ChatMessage(role="assistant", content=item["content"]))
-            else:
+                continue
+            if item["image"] == "":
                 output.append(ChatMessage(role="user", content=item["content"]))
+            else:
+                message = {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": item["content"]
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": f"data:image/jpeg;base64,{item['image']}"
+                        }
+                    ]
+                }
+                output.append(message)
         return output
 
     async def prompt(self, messages: list) -> Generator[Any, Any, None]:

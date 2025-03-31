@@ -1,6 +1,7 @@
 services:
   chatgpt:
-    image: gpt4:latest
+    #image: gpt4:latest
+    build: .
     container_name: gpt4
     env_file:
       - .env

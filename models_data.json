@@ -23,11 +23,11 @@
             },
             {
                 "name": "pixtral-large-latest",
-                "handles_image": false
+                "handles_image": true
             },
             {
                 "name": "mistral-small-latest",
-                "handles_image": false
+                "handles_image": true
             },
             {
                 "name": "codestral-latest",
