@@ -46,5 +46,5 @@ class Mistral(BaseModel):
             logger.error(f"There was an error {str(e)}", exc_info=True)
             raise Exception(str(e))
 
-    def _extract_content(self, response_chunk: Any) -> dict:
+    def _extract_content(self, response_chunk: Any) -> str:
         return response_chunk.choices[0].delta.content
