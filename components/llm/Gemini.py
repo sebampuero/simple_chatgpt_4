@@ -37,5 +37,5 @@ class Gemini(BaseModel):
             logger.error(f"There was an error {str(e)}", exc_info=True)
             raise Exception(str(e))
 
-    def _extract_content(self, response_chunk: Any) -> str:
+    def _extract_content(self, response_chunk: Any) -> dict:
         return response_chunk.text
