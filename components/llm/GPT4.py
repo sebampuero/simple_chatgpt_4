@@ -31,16 +31,24 @@ class GPT4(BaseModel):
         prompt_input = self._from_own_format_to_model_format(messages)
         try:
             aclient = AsyncOpenAI(api_key=appconfig.OPENAI_KEY)
-            response = await aclient.chat.completions.create(
-                model=self.model,
-                messages=prompt_input,
-                max_completion_tokens=self.max_tokens,
-                temperature=1,
-                top_p=1,
-                frequency_penalty=0,
-                presence_penalty=0,
-                stream=True,
-            )
+            if self.model == "gpt-4o-mini-search-preview" or self.model == "gpt-4o-search-preview":
+                response = await aclient.chat.completions.create(
+                    model=self.model,
+                    messages=prompt_input,
+                    max_completion_tokens=self.max_tokens,
+                    stream=True,
+                )
+            else:
+                response = await aclient.chat.completions.create(
+                    model=self.model,
+                    messages=prompt_input,
+                    max_completion_tokens=self.max_tokens,
+                    temperature=1,
+                    top_p=1,
+                    frequency_penalty=0,
+                    presence_penalty=0,
+                    stream=True,
+                )
             return response
         except openai.RateLimitError:
             logger.error("Rate limit exceeded", exc_info=True)
@@ -55,4 +63,21 @@ class GPT4(BaseModel):
     def _extract_content(self, response_chunk: Any) -> str:
         if response_chunk.choices[0].delta.content:
             return response_chunk.choices[0].delta.content
+        if response_chunk.choices[0].delta.content is None and hasattr(response_chunk.choices[0].delta, "annotations"):
+            return self._process_annotations(response_chunk.choices[0].delta.annotations)
         return ""
+
+    def _process_annotations(self, annotations: list) -> str:
+        citation_urls = [
+            annotation.get("url_citation")
+            for annotation in annotations
+            if annotation.get("type") == "url_citation" and annotation.get("url_citation")
+        ]
+        if not citation_urls:
+            return ""
+        citations = "\n### Citations:\n"
+        citations += "\n".join(
+            f"- [{url.get('title')}]({url.get('url')})"
+            for url in citation_urls
+        )
+        return citations
