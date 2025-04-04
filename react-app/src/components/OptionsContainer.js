@@ -21,12 +21,8 @@ const OptionsContainer = ({
   }, []);
 
   const loadModels = () => {
-    const token = localStorage.getItem('jwt');
     fetchWithToken(`${process.env.PUBLIC_URL}/api/models`, {
-      method: "GET",
-      headers: {
-        "Authorization": token
-      }
+      method: "GET"
     })
     .then((response) => {
       if(response.status === 200) return response.json();
