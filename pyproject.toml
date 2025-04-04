@@ -73,7 +73,7 @@ urllib3 = "2.3.0"
 uvloop = "0.20.0"
 websockets = "14.1"
 yarl = "1.18.3"
-setuptools = "^77.0.3"
+setuptools = "^78.1.0"
 
 
 [build-system]
