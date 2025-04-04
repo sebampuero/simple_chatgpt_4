@@ -2,7 +2,7 @@
     "DeepSeek": {
         "models": [
             {
-                "name": "deepseek/deepseek-r1-zero:free",
+                "name": "deepseek-chat",
                 "handles_image": false
             }
         ]

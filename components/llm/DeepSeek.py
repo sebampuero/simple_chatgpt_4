@@ -31,7 +31,7 @@ class DeepSeek(BaseModel):
         prompt_input = self._from_own_format_to_model_format(messages)
         try:
             aclient = AsyncOpenAI(
-                base_url="https://openrouter.ai/api/v1",
+                base_url="https://api.deepseek.com",
                 api_key=appconfig.DEEPSEEK_KEY
             )
             response = await aclient.chat.completions.create(
