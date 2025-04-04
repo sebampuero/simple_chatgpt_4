@@ -1824,14 +1824,14 @@ crt = ["botocore[crt] (>=1.33.2,<2.0a.0)"]
 
 [[package]]
 name = "sanic"
-version = "24.12.0"
+version = "25.3.0"
 description = "A web server and web framework that's written to go fast. Build fast. Run fast."
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "sanic-24.12.0-py3-none-any.whl", hash = "sha256:3c2a01ec0b6c5926e3efe34eac1b497d31ed989038fe213eb25ad0c98687d388"},
-    {file = "sanic-24.12.0.tar.gz", hash = "sha256:09c23aa917616c1e60e44c66dfd7582cb9fd6503f78298c309945909f5839836"},
+    {file = "sanic-25.3.0-py3-none-any.whl", hash = "sha256:fb519b38b4c220569b0e2e868583ffeaffaab96a78b2e42ae78bc56a644a4cd7"},
+    {file = "sanic-25.3.0.tar.gz", hash = "sha256:775d522001ec81f034ec8e4d7599e2175bfc097b8d57884f5e4c9322f5e369bb"},
 ]
 
 [package.dependencies]
@@ -2480,4 +2480,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "804ba9debf852c5f5390997645d6568cc59abd81b046f497af28cb1d871d51bf"
+content-hash = "de6c5c30a75c8e49a0e65449c34985569732b45a702356921e28d09cb66c6dea"
