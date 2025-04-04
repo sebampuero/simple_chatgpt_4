@@ -1,4 +1,12 @@
 {
+    "DeepSeek": {
+        "models": [
+            {
+                "name": "deepseek/deepseek-r1-zero:free",
+                "handles_image": false
+            }
+        ]
+    },
     "GPT4": {
         "models": [
             {

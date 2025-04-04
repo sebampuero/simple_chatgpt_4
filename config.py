@@ -14,6 +14,7 @@ class Config:
         self.ELASTIC_SEARCH_HOST = os.getenv("ES_HOST", "192.168.0.7")
         self.ELASTIC_SEARCH_PORT = os.getenv("ES_PORT", "9200")
         self.OPENAI_KEY = os.getenv("OPENAI_KEY")
+        self.DEEPSEEK_KEY = os.getenv("DEEPSEEK_KEY")
         self.MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
         self.JWT_SECRET = os.getenv("JWT_SECRET")
         self.DDB_CHATS_TABLE = os.getenv("DDB_CHATS_TABLE", "chats")
@@ -42,6 +43,7 @@ class Config:
         assert self.GOOGLE_OAUTH_CLIENT_ID
         assert self.GOOGLE_OAUTH_CLIENT_SECRET
         assert self.OPENAI_KEY
+        assert self.DEEPSEEK_KEY
         assert self.MISTRAL_API_KEY
         assert self.ACCESS_TOKEN_SECRET
         assert self.REFRESH_TOKEN_SECRET

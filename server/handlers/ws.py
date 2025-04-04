@@ -2,6 +2,7 @@ from sanic import Websocket, Request
 import logging
 import json
 from datetime import datetime
+from components.llm.DeepSeek import DeepSeek
 from components.llm.GPT4 import GPT4
 from components.llm.Mistral import Mistral
 from components.llm.Claude import Claude
@@ -11,7 +12,12 @@ from constants.WebsocketConstants import WebsocketConstants
 
 logger = logging.getLogger("ChatGPT")
 
-language_categories = {"GPT4": GPT4(), "Mistral": Mistral(), "Claude": Claude()}
+language_categories = {
+    "GPT4": GPT4(),
+    "Mistral": Mistral(),
+    "Claude": Claude(),
+    "DeepSeek": DeepSeek()
+}
 
 
 async def chat(request: Request, ws: Websocket):
