@@ -11,7 +11,7 @@ class Config:
         self.APP_LOG_LEVEL = os.getenv("APP_LOG_LEVEL", "INFO").upper()
         self.GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
         self.GOOGLE_OAUTH_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
-        self.ELASTIC_SEARCH_HOST = os.getenv("ES_HOST", "192.168.0.7")
+        self.ELASTIC_SEARCH_HOST = os.getenv("ES_HOST", "elasticsearch")
         self.ELASTIC_SEARCH_PORT = os.getenv("ES_PORT", "9200")
         self.OPENAI_KEY = os.getenv("OPENAI_KEY")
         self.DEEPSEEK_KEY = os.getenv("DEEPSEEK_KEY")
@@ -37,7 +37,7 @@ class Config:
         self.OAUTH_TOKEN_URL = os.getenv(
             "OAUTH_TOKEN_URL", "https://oauth2.googleapis.com/token"
         )
-        self.REDIS_HOST = os.getenv("REDIS_HOST", "192.168.0.21")
+        self.REDIS_HOST = os.getenv("REDIS_HOST", "redis")
         self.REDIS_PORT = os.getenv("REDIS_PORT", "6379")
         self.MAX_LLM_TOKENS = os.getenv("MAX_LLM_TOKENS", 4096)
         assert self.GOOGLE_OAUTH_CLIENT_ID

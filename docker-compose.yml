@@ -2,7 +2,10 @@ services:
   chatgpt:
     #image: gpt4:latest
     build: .
-    container_name: gpt4
+    container_name: gpts
+    depends_on:
+      - redis
+      - elasticsearch
     env_file:
       - .env
     networks:
@@ -10,6 +13,30 @@ services:
     ports:
       - 9191:9191
     restart: unless-stopped
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7
+    container_name: redis_gpts
+    networks:
+      - chatgpt
+    restart: unless-stopped
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.1
+    container_name: elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=changemepls
+      - "ELASTICSEARCH_USERNAME=elastic"
+    volumes:
+      - ./esdata:/usr/share/elasticsearch/data
+    networks:
+      - chatgpt
 
 networks:
   chatgpt:
