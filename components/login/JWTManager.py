@@ -20,17 +20,6 @@ def decode_google_jwt(token: str):
     return data
 
 
-def generate_jwt(id_token: dict):
-    secret = appconfig.JWT_SECRET
-    exp = int(datetime.now().timestamp()) + 86400 * 7
-    encoded = jwt.encode(
-        {"authenticated": True, "email": id_token["email"], "exp": exp},
-        secret,
-        algorithm=appconfig.JWT_ALGORITHM,
-    )
-    return encoded
-
-
 def generate_access_token(subject: str, expires_delta: int = None) -> str:
     if expires_delta is not None:
         expires_delta = datetime.utcnow() + expires_delta

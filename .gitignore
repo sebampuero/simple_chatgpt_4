@@ -11,3 +11,4 @@ build/
 .vscode/
 .gcloud
 esdata/
+dynamodb-data/

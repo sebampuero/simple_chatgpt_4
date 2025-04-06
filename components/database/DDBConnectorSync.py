@@ -1,7 +1,8 @@
 import logging
 import boto3
-from boto3.dynamodb.conditions import Key, Attr
+from boto3.dynamodb.conditions import Key
 from components.elasticsearch.ElasticClient import ElasticClient
+from config import config
 
 logger = logging.getLogger("ChatGPT")
 
@@ -11,7 +12,11 @@ class DDBConnectorSync:
     def __init__(self, chats_table: str, users_table: str):
         self.chats_table = chats_table
         self.users_table = users_table
-        self.resource = boto3.resource("dynamodb")
+        self.resource = boto3.resource('dynamodb',
+                          endpoint_url=config.AWS_DYNAMODB_ENDPOINT,
+                          region_name=config.AWS_REGION,
+                          aws_access_key_id=config.AWS_ACCESS_KEY_ID,
+                          aws_secret_access_key=config.AWS_SECRET_ACCESS_KEY)
         self.es = ElasticClient()
 
     async def get_chats_by_email(self, email: str) -> dict:

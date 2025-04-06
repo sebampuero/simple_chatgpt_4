@@ -6,6 +6,7 @@ services:
     depends_on:
       - redis
       - elasticsearch
+      - dynamodb-local
     env_file:
       - .env
     networks:
@@ -13,8 +14,6 @@ services:
     ports:
       - 9191:9191
     restart: unless-stopped
-    depends_on:
-      - redis
 
   redis:
     image: redis:7
@@ -37,6 +36,16 @@ services:
       - ./esdata:/usr/share/elasticsearch/data
     networks:
       - chatgpt
+
+  dynamodb-local:
+    image: amazon/dynamodb-local
+    container_name: dynamodb-local
+    restart: unless-stopped
+    networks:
+      - chatgpt
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /home/dynamodblocal/data/"
+    volumes:
+      - ./dynamodb-data:/home/dynamodblocal/data/
 
 networks:
   chatgpt:

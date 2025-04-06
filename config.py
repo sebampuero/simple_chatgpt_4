@@ -40,6 +40,12 @@ class Config: #TODO: replace with https://sanic.dev/en/guide/running/configurati
         self.REDIS_HOST = os.getenv("REDIS_HOST", "redis")
         self.REDIS_PORT = os.getenv("REDIS_PORT", "6379")
         self.MAX_LLM_TOKENS = os.getenv("MAX_LLM_TOKENS", 4096)
+        self.AWS_DYNAMODB_ENDPOINT = os.getenv(
+            "AWS_DYNAMODB_ENDPOINT", "http://dynamodb-local:8000"
+        )
+        self.AWS_REGION = os.getenv("AWS_REGION", "eu-central-1")
+        self.AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "DUMMY")
+        self.AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "DUMMY")
         assert self.GOOGLE_OAUTH_CLIENT_ID
         assert self.GOOGLE_OAUTH_CLIENT_SECRET
         assert self.OPENAI_KEY

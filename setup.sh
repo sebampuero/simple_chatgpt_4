@@ -1,8 +1,14 @@
 #!/bin/bash
+
+# Check if aws-cli is installed
 if ! command -v aws &> /dev/null; then
     echo "aws-cli needs to be installed"
     exit 1
 fi
+
+# Set the local endpoint
+DYNAMODB_LOCAL_ENDPOINT="http://localhost:8000"
+
 # Prompt for the first table name
 read -p "Enter the name for the first table (chats_table): " first_table_name
 first_table_name=${first_table_name:-chats_table}
@@ -13,6 +19,7 @@ second_table_name=${second_table_name:-users_table}
 
 # Create the first table (chats_table)
 aws dynamodb create-table \
+    --endpoint-url "$DYNAMODB_LOCAL_ENDPOINT" \
     --table-name "$first_table_name" \
     --attribute-definitions \
         AttributeName=chat_id,AttributeType=S \
@@ -35,6 +42,7 @@ aws dynamodb create-table \
 
 # Create the second table (users_table)
 aws dynamodb create-table \
+    --endpoint-url "$DYNAMODB_LOCAL_ENDPOINT" \
     --table-name "$second_table_name" \
     --attribute-definitions \
         AttributeName=email,AttributeType=S \
@@ -43,4 +51,4 @@ aws dynamodb create-table \
     --provisioned-throughput \
         ReadCapacityUnits=5,WriteCapacityUnits=5
 
-echo "Tables $first_table_name and $second_table_name created successfully."
+echo "Tables $first_table_name and $second_table_name created successfully on local DynamoDB at $DYNAMODB_LOCAL_ENDPOINT."
