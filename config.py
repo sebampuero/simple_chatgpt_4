@@ -1,7 +1,7 @@
 import os
 
 
-class Config:
+class Config: #TODO: replace with https://sanic.dev/en/guide/running/configuration.html#basics
     def __init__(self):
         self.ENV = os.getenv("ENV", "DEV")
         self.SUB_DIRECTORY = os.getenv("SUBDIRECTORY", "/")
