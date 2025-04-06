@@ -9,8 +9,6 @@ class Config: #TODO: replace with https://sanic.dev/en/guide/running/configurati
         self.PORT = int(os.getenv("PORT", "9292"))
         self.ROOT_LOG_LEVEL = os.getenv("ROOT_LOG_LEVEL", "INFO").upper()
         self.APP_LOG_LEVEL = os.getenv("APP_LOG_LEVEL", "INFO").upper()
-        self.GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
-        self.GOOGLE_OAUTH_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
         self.ELASTIC_SEARCH_HOST = os.getenv("ES_HOST", "elasticsearch")
         self.ELASTIC_SEARCH_PORT = os.getenv("ES_PORT", "9200")
         self.OPENAI_KEY = os.getenv("OPENAI_KEY")
@@ -46,8 +44,6 @@ class Config: #TODO: replace with https://sanic.dev/en/guide/running/configurati
         self.AWS_REGION = os.getenv("AWS_REGION", "eu-central-1")
         self.AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "DUMMY")
         self.AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "DUMMY")
-        assert self.GOOGLE_OAUTH_CLIENT_ID
-        assert self.GOOGLE_OAUTH_CLIENT_SECRET
         assert self.OPENAI_KEY
         assert self.DEEPSEEK_KEY
         assert self.MISTRAL_API_KEY
