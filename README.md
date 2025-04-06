@@ -1,12 +1,27 @@
 # Basic Chatbot that uses different public LLMs
 
 ## Features
-Simple chatGPT clone that uses the OpenAI, Gemini, Mistral and Anthropic APIs. Sign in via Google. Chat history and authorized google emails are stored in DynamoDB.
+- Simple chatGPT clone that uses the OpenAI, DeepSeek, Mistral and Anthropic APIs. 
+
+- Sign in via Google. Chat history and authorized google emails are stored in DynamoDB.
+
+- Chat search capabitilies with the help of ElasticSearch
 
 ## Setup
 
-First install the aws-cli with `sudo pip3 install awscli`  
-Then, run `aws configure` to set up your AWS credentials. Make sure you have the correct policies set in place for your AWS user or role (Creation of tables, put, query and scan privileges)  
+Populate a `.env`file by using the provided `.env.dist`.
+
+Get up and running by starting the docker containers from the `docker-compose.yml` file:
+```bash
+docker compose up -d
+```
+
+Install the aws-cli with `sudo pip3 install awscli`.
+Then, run `setup.sh` to create the tables in DynamoDB. It will ask for the name of the chats table and authorized table. Execute the bash script `add_authorized_email.sh` to add your Google email to the authorized users table. Add other emails if you want to share with other people.
+
+### Using real AWS DynamoDB
+
+Make sure you have the correct policies set in place for your AWS user or role (Creation of tables, put, query and scan privileges). The AWS Secret ID and Key need to be inside the `.env` file.
 Example:  
 ```json
 {
@@ -31,52 +46,6 @@ Example:
 }
 ```
 
-Then, run `setup.sh` to create the tables in DynamoDB. It will ask for the name of the chats table and authorized table. Place those in the `start_prd.sh` file, too.  
-Execute the bash script `add_authorized_email.sh` to add your Google email to the authorized users table. Add other emails if you want to share with other people.
-
-Activate the virtual environment in python:  
-`source venv/bin/activate`  
-and install the dependencies  
-`pip install -r requirements.txt`
-
-Configure a new Google project that uses the Google+ API. Generate a pair of Client ID and secret. https://console.cloud.google.com/apis/api/plus.googleapis.com  
-For this flow to work, a domain needs to be registered (free domain under https://www.getfreedomain.name/ for example). A certificate for TLS communication can be automatically managed by Certbot: https://letsencrypt.org/getting-started/  
-Create a `.env` file and store your `OPENAPI_APIKEY`, `CLIENT_ID` (Google Oauth), `CLIENT_SECRET` (Google Oauth) , `JWT_SECRET` (for session authorization), `GEMINI_PROJECTID` and `MISTRAL_API_KEY`
-
-Start development with `start_dev.sh` or production with `start_prd.sh`
-
-The chat app includes a searching functionality that leverages elastic search. In order to start elastic search, the following docker-compose.yml file can be used:
-
-```
-version: '3'
-services:
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:latest
-    container_name: elasticsearch
-    restart: unless-stopped
-    environment:
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-      - xpack.security.enabled=true
-      - ELASTIC_PASSWORD=yourpassowrd
-      - "ELASTICSEARCH_USERNAME=elastic"
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    volumes:
-      - ./esdata:/usr/share/elasticsearch/data
-    networks:
-      - esnet
-
-volumes:
-  esdata:
-    driver: local
-
-networks:
-  esnet:
-    driver: bridge
-```
-
 ## Screenshots
  <table>
   <tr>
@@ -91,7 +60,3 @@ networks:
     </td>
   </tr>
 </table>
-
-## TODO
-More tests      
-Some sort of "quota" for individual users (email addresses)
