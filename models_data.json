@@ -4,6 +4,10 @@
             {
                 "name": "deepseek-chat",
                 "handles_image": false
+            },
+            {
+                "name": "deepseek-reasoner",
+                "handles_image": false
             }
         ]
     },
