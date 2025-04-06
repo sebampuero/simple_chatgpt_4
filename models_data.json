@@ -19,11 +19,11 @@
             },
             {
                 "name": "gpt-4o-search-preview",
-                "handles_image": true
+                "handles_image": false
             },
             {
                 "name": "gpt-4o-mini-search-preview",
-                "handles_image": true
+                "handles_image": false
             },
             {
                 "name": "o1",
