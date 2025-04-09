@@ -12,3 +12,4 @@ build/
 .gcloud
 esdata/
 dynamodb-data/
+docker-compose-fake.yml
