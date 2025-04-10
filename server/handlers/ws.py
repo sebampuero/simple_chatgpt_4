@@ -40,8 +40,7 @@ async def chat(request: Request, ws: Websocket):
             input_raw = await ws.recv()
         except:
             logger.error(
-                f"Unexpected exception, most probably {client_ip} closed the websocket connection",
-                exc_info=True,
+                f"Unexpected exception, most probably {client_ip} closed the websocket connection"
             )
             await DDBRepository().store_chat(chat_state.get_messages(socket_id))
             await close_connection()
@@ -53,8 +52,15 @@ async def chat(request: Request, ws: Websocket):
             input_json = json.loads(input_raw)
         except json.JSONDecodeError:
             logger.debug(f"Client IP {client_ip} sent unsupported command")
-            await ws.close()
-            break
+            continue
+        chat_state.append_message(
+            {
+                "role": "user",
+                "image": input_json["image"],
+                "content": input_json["msg"],
+            },
+            socket_id
+        )
         try:
             category = chat_state.get_language_category(socket_id)
             llm = chat_state.get_language_model(socket_id)

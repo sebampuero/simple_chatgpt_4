@@ -68,7 +68,7 @@ class RedisState: # TODO: use async!!
         try:
             logger.debug(f"Getting messages for websocket ID {ws_id}")
             messages = json.loads(self.r.hget(f"ws:{ws_id}", "messages"))
-            return {"messages": messages}
+            return messages
         except redis.exceptions.RedisError as e:
             logger.error(f"Error getting messages with timestamp: {e}")
             return {}
@@ -85,7 +85,7 @@ class RedisState: # TODO: use async!!
 
     def load_new_chat_state(self, new_chat_state: dict, ws_id: str):
         try:
-            logger.debug(f"Loading new state for websocket ID {ws_id}")
+            logger.debug(f"Loading new state for websocket ID {ws_id}: {new_chat_state}")
             self.r.hset(f"ws:{ws_id}", mapping={"messages": json.dumps(new_chat_state)})
         except redis.exceptions.RedisError as e:
             logger.error(f"Error clearing state for websocket ID {ws_id}: {e}")

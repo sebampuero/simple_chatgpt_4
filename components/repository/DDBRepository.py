@@ -46,6 +46,7 @@ class DDBRepository(Repository):
         return await self.ddb_connector.get_user(email)
 
     async def store_chat(self, chats_info: dict):
+        logger.debug(f"Trying to store chat {chats_info}")
         if chats_info["messages"] == []:
             logger.info("No messages to store")
             return
@@ -55,8 +56,6 @@ class DDBRepository(Repository):
             "user_email": chats_info["email"],
             "messages": chats_info["messages"],
         }
-        logger.info("Storing chat with id " + new_chat["chat_id"])
-        logger.debug(f"Message to store: {new_chat}")
         await self.ddb_connector.store_chat(new_chat)
 
     def convert_decimal_to_int(self, data: dict) -> dict:

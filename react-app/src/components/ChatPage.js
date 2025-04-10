@@ -56,9 +56,14 @@ const ChatPage = ({ email }) => {
     }
     if (!socket){
       createSocket()
-      loadNewChatState();
     }
-  }, [socket]); // needed here because rendering is needed every time a new chat is selected
+
+    return () => {
+      if (socket) {
+        socket.close();
+      }
+    }
+  }, []); // loading on first render
 
   useEffect(() => {
     selectedModelRef.current = selectedModel;
@@ -251,7 +256,8 @@ const ChatPage = ({ email }) => {
     const msg = JSON.parse(data);
     if (msg.type === "INIT"){
       sendNewModel(selectedModelRef.current, categoryRef.current, msg.socket_id)
-      currentSocketId.current = msg.socket_id
+      currentSocketId.current = msg.socket_id;
+      loadNewChatState();
     }else if(msg.type === "CONTENT"){
       handleReceivedMessage(data)
     }else if(msg.type === "ERROR"){
