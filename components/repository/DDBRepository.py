@@ -35,8 +35,8 @@ class DDBRepository(Repository):
         chats = self.convert_decimal_to_int(results["items"])
         return {"chats": chats, "last_eval_key": results["last_eval_key"]}
 
-    async def get_chat_by_id(self, id: str, timestamp: int = None) -> dict:
-        chat = await self.ddb_connector.get_chat_by_id(id, timestamp)
+    async def get_chat_by_id(self, id: str) -> dict:
+        chat = await self.ddb_connector.get_chat_by_id(id)
         return self.convert_decimal_to_int(chat)
 
     async def delete_chat_by_id(self, id: str, timestamp: int = None):
@@ -45,27 +45,21 @@ class DDBRepository(Repository):
     async def get_user(self, email: str) -> User:
         return await self.ddb_connector.get_user(email)
 
-    async def store_chat(self, chats_info: dict, user_email: str, chat_id: str):
-        if chats_info.items() == 0:
+    async def store_chat(self, chats_info: dict):
+        if chats_info["messages"] == []:
             logger.info("No messages to store")
             return
-        if user_email.strip() == "":
-            logger.info("Cannot store chats without email")
-            return
-        if len(chats_info) == 0:
-            logger.info("No chats to store")
-            return
         new_chat = {
-            "chat_id": uuid.uuid4().hex if chat_id == "" else chat_id,
-            "timestamp": int(datetime.now().timestamp()),
-            "user_email": user_email,
+            "chat_id": chats_info["current_chat_id"],
+            "timestamp": chats_info["timestamp"],
+            "user_email": chats_info["email"],
             "messages": chats_info["messages"],
         }
         logger.info("Storing chat with id " + new_chat["chat_id"])
         logger.debug(f"Message to store: {new_chat}")
         await self.ddb_connector.store_chat(new_chat)
 
-    def convert_decimal_to_int(self, data):
+    def convert_decimal_to_int(self, data: dict) -> dict:
         if isinstance(data, Decimal):
             return int(data)
         elif isinstance(data, list):

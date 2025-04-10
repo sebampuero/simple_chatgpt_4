@@ -15,7 +15,7 @@ class Repository(Protocol):
     ) -> dict:
         pass
 
-    async def get_chat_by_id(self, id: str, timestamp: int = None) -> dict:
+    async def get_chat_by_id(self, id: str) -> dict | None:
         pass
 
     async def delete_chat_by_id(self, id: str, timestamp: int = None):

@@ -65,14 +65,18 @@ class DDBConnectorSync:
             "last_eval_key": response.get("LastEvaluatedKey"),
         }
 
-    async def get_chat_by_id(self, id: str, timestamp: int) -> dict:
+    async def get_chat_by_id(self, id: str) -> dict | None:
         table = self.resource.Table(self.chats_table)
         try:
-            response = table.get_item(Key={"chat_id": id, "timestamp": timestamp})
+            response = table.query(
+                KeyConditionExpression=Key('chat_id').eq(id),
+                Limit=1
+            )
+            items = response.get('Items', [])
+            return items[0] if items else None
         except Exception as e:
-            logger.error(f"Error querying chat with id {id} {e}")
+            logger.error(f"Error querying chat with id {id}: {e}")
             return None
-        return response.get("Item")
 
     async def delete_chat_by_id(self, id: str, timestamp: int):
         table = self.resource.Table(self.chats_table)
@@ -99,6 +103,6 @@ class DDBConnectorSync:
             self.es.create_document(
                 chat["chat_id"], chat["timestamp"], chat["messages"], chat["user_email"]
             )
-            logger.debug(f"Created chat {chat}. Response: {response}")
+            logger.debug(f"Created or updated chat {chat}. Response: {response}")
         except Exception as e:
             logger.error(f"Error saving chat {chat} {e}")

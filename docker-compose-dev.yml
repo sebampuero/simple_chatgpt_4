@@ -8,9 +8,7 @@ services:
       - elasticsearch
       - dynamodb-local
     env_file:
-      - .env
-    environment:
-      - AWS_DYNAMODB_ENDPOINT=http://dynamodb-local:8000
+      - .env_dev
     networks:
       - chatgpt_dev
     ports:

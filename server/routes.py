@@ -6,6 +6,7 @@ from server.handlers.chat import (
     get_chats_for_user,
     set_model,
     search_for_chat,
+    load_new_chat_state,
 )
 from server.handlers.models import get_available_models
 
@@ -14,7 +15,7 @@ bp = Blueprint("routes")
 bp.add_route(login_code, "/login-code", methods=["POST"])
 bp.add_route(
     load_new_chat,
-    "/chat/<id>/<timestamp>/<new_socket_id>/<old_socket_id>",
+    "/chat/<id>/<socket_id>",
     methods=["GET"],
 )
 bp.add_route(delete_chat, "/chat/<id>/<timestamp>", methods=["DELETE"])
@@ -24,3 +25,4 @@ bp.add_route(search_for_chat, "/search_for_chat", methods=["POST"])
 bp.add_route(get_available_models, "/models", methods=["GET"])
 bp.add_route(refresh_token, "/refresh", methods=["POST"])
 bp.add_route(get_authorized_email, "/authorized-email", methods=["GET"])
+bp.add_route(load_new_chat_state, "/chat_state/<socket_id>", methods=["POST"])

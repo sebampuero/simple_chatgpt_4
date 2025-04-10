@@ -2,7 +2,6 @@
 npm run build
 
 # If the build is successful, upload to S3.
-# TODO: develop pipeline to automate deployment to nginx
 if [ $? -eq 0 ]; then
     echo "Build successful. Deploying to server..."
     zip -r chatgpt.zip build/

@@ -19,12 +19,14 @@ class RedisState: # TODO: use async!!
 
     def set_language_model_category(self, model: str, category: str, ws_id: str):
         try:
+            logger.debug(f"Setting language model {model} and category {category} for websocket ID {ws_id}")
             self.r.hset(f"ws:{ws_id}", mapping={"model": model, "category": category})
         except redis.exceptions.RedisError as e:
             logger.error(f"Error setting language model: {e}")
 
     def get_language_category(self, ws_id: str) -> str:
         try:
+            logger.debug(f"Getting language category for websocket ID {ws_id}")
             return self.r.hget(f"ws:{ws_id}", "category")
         except redis.exceptions.RedisError as e:
             logger.error(f"Error getting language category: {e}")
@@ -32,6 +34,7 @@ class RedisState: # TODO: use async!!
 
     def get_language_model(self, ws_id: str) -> str:
         try:
+            logger.debug(f"Getting language model for websocket ID {ws_id}")
             return self.r.hget(f"ws:{ws_id}", "model")
         except redis.exceptions.RedisError as e:
             logger.error(f"Error getting language model: {e}")
@@ -39,16 +42,18 @@ class RedisState: # TODO: use async!!
 
     def append_message(self, item: dict, ws_id: str):
         try:
-            msg_list = json.loads(self.r.hget(f"ws:{ws_id}", "messages"))
-            msg_list.append(item)
-            self.r.hset(f"ws:{ws_id}", mapping={"messages": json.dumps(msg_list)})
+            logger.debug(f"Appending message {item} to websocket ID {ws_id}")
+            msg_dict = json.loads(self.r.hget(f"ws:{ws_id}", "messages"))
+            msg_dict["messages"].append(item)
+            self.r.hset(f"ws:{ws_id}", mapping={"messages": json.dumps(msg_dict)})
         except redis.exceptions.RedisError as e:
             logger.error(f"Error appending message: {e}")
         except json.JSONDecodeError as e:
             logger.error(f"Error decoding JSON: {e}")
 
-    def set_messages(self, messages: list, ws_id: str):
+    def set_messages(self, messages: dict, ws_id: str):
         try:
+            logger.debug(f"Setting messages for websocket ID {ws_id}: {messages}")
             messages = json.dumps(messages)
             self.r.hset(
                 f"ws:{ws_id}",
@@ -61,6 +66,7 @@ class RedisState: # TODO: use async!!
 
     def get_messages(self, ws_id: str) -> dict:
         try:
+            logger.debug(f"Getting messages for websocket ID {ws_id}")
             messages = json.loads(self.r.hget(f"ws:{ws_id}", "messages"))
             return {"messages": messages}
         except redis.exceptions.RedisError as e:
@@ -72,13 +78,15 @@ class RedisState: # TODO: use async!!
 
     def remove_ws(self, ws_id: str):
         try:
+            logger.debug(f"Removing websocket ID {ws_id}")
             self.r.delete(f"ws:{ws_id}")
         except redis.exceptions.RedisError as e:
             logger.error(f"Error removing websocket ID {ws_id}: {e}")
 
-    def clear_state(self, ws_id: str):
+    def load_new_chat_state(self, new_chat_state: dict, ws_id: str):
         try:
-            self.r.hset(f"ws:{ws_id}", mapping={"messages": json.dumps([])})
+            logger.debug(f"Loading new state for websocket ID {ws_id}")
+            self.r.hset(f"ws:{ws_id}", mapping={"messages": json.dumps(new_chat_state)})
         except redis.exceptions.RedisError as e:
             logger.error(f"Error clearing state for websocket ID {ws_id}: {e}")
         except json.JSONDecodeError as e:
