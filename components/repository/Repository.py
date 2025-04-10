@@ -21,7 +21,7 @@ class Repository(Protocol):
     async def delete_chat_by_id(self, id: str, timestamp: int = None):
         pass
 
-    async def get_user(self, email: str) -> User:
+    async def get_user(self, email: str) -> User: # TODO: use Pydantic or dataclasses for all other structures, like Chat which is stored in DDB and Redis
         pass
 
     async def store_chat(self, chat: dict):
