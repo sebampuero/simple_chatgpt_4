@@ -33,11 +33,11 @@ class ChatState:
     def append_message(self, item: dict, ws_id: str):
         self.redis.append_message(item, ws_id)
 
-    def set_messages(self, messages: dict, ws_id: str):
-        self.redis.set_messages(messages, ws_id)
+    def set_chat_state(self, chat_state: dict, ws_id: str):
+        self.redis.set_chat_state(chat_state, ws_id)
 
-    def get_messages(self, ws_id: str) -> dict:
-        return self.redis.get_messages(ws_id)
+    def get_chat_state(self, ws_id: str) -> dict:
+        return self.redis.get_chat_state(ws_id)
 
     def remove_ws(self, ws_id: str):
         self.redis.remove_ws(ws_id)

@@ -43,32 +43,32 @@ class RedisState: # TODO: use async!!
     def append_message(self, item: dict, ws_id: str):
         try:
             logger.debug(f"Appending message {item} to websocket ID {ws_id}")
-            msg_dict = json.loads(self.r.hget(f"ws:{ws_id}", "messages"))
-            msg_dict["messages"].append(item)
-            self.r.hset(f"ws:{ws_id}", mapping={"messages": json.dumps(msg_dict)})
+            chat_state_dict = json.loads(self.r.hget(f"ws:{ws_id}", "chat_state"))
+            chat_state_dict["messages"].append(item)
+            self.r.hset(f"ws:{ws_id}", mapping={"chat_state": json.dumps(chat_state_dict)})
         except redis.exceptions.RedisError as e:
             logger.error(f"Error appending message: {e}")
         except json.JSONDecodeError as e:
             logger.error(f"Error decoding JSON: {e}")
 
-    def set_messages(self, messages: dict, ws_id: str):
+    def set_chat_state(self, chat_state: dict, ws_id: str):
         try:
-            logger.debug(f"Setting messages for websocket ID {ws_id}: {messages}")
-            messages = json.dumps(messages)
+            logger.debug(f"Setting messages for websocket ID {ws_id}: {chat_state}")
+            chat_state = json.dumps(chat_state)
             self.r.hset(
                 f"ws:{ws_id}",
-                mapping={"messages": messages},
+                mapping={"chat_state": chat_state},
             )
         except redis.exceptions.RedisError as e:
             logger.error(f"Error setting messages with timestamp: {e}")
         except json.JSONDecodeError as e:
             logger.error(f"Error encoding JSON: {e}")
 
-    def get_messages(self, ws_id: str) -> dict:
+    def get_chat_state(self, ws_id: str) -> dict:
         try:
-            logger.debug(f"Getting messages for websocket ID {ws_id}")
-            messages = json.loads(self.r.hget(f"ws:{ws_id}", "messages"))
-            return messages
+            logger.debug(f"Getting chat for websocket ID {ws_id}")
+            chat_state = json.loads(self.r.hget(f"ws:{ws_id}", "chat_state"))
+            return chat_state
         except redis.exceptions.RedisError as e:
             logger.error(f"Error getting messages with timestamp: {e}")
             return {}
@@ -86,7 +86,7 @@ class RedisState: # TODO: use async!!
     def load_new_chat_state(self, new_chat_state: dict, ws_id: str):
         try:
             logger.debug(f"Loading new state for websocket ID {ws_id}: {new_chat_state}")
-            self.r.hset(f"ws:{ws_id}", mapping={"messages": json.dumps(new_chat_state)})
+            self.r.hset(f"ws:{ws_id}", mapping={"chat_state": json.dumps(new_chat_state)})
         except redis.exceptions.RedisError as e:
             logger.error(f"Error clearing state for websocket ID {ws_id}: {e}")
         except json.JSONDecodeError as e:

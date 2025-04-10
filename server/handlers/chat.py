@@ -68,7 +68,7 @@ async def load_new_chat(
         return HTTPResponse(status=404)
     if socket_id:
         chat_state = ChatState.get_instance()
-        chat_state.set_messages(
+        chat_state.set_chat_state(
             {
                 "email": chat_data["user_email"],
                 "messages": chat_data["messages"],

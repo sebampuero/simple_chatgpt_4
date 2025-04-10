@@ -42,7 +42,7 @@ async def chat(request: Request, ws: Websocket):
             logger.error(
                 f"Unexpected exception, most probably {client_ip} closed the websocket connection"
             )
-            await DDBRepository().store_chat(chat_state.get_messages(socket_id))
+            await DDBRepository().store_chat(chat_state.get_chat_state(socket_id))
             await close_connection()
             break
         if not input_raw or "email" not in input_raw:
@@ -68,7 +68,7 @@ async def chat(request: Request, ws: Websocket):
             category_instance.set_model(llm)
             logger.debug(f"Using model: {llm} and category {category}")
             response_generator = await category_instance.prompt(
-                chat_state.get_messages(socket_id)["messages"]
+                chat_state.get_chat_state(socket_id).get("messages")
             )
             assistant_msg = ""
             async for response_content in category_instance.retrieve_response(
@@ -101,8 +101,8 @@ async def chat(request: Request, ws: Websocket):
                 },
                 socket_id,
             )
-            await DDBRepository().store_chat(chat_state.get_messages(socket_id))
+            await DDBRepository().store_chat(chat_state.get_chat_state(socket_id))
         except Exception as e:
             logger.error(str(e), exc_info=True)
-            await DDBRepository().store_chat(chat_state.get_messages(socket_id))
+            await DDBRepository().store_chat(chat_state.get_chat_state(socket_id))
             await ws.send(json.dumps({"type": WebsocketConstants.ERROR}))
