@@ -5,6 +5,10 @@ from components.elasticsearch.ElasticClient import ElasticClient
 from components.chat.ChatState import ChatState
 import json
 
+async def clear_chat_state_for_socket(request: Request, socket_id: str):
+    chat_state = ChatState.get_instance()
+    chat_state.clear_state(socket_id)
+    return HTTPResponse(status=200)
 
 async def get_chats_for_user(request: Request):
     email = request.args.get("email")
@@ -38,7 +42,7 @@ async def search_for_chat(request: Request):
     return sanicjson({"chats": chats})
 
 
-async def load_new_chat(
+async def load_new_chat( # TODO: change, no need for old and new socket id
     request: Request, id: str, timestamp: str, new_socket_id: str, old_socket_id: str
 ):
     if id is None or id.strip() == "":
@@ -47,8 +51,8 @@ async def load_new_chat(
     if chat_data is None:
         return HTTPResponse(status=404)
     chat_state = ChatState.get_instance()
-    chat_state.set_messages_with_ts(
-        chat_data["messages"], new_socket_id, int(timestamp)
+    chat_state.set_messages(
+        chat_data["messages"], new_socket_id
     )
     chat_state.remove_ws(old_socket_id)
     return sanicjson({"body": chat_data})

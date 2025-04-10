@@ -16,7 +16,7 @@ class ChatState:
             self.redis = RedisState()
 
     @staticmethod
-    def get_instance():
+    def get_instance() -> "ChatState":
         if ChatState.__instance is None:
             ChatState()
         return ChatState.__instance
@@ -33,11 +33,14 @@ class ChatState:
     def append_message(self, item: dict, ws_id: str):
         self.redis.append_message(item, ws_id)
 
-    def set_messages_with_ts(self, messages: list, ws_id: str, timestamp: int):
-        self.redis.set_messages_with_ts(messages, ws_id, timestamp)
+    def set_messages(self, messages: list, ws_id: str):
+        self.redis.set_messages(messages, ws_id)
 
-    def get_messages_with_ts(self, ws_id: str) -> dict:
-        return self.redis.get_messages_with_ts(ws_id)
+    def get_messages(self, ws_id: str) -> dict:
+        return self.redis.get_messages(ws_id)
 
     def remove_ws(self, ws_id: str):
         self.redis.remove_ws(ws_id)
+
+    def clear_state(self, ws_id: str):
+        self.redis.clear_state(ws_id)

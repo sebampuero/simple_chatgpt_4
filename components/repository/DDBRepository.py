@@ -3,6 +3,7 @@ from components.repository.Repository import Repository
 from components.repository.User import User
 from decimal import Decimal
 from config import config as appconfig
+from datetime import datetime
 import uuid
 import logging
 
@@ -56,7 +57,7 @@ class DDBRepository(Repository):
             return
         new_chat = {
             "chat_id": uuid.uuid4().hex if chat_id == "" else chat_id,
-            "timestamp": chats_info["timestamp"],
+            "timestamp": int(datetime.now().timestamp()),
             "user_email": user_email,
             "messages": chats_info["messages"],
         }

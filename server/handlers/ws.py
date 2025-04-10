@@ -28,7 +28,7 @@ async def chat(request: Request, ws: Websocket):
     logger.info(f"Client connected via WS: {client_ip} and socket_id {socket_id}")
     await ws.send(json.dumps({"socket_id": socket_id, "type": WebsocketConstants.INIT}))
     chat_state = ChatState.get_instance()
-    chat_state.set_messages_with_ts([], socket_id, int(datetime.now().timestamp()))
+    chat_state.set_messages([], socket_id)
 
     async def close_connection():
         chat_state.remove_ws(socket_id)
@@ -36,11 +36,13 @@ async def chat(request: Request, ws: Websocket):
 
     async def store_chat():
         await DDBRepository().store_chat(
-            chat_state.get_messages_with_ts(socket_id), user_email, chat_id
+            chat_state.get_messages(socket_id), user_email, chat_id
         )
 
     while True:
-        message_timestamp = datetime.timestamp(datetime.now())
+        # this "unique" value is used to track message in frontend, so that frontend can append
+        # incoming messages to the same div bubble
+        assistant_message_unique_id = datetime.timestamp(datetime.now())
         try:
             input_raw = await ws.recv()
         except:
@@ -77,16 +79,16 @@ async def chat(request: Request, ws: Websocket):
             category_instance.set_model(llm)
             logger.debug(f"Using model: {llm} and category {category}")
             response_generator = await category_instance.prompt(
-                chat_state.get_messages_with_ts(socket_id)["messages"]
+                chat_state.get_messages(socket_id)["messages"]
             )
             assistant_msg = await category_instance.process_response(
-                response_generator, ws, int(message_timestamp)
+                response_generator, ws, int(assistant_message_unique_id)
             )
             await ws.send(
                 json.dumps(
                     {
                         "content": WebsocketConstants.END,
-                        "timestamp": int(message_timestamp),
+                        "timestamp": int(assistant_message_unique_id),
                         "type": WebsocketConstants.CONTENT,
                     }
                 )

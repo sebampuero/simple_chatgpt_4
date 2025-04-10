@@ -7,7 +7,7 @@ from config import config as appconfig
 logger = logging.getLogger("ChatGPT")
 
 
-class RedisState:
+class RedisState: # TODO: use async!!
     def __init__(self):
         self.r = redis.Redis(
             host=appconfig.REDIS_HOST,
@@ -47,23 +47,22 @@ class RedisState:
         except json.JSONDecodeError as e:
             logger.error(f"Error decoding JSON: {e}")
 
-    def set_messages_with_ts(self, messages: list, ws_id: str, timestamp: int):
+    def set_messages(self, messages: list, ws_id: str):
         try:
             messages = json.dumps(messages)
             self.r.hset(
                 f"ws:{ws_id}",
-                mapping={"messages": messages, "timestamp": str(timestamp)},
+                mapping={"messages": messages},
             )
         except redis.exceptions.RedisError as e:
             logger.error(f"Error setting messages with timestamp: {e}")
         except json.JSONDecodeError as e:
             logger.error(f"Error encoding JSON: {e}")
 
-    def get_messages_with_ts(self, ws_id: str) -> dict:
+    def get_messages(self, ws_id: str) -> dict:
         try:
             messages = json.loads(self.r.hget(f"ws:{ws_id}", "messages"))
-            timestamp = int(self.r.hget(f"ws:{ws_id}", "timestamp"))
-            return {"messages": messages, "timestamp": timestamp}
+            return {"messages": messages}
         except redis.exceptions.RedisError as e:
             logger.error(f"Error getting messages with timestamp: {e}")
             return {}
@@ -76,3 +75,13 @@ class RedisState:
             self.r.delete(f"ws:{ws_id}")
         except redis.exceptions.RedisError as e:
             logger.error(f"Error removing websocket ID {ws_id}: {e}")
+
+    def clear_state(self, ws_id: str):
+        try:
+            self.r.hset(f"ws:{ws_id}", mapping={"messages": json.dumps([])})
+        except redis.exceptions.RedisError as e:
+            logger.error(f"Error clearing state for websocket ID {ws_id}: {e}")
+        except json.JSONDecodeError as e:
+            logger.error(f"Error decoding JSON: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error clearing state for websocket ID {ws_id}: {e}")

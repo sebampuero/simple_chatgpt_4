@@ -32,6 +32,8 @@ const ChatPage = ({ email }) => {
   const PAGINATION_LIMIT = 10;
   const MAX_IMG_WIDTH = 650;
   const MAX_IMG_HEIGHT = 650;
+  const MAX_SOCKET_RECONNECT_TRIES = 5;
+  const SOCKET_RECONNECT_DELAY = 10000; // 10 seconds
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -175,6 +177,19 @@ const ChatPage = ({ email }) => {
       socket.addEventListener('error', (event) => {
         console.error('WebSocket error:', event);
         alert("There was an error with the connection, try again later.");
+      });
+
+      //TODO: add event listener for close and add logic that tries to reconnect for a max of 5 retries with 10 second delay
+      socket.addEventListener('close', (event) => {
+        console.log('WebSocket closed:', event);
+        var retries = 0;
+        while (retries < MAX_SOCKET_RECONNECT_TRIES) {
+          setTimeout(() => {
+            console.log('Attempting to reconnect to WebSocket...');
+            createSocket();
+            retries++;
+          }, SOCKET_RECONNECT_DELAY);
+        }
       });
 
       setSocket(socket);
@@ -364,7 +379,7 @@ const ChatPage = ({ email }) => {
     currentChatId.current = "";
     imgBase64Data.current = "";
     imageDataURL.current = null;
-    closeSocket();
+    closeSocket();// TODO: do not close socket when changing chats, wipe state on backend only
     createSocket();
     setSidebarVisible(false);
     setOptionsVisible(false);
