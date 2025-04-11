@@ -1,4 +1,3 @@
-import uuid
 from sanic import Websocket, Request
 import logging
 import json
@@ -9,7 +8,8 @@ from components.llm.Mistral import Mistral
 from components.llm.Claude import Claude
 from components.repository.DDBRepository import DDBRepository
 from components.chat.ChatState import ChatState
-from constants.WebsocketConstants import WebsocketConstants
+from constants.WebSocketStatesEnum import WebsocketConstants
+from models.WebSocketMessageModel import WebSocketMessageModel
 
 logger = logging.getLogger("ChatGPT")
 
