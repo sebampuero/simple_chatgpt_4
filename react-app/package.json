@@ -10,7 +10,7 @@
     "@testing-library/user-event": "^14.6.1",
     "bootstrap": "^5.3.3",
     "dotenv": "^16.4.7",
-    "http-proxy-middleware": "^3.0.3",
+    "http-proxy-middleware": "^3.0.5",
     "js-cookie": "^3.0.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
