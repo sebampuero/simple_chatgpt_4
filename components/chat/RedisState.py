@@ -3,6 +3,7 @@ import logging
 import json
 
 from config import config as appconfig
+from models.ChatStateModel import ChatStateModel
 
 logger = logging.getLogger("ChatGPT")
 
@@ -51,30 +52,29 @@ class RedisState: # TODO: use async!!
         except json.JSONDecodeError as e:
             logger.error(f"Error decoding JSON: {e}")
 
-    def set_chat_state(self, chat_state: dict, ws_id: str):
+    def set_chat_state(self, chat_state: ChatStateModel, ws_id: str):
         try:
             logger.debug(f"Setting messages for websocket ID {ws_id}: {chat_state}")
-            chat_state = json.dumps(chat_state)
             self.r.hset(
                 f"ws:{ws_id}",
-                mapping={"chat_state": chat_state},
+                mapping={"chat_state": chat_state.model_dump_json()},
             )
         except redis.exceptions.RedisError as e:
             logger.error(f"Error setting messages with timestamp: {e}")
         except json.JSONDecodeError as e:
             logger.error(f"Error encoding JSON: {e}")
 
-    def get_chat_state(self, ws_id: str) -> dict:
+    def get_chat_state(self, ws_id: str) -> ChatStateModel:
         try:
             logger.debug(f"Getting chat for websocket ID {ws_id}")
             chat_state = json.loads(self.r.hget(f"ws:{ws_id}", "chat_state"))
-            return chat_state
+            return ChatStateModel.model_validate(chat_state)
         except redis.exceptions.RedisError as e:
             logger.error(f"Error getting messages with timestamp: {e}")
-            return {}
+            return ChatStateModel()
         except json.JSONDecodeError as e:
             logger.error(f"Error decoding JSON: {e}")
-            return {}
+            return ChatStateModel()
 
     def remove_ws(self, ws_id: str):
         try:
@@ -83,10 +83,10 @@ class RedisState: # TODO: use async!!
         except redis.exceptions.RedisError as e:
             logger.error(f"Error removing websocket ID {ws_id}: {e}")
 
-    def load_new_chat_state(self, new_chat_state: dict, ws_id: str):
+    def load_new_chat_state(self, new_chat_state: ChatStateModel, ws_id: str):
         try:
             logger.debug(f"Loading new state for websocket ID {ws_id}: {new_chat_state}")
-            self.r.hset(f"ws:{ws_id}", mapping={"chat_state": json.dumps(new_chat_state)})
+            self.r.hset(f"ws:{ws_id}", mapping={"chat_state": new_chat_state.model_dump_json()})
         except redis.exceptions.RedisError as e:
             logger.error(f"Error clearing state for websocket ID {ws_id}: {e}")
         except json.JSONDecodeError as e:

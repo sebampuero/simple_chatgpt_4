@@ -1,11 +1,11 @@
 from components.database.DDBConnectorSync import DDBConnectorSync
 from components.repository.Repository import Repository
-from components.repository.User import User
 from decimal import Decimal
 from config import config as appconfig
-from datetime import datetime
-import uuid
 import logging
+
+from models.ChatStateModel import ChatStateModel
+from models.UserModel import UserModel
 
 logger = logging.getLogger("ChatGPT")
 
@@ -42,20 +42,14 @@ class DDBRepository(Repository):
     async def delete_chat_by_id(self, id: str, timestamp: int = None):
         await self.ddb_connector.delete_chat_by_id(id, timestamp)
 
-    async def get_user(self, email: str) -> User:
+    async def get_user(self, email: str) -> UserModel | None:
         return await self.ddb_connector.get_user(email)
 
-    async def store_chat(self, chats_info: dict):
+    async def store_chat(self, chats_info: ChatStateModel):
         logger.debug(f"Trying to store chat {chats_info}")
-        if chats_info["messages"] == []:
+        if not chats_info.messages:
             logger.info("No messages to store")
             return
-        new_chat = {
-            "chat_id": chats_info["current_chat_id"],
-            "timestamp": chats_info["timestamp"],
-            "user_email": chats_info["email"],
-            "messages": chats_info["messages"],
-        }
         await self.ddb_connector.store_chat(new_chat)
 
     def convert_decimal_to_int(self, data: dict) -> dict:
