@@ -3,8 +3,6 @@ from components.elasticsearch.ElasticClient import ElasticClient
 from components.repository.Repository import Repository
 from decimal import Decimal
 from sanic import Sanic
-from constants.AppConstants import AppConstants
-app = Sanic(AppConstants.APP_NAME)
 import logging
 
 from models.ChatModel import ChatModel
@@ -15,6 +13,7 @@ logger = logging.getLogger("ChatGPT")
 
 class DDBRepository(Repository):
     def __init__(self, chats_table=None, users_table=None) -> None:
+        app = Sanic.get_app()
         if not chats_table and not users_table:
             chats_table = app.config.DDB_CHATS_TABLE
             users_table = app.config.DDB_USERS_TABLE

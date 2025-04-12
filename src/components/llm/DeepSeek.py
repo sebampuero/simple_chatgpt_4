@@ -4,8 +4,6 @@ import logging
 from .BaseModel import BaseModel
 from typing import Any
 from sanic import Sanic
-from constants.AppConstants import AppConstants
-app = Sanic(AppConstants.APP_NAME)
 
 logger = logging.getLogger("ChatGPT")
 
@@ -34,7 +32,7 @@ class DeepSeek(BaseModel):
         try:
             aclient = AsyncOpenAI(
                 base_url="https://api.deepseek.com",
-                api_key=app.config.DEEPSEEK_KEY
+                api_key=self.app.config.DEEPSEEK_KEY
             )
             response = await aclient.chat.completions.create(
                 model=self.model,

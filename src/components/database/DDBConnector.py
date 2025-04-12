@@ -3,8 +3,6 @@ import boto3
 import asyncio
 from boto3.dynamodb.conditions import Key
 from sanic import Sanic
-from constants.AppConstants import AppConstants
-app = Sanic(AppConstants.APP_NAME)
 from models.ChatModel import ChatModel
 from models.UserModel import UserModel
 
@@ -12,6 +10,7 @@ logger = logging.getLogger("ChatGPT")
 
 class DDBConnector:
     def __init__(self, chats_table: str, users_table: str):
+        app = Sanic.get_app()
         self.chats_table = chats_table
         self.users_table = users_table
         self.resource = boto3.resource('dynamodb',

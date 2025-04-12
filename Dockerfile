@@ -20,5 +20,5 @@ EXPOSE 9191
 
 USER 1000
 
-CMD ["poetry", "run", "python", "main.py"]
+CMD ["poetry", "run", "python", "src/main.py"]
 

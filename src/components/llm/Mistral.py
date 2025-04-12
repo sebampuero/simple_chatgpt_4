@@ -4,8 +4,6 @@ from mistralai.async_client import MistralAsyncClient # TODO: migrate https://gi
 from mistralai.models.chat_completion import ChatMessage
 from typing import Any, Generator
 from sanic import Sanic
-from constants.AppConstants import AppConstants
-app = Sanic(AppConstants.APP_NAME)
 
 logger = logging.getLogger("ChatGPT")
 
@@ -39,7 +37,7 @@ class Mistral(BaseModel):
     async def prompt(self, messages: list) -> Generator[Any, Any, None]:
         try:
             prompt = self._from_own_format_to_model_format(messages)
-            client = MistralAsyncClient(api_key=app.config.MISTRAL_API_KEY)
+            client = MistralAsyncClient(api_key=self.app.config.MISTRAL_API_KEY)
             response = client.chat_stream(model=self.model, messages=prompt)
             return response
         except Exception as e:

@@ -15,14 +15,14 @@ from datetime import timedelta
 import logging
 import aiohttp
 
-from constants.AppConstants import AppConstants
 
 
 logger = logging.getLogger("ChatGPT")
-app = Sanic(AppConstants.APP_NAME)
+
 
 
 async def login_code(request: Request):
+    app = Sanic.get_app()
     try:
         body = request.json
         auth_code = body.get("code")
@@ -64,6 +64,7 @@ async def login_code(request: Request):
 
 
 async def refresh_token(request: Request):
+    app = Sanic.get_app()
     refresh_token = request.cookies.get("refresh_token")
 
     if not refresh_token:

@@ -4,21 +4,18 @@ from sanic.response import HTTPResponse
 from components.login.JWTManager import *
 from components.login.Login import Login
 from sanic import Sanic
-from constants.AppConstants import AppConstants
 
 logger = logging.getLogger("ChatGPT")
-app = Sanic(AppConstants.APP_NAME)
-
-NO_AUTH_NEEDED = [
-    f"/{app.config.SUB_DIRECTORY}/api/login-code",
-    f"/{app.config.SUB_DIRECTORY}/api/refresh",
-]
-
 
 async def authenticate_requests(request: Request):
-    if request.path not in NO_AUTH_NEEDED:
+    app = Sanic.get_app()
+    no_auth_needed = [
+        f"/{app.config.SUB_DIRECTORY}/api/login-code",
+        f"/{app.config.SUB_DIRECTORY}/api/refresh",
+    ]
+    if request.path not in no_auth_needed:
         logger.debug(
-            f"Proceeding to authenticate route: {request.path} because not in {NO_AUTH_NEEDED}"
+            f"Proceeding to authenticate route: {request.path} because not in {no_auth_needed}"
         )
         token = request.cookies.get("access_token")
         if not token:

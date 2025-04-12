@@ -4,7 +4,6 @@ from typing import Any
 from anthropic import AsyncAnthropic
 from constants.AppConstants import AppConstants
 from sanic import Sanic
-app = Sanic(AppConstants.APP_NAME)
 logger = logging.getLogger("ChatGPT")
 
 
@@ -21,7 +20,7 @@ class Claude(BaseModel):
     async def prompt(self, messages: list):
         try:
             prompt = self._from_own_format_to_model_format(messages)
-            model = AsyncAnthropic(api_key=app.config.ANTHROPIC_API_KEY)
+            model = AsyncAnthropic(api_key=self.app.config.ANTHROPIC_API_KEY)
             response = await model.messages.create(
                 max_tokens=self.max_tokens,
                 messages=prompt,

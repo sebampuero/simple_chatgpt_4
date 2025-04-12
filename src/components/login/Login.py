@@ -5,7 +5,7 @@ from constants.AppConstants import AppConstants
 
 class Login:
     def __init__(self, repo: Repository = None) -> None:
-        self.app = Sanic.get_app(AppConstants.APP_NAME)
+        self.app = Sanic.get_app()
         self.repo = DDBRepository() if not repo else repo
 
     async def check_user_is_authorized(self, email: str) -> bool:

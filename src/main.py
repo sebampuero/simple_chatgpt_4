@@ -1,10 +1,9 @@
-from sanic import Sanic
 from server.routes import bp
 from server.logging import setup_logging
-from constants.AppConstants import AppConstants
 from middleware.authentication import authenticate_requests
-
 from server.handlers.ws import chat
+from sanic import Sanic
+from constants.AppConstants import AppConstants
 
 app = Sanic(AppConstants.APP_NAME)
 setup_logging(app.config.ROOT_LOG_LEVEL, app.config.APP_LOG_LEVEL)

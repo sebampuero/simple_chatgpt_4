@@ -2,16 +2,15 @@ import abc
 import logging
 from typing import Any, AsyncGenerator, Generator
 from sanic import Sanic
-from constants.AppConstants import AppConstants
-app = Sanic(AppConstants.APP_NAME)
 
 logger = logging.getLogger("ChatGPT")
 
 class BaseModel(abc.ABC):
     def set_model(self, model: str):
+        self.app = Sanic.get_app()
         logger.debug(f"Set model {model} for instance {self}")
         self.model = model
-        self.max_tokens = app.config.MAX_LLM_TOKENS
+        self.max_tokens = self.app.config.MAX_LLM_TOKENS
 
     @abc.abstractmethod
     def _from_own_format_to_model_format(self, chats: list) -> list:

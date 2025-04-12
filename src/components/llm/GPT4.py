@@ -4,8 +4,6 @@ import logging
 from .BaseModel import BaseModel
 from typing import Any
 from sanic import Sanic
-from constants.AppConstants import AppConstants
-app = Sanic(AppConstants.APP_NAME)
 
 logger = logging.getLogger("ChatGPT")
 
@@ -32,7 +30,7 @@ class GPT4(BaseModel):
     async def prompt(self, messages: list):
         prompt_input = self._from_own_format_to_model_format(messages)
         try:
-            aclient = AsyncOpenAI(api_key=app.config.OPENAI_KEY)
+            aclient = AsyncOpenAI(api_key=self.app.config.OPENAI_KEY)
             if self.model == "gpt-4o-mini-search-preview" or self.model == "gpt-4o-search-preview":
                 response = await aclient.chat.completions.create(
                     model=self.model,

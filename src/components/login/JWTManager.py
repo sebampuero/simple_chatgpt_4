@@ -3,13 +3,12 @@ from jwt import PyJWKClient
 import logging
 from datetime import datetime, timedelta
 from sanic import Sanic
-from constants.AppConstants import AppConstants
-app = Sanic(AppConstants.APP_NAME)
 
 logger = logging.getLogger("ChatGPT")
 
 
 def decode_google_jwt(token: str):
+    app = Sanic.get_app()
     logger.debug(f"Trying to decode google token {token}")
     jwks_client = PyJWKClient(app.config.PUBLIC_CERTS_URL)
     data = jwt.decode(
@@ -23,6 +22,7 @@ def decode_google_jwt(token: str):
 
 
 def generate_access_token(subject: str, expires_delta: int = None) -> str:
+    app = Sanic.get_app()
     if expires_delta is not None:
         expires_delta = datetime.utcnow() + expires_delta
     else:
@@ -38,6 +38,7 @@ def generate_access_token(subject: str, expires_delta: int = None) -> str:
 
 
 def generate_refresh_token(subject: str, expires_delta: int = None) -> str:
+    app = Sanic.get_app()
     if expires_delta is not None:
         expires_delta = datetime.utcnow() + expires_delta
     else:
@@ -55,6 +56,7 @@ def generate_refresh_token(subject: str, expires_delta: int = None) -> str:
 def validate_token(
     token: str, type: str
 ) -> bool: 
+    app = Sanic.get_app()
     if type == "at":  # access_token
         secret = app.config.ACCESS_TOKEN_SECRET
     elif type == "rt":  # refresh token
@@ -80,6 +82,7 @@ def validate_token(
 
 
 def validate_jwt(jwt_str: str):
+    app = Sanic.get_app()
     secret = app.config.JWT_SECRET
     try:
         jwt.decode(jwt_str, secret, algorithms="HS256")
@@ -99,6 +102,7 @@ def validate_jwt(jwt_str: str):
 
 
 def get_subject_refresh_token(token: str) -> str | None:
+    app = Sanic.get_app()
     try:
         payload = jwt.decode(
             token, app.config.REFRESH_TOKEN_SECRET, algorithms=[app.config.JWT_ALGORITHM]
@@ -119,6 +123,7 @@ def get_subject_refresh_token(token: str) -> str | None:
 
 
 def get_subject_access_token(token: str) -> str | None:
+    app = Sanic.get_app()
     try:
         payload = jwt.decode(
             token, app.config.ACCESS_TOKEN_SECRET, algorithms=[app.config.JWT_ALGORITHM]

@@ -3,14 +3,8 @@ from elastic_transport import ObjectApiResponse
 from typing import Any
 import logging
 from sanic import Sanic
-from constants.AppConstants import AppConstants
-app = Sanic(AppConstants.APP_NAME)
 
 logger = logging.getLogger("ChatGPT")
-
-HOST = app.config.ELASTIC_SEARCH_HOST
-PORT = app.config.ELASTIC_SEARCH_PORT
-
 
 class ElasticClient:
     _instance = None
@@ -23,8 +17,9 @@ class ElasticClient:
 
     def __init__(self, index=None):
         if not ElasticClient._initialized:
+            app = Sanic.get_app()
             self.es = AsyncElasticsearch(
-                hosts=f"http://{HOST}:{PORT}", basic_auth=("elastic", "changemepls")
+                hosts=f"http://{app.config.ELASTIC_SEARCH_HOST}:{app.config.ELASTIC_SEARCH_PORT}", basic_auth=("elastic", "changemepls")
             )
             self.index = "chat_index" if not index else index
             ElasticClient._initialized = True
