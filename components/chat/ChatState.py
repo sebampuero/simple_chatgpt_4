@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict
 
 from models.ChatModel import ChatModel
 from .RedisState import RedisState
@@ -31,7 +32,7 @@ class ChatState:
     def get_language_model(self, ws_id: str) -> str:
         return self.redis.get_language_model(ws_id)
 
-    def append_message(self, item: dict, ws_id: str):
+    def append_message(self, item: Dict[str, Any], ws_id: str):
         self.redis.append_message(item, ws_id)
 
     def set_chat_state(self, chat_state: ChatModel, ws_id: str):

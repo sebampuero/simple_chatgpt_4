@@ -1,3 +1,4 @@
+from typing import Any, Dict
 import redis
 import logging
 import json
@@ -41,7 +42,7 @@ class RedisState: # TODO: use async!!
             logger.error(f"Error getting language model: {e}")
             return ""
 
-    def append_message(self, item: dict, ws_id: str):
+    def append_message(self, item: Dict[str, Any], ws_id: str):
         try:
             logger.debug(f"Appending message {item} to websocket ID {ws_id}")
             chat_state_dict = json.loads(self.r.hget(f"ws:{ws_id}", "chat_state"))
