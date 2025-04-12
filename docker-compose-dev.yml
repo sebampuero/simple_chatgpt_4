@@ -1,0 +1,53 @@
+services:
+  chatgpt:
+    #image: gpt4:latest
+    build: .
+    container_name: gpts
+    depends_on:
+      - redis
+      - elasticsearch
+      - dynamodb-local
+    env_file:
+      - .env_dev
+    networks:
+      - chatgpt_dev
+    ports:
+      - 9191:9191
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    container_name: redis_gpts
+    networks:
+      - chatgpt_dev
+    restart: unless-stopped
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.1
+    container_name: elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=changemepls
+      - "ELASTICSEARCH_USERNAME=elastic"
+    volumes:
+      - ./esdata-dev:/usr/share/elasticsearch/data
+    networks:
+      - chatgpt_dev
+
+  dynamodb-local:
+    image: amazon/dynamodb-local
+    container_name: dynamodb-local
+    restart: unless-stopped
+    networks:
+      - chatgpt_dev
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /home/dynamodblocal/data/"
+    ports:
+      - 8001:8000
+    volumes:
+      - ./dynamodb-data-dev:/home/dynamodblocal/data/
+
+networks:
+  chatgpt_dev:

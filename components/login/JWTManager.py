@@ -52,7 +52,7 @@ def generate_refresh_token(subject: str, expires_delta: int = None) -> str:
 
 def validate_token(
     token: str, type: str
-) -> bool:  # TODO: add Annotation for type field description or use constants
+) -> bool: 
     if type == "at":  # access_token
         secret = appconfig.ACCESS_TOKEN_SECRET
     elif type == "rt":  # refresh token

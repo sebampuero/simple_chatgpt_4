@@ -1,13 +1,10 @@
 import abc
-import json
 import logging
 from sanic import Websocket
-from typing import Any, Generator
-from constants.WebsocketConstants import WebsocketConstants
+from typing import Any, AsyncGenerator, Generator
 from config import config
 
 logger = logging.getLogger("ChatGPT")
-
 
 class BaseModel(abc.ABC):
     def set_model(self, model: str):
@@ -23,24 +20,13 @@ class BaseModel(abc.ABC):
     async def prompt(self, messages: list) -> Generator[Any, Any, None]:
         pass
 
-    async def process_response(
-        self, response_generator, ws: Websocket, message_timestamp: int
-    ) -> str:
-        assistant_msg = ""
+    async def retrieve_response(
+        self, response_generator
+    ) -> AsyncGenerator[str, None]:
         async for response_chunk in response_generator:
             content = self._extract_content(response_chunk)
             if content:
-                await ws.send(
-                    json.dumps(
-                        {
-                            "content": content,
-                            "timestamp": message_timestamp,
-                            "type": WebsocketConstants.CONTENT,
-                        }
-                    )
-                )
-                assistant_msg += content
-        return assistant_msg
+                yield content
 
     @abc.abstractmethod
     def _extract_content(self, response_chunk: Any) -> str:

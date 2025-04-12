@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set the local endpoint
-DYNAMODB_LOCAL_ENDPOINT="http://localhost:8000"
+DYNAMODB_LOCAL_ENDPOINT="http://localhost:8001"
 
 # Prompt for authorized_users table name
 read -p "Enter the authorized_users table name: " table_name

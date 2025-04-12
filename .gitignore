@@ -1,4 +1,5 @@
 .env
+.env_dev
 db/
 venv/
 .venv/
@@ -13,3 +14,5 @@ build/
 esdata/
 dynamodb-data/
 docker-compose-fake.yml
+dynamodb-data-dev/
+esdata-dev/

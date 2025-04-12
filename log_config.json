@@ -37,7 +37,8 @@
         "handlers": [
           "stderr",
           "stdout"
-        ]
+        ],
+        "propagate": false
       }
     }
   }

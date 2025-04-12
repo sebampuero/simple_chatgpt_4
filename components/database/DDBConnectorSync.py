@@ -3,6 +3,8 @@ import boto3
 from boto3.dynamodb.conditions import Key
 from components.elasticsearch.ElasticClient import ElasticClient
 from config import config
+from models.ChatModel import ChatModel
+from models.UserModel import UserModel
 
 logger = logging.getLogger("ChatGPT")
 
@@ -65,14 +67,18 @@ class DDBConnectorSync:
             "last_eval_key": response.get("LastEvaluatedKey"),
         }
 
-    async def get_chat_by_id(self, id: str, timestamp: int) -> dict:
+    async def get_chat_by_id(self, id: str) -> dict | None:
         table = self.resource.Table(self.chats_table)
         try:
-            response = table.get_item(Key={"chat_id": id, "timestamp": timestamp})
+            response = table.query(
+                KeyConditionExpression=Key('chat_id').eq(id),
+                Limit=1
+            )
+            items = response.get('Items', [])
+            return items[0] if items else None
         except Exception as e:
-            logger.error(f"Error querying chat with id {id} {e}")
+            logger.error(f"Error querying chat with id {id}: {e}")
             return None
-        return response.get("Item")
 
     async def delete_chat_by_id(self, id: str, timestamp: int):
         table = self.resource.Table(self.chats_table)
@@ -83,22 +89,22 @@ class DDBConnectorSync:
         except Exception as e:
             logger.error(f"Error deleting chat with id {id} {e}")
 
-    async def get_user(self, email: str):
+    async def get_user(self, email: str) -> UserModel | None:
         table = self.resource.Table(self.users_table)
         try:
             response = table.get_item(Key={"email": email})
         except Exception as e:
             logger.error(f"Error querying user with email {email} {e}")
             return None
-        return response.get("Item")
+        return UserModel.model_validate(response.get("Item")) if response.get("Item") else None
 
-    async def store_chat(self, chat: dict):
+    async def store_chat(self, chat: ChatModel):
         table = self.resource.Table(self.chats_table)
         try:
-            response = table.put_item(Item=chat)
+            response = table.put_item(Item=chat.model_dump())
             self.es.create_document(
-                chat["chat_id"], chat["timestamp"], chat["messages"], chat["user_email"]
+                chat.chat_id, chat.timestamp, chat.messages, chat.user_email
             )
-            logger.debug(f"Created chat {chat}. Response: {response}")
+            logger.debug(f"Created or updated chat {chat}. Response: {response}")
         except Exception as e:
             logger.error(f"Error saving chat {chat} {e}")

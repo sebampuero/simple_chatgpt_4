@@ -1,5 +1,6 @@
 from typing import Protocol
-from components.repository.User import User
+
+from models.UserModel import UserModel
 
 
 class Repository(Protocol):
@@ -15,13 +16,13 @@ class Repository(Protocol):
     ) -> dict:
         pass
 
-    async def get_chat_by_id(self, id: str, timestamp: int = None) -> dict:
+    async def get_chat_by_id(self, id: str) -> dict | None:
         pass
 
     async def delete_chat_by_id(self, id: str, timestamp: int = None):
         pass
 
-    async def get_user(self, email: str) -> User:
+    async def get_user(self, email: str) -> UserModel | None:
         pass
 
     async def store_chat(self, chat: dict):
