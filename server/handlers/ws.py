@@ -68,29 +68,27 @@ async def chat(request: Request, ws: Websocket):
             category_instance.set_model(llm)
             logger.debug(f"Using model: {llm} and category {category}")
             response_generator = await category_instance.prompt(
-                chat_state.get_chat_state(socket_id).get("messages")
+                chat_state.get_chat_state(socket_id).messages
             )
             assistant_msg = ""
             async for response_content in category_instance.retrieve_response(
                     response_generator
                 ):
                 await ws.send(
-                    json.dumps(
-                        {
-                            "content": response_content,
-                            "timestamp": assistant_message_unique_id,
-                            "type": WebsocketConstants.CONTENT,
-                        }
-                    )
+                    WebSocketMessageModel(
+                        content=response_content,
+                        timestamp=assistant_message_unique_id,
+                        type=WebsocketConstants.CONTENT,
+                    ).model_dump_json(by_alias=True)
                 )
                 assistant_msg += response_content
             await ws.send(
                 json.dumps(
-                    {
-                        "content": WebsocketConstants.END,
-                        "timestamp": int(assistant_message_unique_id),
-                        "type": WebsocketConstants.CONTENT,
-                    }
+                    WebSocketMessageModel(
+                        content=WebsocketConstants.END,
+                        timestamp=assistant_message_unique_id,
+                        type=WebsocketConstants.CONTENT,
+                    ).model_dump_json(by_alias=True)
                 )
             )
             chat_state.append_message(

@@ -3,7 +3,7 @@ from sanic.response import HTTPResponse, json as sanicjson
 from components.repository.DDBRepository import DDBRepository
 from components.elasticsearch.ElasticClient import ElasticClient
 from components.chat.ChatState import ChatState
-from models.ChatStateModel import ChatStateModel
+from models.ChatModel import ChatModel
 import json
 
 async def load_new_chat_state(request: Request, socket_id: str):
@@ -15,8 +15,8 @@ async def load_new_chat_state(request: Request, socket_id: str):
         return HTTPResponse(status=400)
     chat_state = ChatState.get_instance()
     chat_state.load_new_chat_state(
-        ChatStateModel(
-            email=email, 
+        ChatModel(
+            user_email=email, 
             messages=[]), 
         socket_id
     )
@@ -65,11 +65,11 @@ async def load_new_chat(
     if socket_id:
         chat_state = ChatState.get_instance()
         chat_state.set_chat_state(
-            ChatStateModel(
-                email=chat_data["user_email"], 
+            ChatModel(
+                user_email=chat_data["user_email"], 
                 messages=chat_data["messages"], 
                 timestamp=chat_data["timestamp"], 
-                current_chat_id=id), 
+                chat_id=id), 
             socket_id
         )
         return sanicjson({"body": chat_data}, status=200)

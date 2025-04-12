@@ -4,7 +4,7 @@ from decimal import Decimal
 from config import config as appconfig
 import logging
 
-from models.ChatStateModel import ChatStateModel
+from models.ChatModel import ChatModel
 from models.UserModel import UserModel
 
 logger = logging.getLogger("ChatGPT")
@@ -45,12 +45,12 @@ class DDBRepository(Repository):
     async def get_user(self, email: str) -> UserModel | None:
         return await self.ddb_connector.get_user(email)
 
-    async def store_chat(self, chats_info: ChatStateModel):
+    async def store_chat(self, chats_info: ChatModel):
         logger.debug(f"Trying to store chat {chats_info}")
         if not chats_info.messages:
             logger.info("No messages to store")
             return
-        await self.ddb_connector.store_chat(new_chat)
+        await self.ddb_connector.store_chat(chats_info)
 
     def convert_decimal_to_int(self, data: dict) -> dict:
         if isinstance(data, Decimal):

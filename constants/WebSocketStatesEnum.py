@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class WebsocketConstants(Enum, str):
+class WebsocketConstants(str, Enum):
     INIT = "INIT"
     CONTENT = "CONTENT"
     ERROR = "ERROR"

@@ -3,7 +3,7 @@ import boto3
 from boto3.dynamodb.conditions import Key
 from components.elasticsearch.ElasticClient import ElasticClient
 from config import config
-from models.ChatStateModel import ChatStateModel
+from models.ChatModel import ChatModel
 from models.UserModel import UserModel
 
 logger = logging.getLogger("ChatGPT")
@@ -98,12 +98,12 @@ class DDBConnectorSync:
             return None
         return UserModel.model_validate(response.get("Item")) if response.get("Item") else None
 
-    async def store_chat(self, chat: ChatStateModel):
+    async def store_chat(self, chat: ChatModel):
         table = self.resource.Table(self.chats_table)
         try:
             response = table.put_item(Item=chat.model_dump())
             self.es.create_document(
-                chat.current_chat_id, chat.timestamp, chat.messages, chat.email
+                chat.chat_id, chat.timestamp, chat.messages, chat.user_email
             )
             logger.debug(f"Created or updated chat {chat}. Response: {response}")
         except Exception as e:

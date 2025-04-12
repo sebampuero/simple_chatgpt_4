@@ -1,6 +1,6 @@
 import logging
 
-from models.ChatStateModel import ChatStateModel
+from models.ChatModel import ChatModel
 from .RedisState import RedisState
 
 logger = logging.getLogger("ChatGPT")
@@ -34,14 +34,14 @@ class ChatState:
     def append_message(self, item: dict, ws_id: str):
         self.redis.append_message(item, ws_id)
 
-    def set_chat_state(self, chat_state: ChatStateModel, ws_id: str):
+    def set_chat_state(self, chat_state: ChatModel, ws_id: str):
         self.redis.set_chat_state(chat_state, ws_id)
 
-    def get_chat_state(self, ws_id: str) -> ChatStateModel:
+    def get_chat_state(self, ws_id: str) -> ChatModel:
         return self.redis.get_chat_state(ws_id)
 
     def remove_ws(self, ws_id: str):
         self.redis.remove_ws(ws_id)
 
-    def load_new_chat_state(self, new_chat_state: ChatStateModel, ws_id: str):
+    def load_new_chat_state(self, new_chat_state: ChatModel, ws_id: str):
         self.redis.load_new_chat_state(new_chat_state, ws_id)
