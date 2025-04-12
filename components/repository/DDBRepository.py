@@ -19,7 +19,6 @@ class DDBRepository(Repository):
         self.ddb_connector = DDBConnector(
             chats_table=chats_table, users_table=users_table
         )
-        self.es = ElasticClient()
 
     async def get_chats_by_email(self, email: str) -> dict:
         chats = await self.ddb_connector.get_chats_by_email(email)
@@ -42,7 +41,8 @@ class DDBRepository(Repository):
         return self.convert_decimal_to_int(chat)
 
     async def delete_chat_by_id(self, id: str, timestamp: int = None):
-        self.es.delete_document(id)
+        es = await ElasticClient.get_instance()
+        await es.delete_document(id)
         await self.ddb_connector.delete_chat_by_id(id, timestamp)
 
     async def get_user(self, email: str) -> UserModel | None:
@@ -50,7 +50,8 @@ class DDBRepository(Repository):
 
     async def store_chat(self, chats_info: ChatModel):
         logger.debug(f"Trying to store chat {chats_info}")
-        self.es.create_document(
+        es = await ElasticClient.get_instance()
+        await es.create_document(
             chat_id=chats_info.chat_id,
             timestamp=chats_info.timestamp,
             email_address=chats_info.user_email,

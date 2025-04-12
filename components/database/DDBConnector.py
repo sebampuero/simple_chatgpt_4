@@ -2,7 +2,6 @@ import logging
 import boto3
 import asyncio
 from boto3.dynamodb.conditions import Key
-from components.elasticsearch.ElasticClient import ElasticClient
 from config import config
 from models.ChatModel import ChatModel
 from models.UserModel import UserModel

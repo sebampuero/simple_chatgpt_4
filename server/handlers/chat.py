@@ -48,7 +48,8 @@ async def search_for_chat(request: Request):
     body = request.json
     keywords = body.get("keywords")
     email_address = body.get("email_address")
-    chats = ElasticClient().search_chats_by_keyword(
+    es = await ElasticClient.get_instance()
+    chats = await es.search_chats_by_keyword(
         keyword=keywords, email_address=email_address
     )
     return sanicjson({"chats": chats})
