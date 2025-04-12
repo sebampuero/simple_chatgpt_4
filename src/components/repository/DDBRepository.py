@@ -50,6 +50,9 @@ class DDBRepository(Repository):
         return await self.ddb_connector.get_user(email)
 
     async def store_chat(self, chats_info: ChatModel):
+        if not chats_info.messages:
+            logger.info("No messages to store")
+            return
         logger.debug(f"Trying to store chat {chats_info}")
         es = await ElasticClient.get_instance()
         await es.create_document(
@@ -58,9 +61,6 @@ class DDBRepository(Repository):
             email_address=chats_info.user_email,
             messages=chats_info.messages
         )
-        if not chats_info.messages:
-            logger.info("No messages to store")
-            return
         await self.ddb_connector.store_chat(chats_info)
 
     def convert_decimal_to_int(self, data: dict) -> dict:
