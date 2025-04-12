@@ -18,7 +18,6 @@ class DDBConnector:
                           region_name=config.AWS_REGION,
                           aws_access_key_id=config.AWS_ACCESS_KEY_ID,
                           aws_secret_access_key=config.AWS_SECRET_ACCESS_KEY)
-        self.es = ElasticClient()
 
     async def get_chats_by_email(self, email: str) -> dict:
         table = self.resource.Table(self.chats_table)
@@ -91,7 +90,6 @@ class DDBConnector:
             response = await asyncio.to_thread(
                 lambda: table.delete_item(Key={"chat_id": id, "timestamp": timestamp})
             )
-            self.es.delete_document(id)
             logger.debug(f"Deleting ID {id}. Response: {response}")
         except Exception as e:
             logger.error(f"Error deleting chat with id {id} {e}")
@@ -111,9 +109,6 @@ class DDBConnector:
         table = self.resource.Table(self.chats_table)
         try:
             response = await asyncio.to_thread(lambda: table.put_item(Item=chat.model_dump()))
-            self.es.create_document(
-                chat.chat_id, chat.timestamp, chat.messages, chat.user_email
-            )
             logger.debug(f"Created or updated chat {chat}. Response: {response}")
         except Exception as e:
             logger.error(f"Error saving chat {chat} {e}")
