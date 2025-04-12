@@ -44,7 +44,7 @@ class RedisState:
     async def append_message(self, item: Dict[str, Any], ws_id: str):
         try:
             logger.debug(f"Appending message {item} to websocket ID {ws_id}")
-            chat_state_dict = json.loads(self.r.hget(f"ws:{ws_id}", "chat_state"))
+            chat_state_dict = json.loads(await self.r.hget(f"ws:{ws_id}", "chat_state"))
             chat_state_dict["messages"].append(item)
             await self.r.hset(f"ws:{ws_id}", mapping={"chat_state": json.dumps(chat_state_dict)})
         except redis.exceptions.RedisError as e:

@@ -67,8 +67,9 @@ async def chat(request: Request, ws: Websocket):
             category_instance = language_categories[category]
             category_instance.set_model(llm)
             logger.debug(f"Using model: {llm} and category {category}")
+            chat_state_obj = await chat_state.get_chat_state(socket_id)
             response_generator = await category_instance.prompt(
-                await chat_state.get_chat_state(socket_id).messages
+                chat_state_obj.messages
             )
             assistant_msg = ""
             async for response_content in category_instance.retrieve_response(

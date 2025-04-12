@@ -1,5 +1,6 @@
 import logging
 import boto3
+import asyncio
 from boto3.dynamodb.conditions import Key
 from components.elasticsearch.ElasticClient import ElasticClient
 from config import config
@@ -8,8 +9,6 @@ from models.UserModel import UserModel
 
 logger = logging.getLogger("ChatGPT")
 
-
-# TODO: async needs to be pushed. Maybe use https://pypi.org/project/asgiref/ ? evaluate how does it work
 class DDBConnectorSync:
     def __init__(self, chats_table: str, users_table: str):
         self.chats_table = chats_table
@@ -24,13 +23,15 @@ class DDBConnectorSync:
     async def get_chats_by_email(self, email: str) -> dict:
         table = self.resource.Table(self.chats_table)
         try:
-            response = table.query(
-                IndexName="user_email-index",
-                KeyConditionExpression=Key("user_email").eq(email),
+            response = await asyncio.to_thread(
+                lambda: table.query(
+                    IndexName="user_email-index",
+                    KeyConditionExpression=Key("user_email").eq(email),
+                ),
             )
         except Exception as e:
             logger.error(f"Error querying for {email} {e}")
-            return []
+            return {}
         return response.get("Items", [])
 
     async def get_chats_by_email_paginated(
@@ -52,7 +53,9 @@ class DDBConnectorSync:
                 query_params["ExclusiveStartKey"] = last_evaluated_key
             if limit:
                 query_params["Limit"] = limit
-            response = table.query(**query_params)
+            response = await asyncio.to_thread(
+                lambda: table.query(**query_params),
+            )
             if not load_images:
                 items = response.get("Items", [])
                 for item in items:
@@ -70,9 +73,11 @@ class DDBConnectorSync:
     async def get_chat_by_id(self, id: str) -> dict | None:
         table = self.resource.Table(self.chats_table)
         try:
-            response = table.query(
-                KeyConditionExpression=Key('chat_id').eq(id),
-                Limit=1
+            response = await asyncio.to_thread(
+                lambda: table.query(
+                    KeyConditionExpression=Key('chat_id').eq(id),
+                    Limit=1
+                )
             )
             items = response.get('Items', [])
             return items[0] if items else None
@@ -83,7 +88,9 @@ class DDBConnectorSync:
     async def delete_chat_by_id(self, id: str, timestamp: int):
         table = self.resource.Table(self.chats_table)
         try:
-            response = table.delete_item(Key={"chat_id": id, "timestamp": timestamp})
+            response = await asyncio.to_thread(
+                lambda: table.delete_item(Key={"chat_id": id, "timestamp": timestamp})
+            )
             self.es.delete_document(id)
             logger.debug(f"Deleting ID {id}. Response: {response}")
         except Exception as e:
@@ -92,7 +99,9 @@ class DDBConnectorSync:
     async def get_user(self, email: str) -> UserModel | None:
         table = self.resource.Table(self.users_table)
         try:
-            response = table.get_item(Key={"email": email})
+            response = await asyncio.to_thread(
+                lambda: table.get_item(Key={"email": email})
+            )
         except Exception as e:
             logger.error(f"Error querying user with email {email} {e}")
             return None
@@ -101,7 +110,7 @@ class DDBConnectorSync:
     async def store_chat(self, chat: ChatModel):
         table = self.resource.Table(self.chats_table)
         try:
-            response = table.put_item(Item=chat.model_dump())
+            response = await asyncio.to_thread(lambda: table.put_item(Item=chat.model_dump()))
             self.es.create_document(
                 chat.chat_id, chat.timestamp, chat.messages, chat.user_email
             )
