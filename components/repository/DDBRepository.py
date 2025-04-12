@@ -1,4 +1,4 @@
-from components.database.DDBConnectorSync import DDBConnectorSync
+from components.database.DDBConnector import DDBConnector
 from components.repository.Repository import Repository
 from decimal import Decimal
 from config import config as appconfig
@@ -15,7 +15,7 @@ class DDBRepository(Repository):
         if not chats_table and not users_table:
             chats_table = appconfig.DDB_CHATS_TABLE
             users_table = appconfig.DDB_USERS_TABLE
-        self.ddb_connector = DDBConnectorSync(
+        self.ddb_connector = DDBConnector(
             chats_table=chats_table, users_table=users_table
         )
 

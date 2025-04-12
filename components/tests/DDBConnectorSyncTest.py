@@ -1,6 +1,6 @@
 import boto3
 import aiounittest
-from components.database.DDBConnectorSync import DDBConnectorSync
+from components.database.DDBConnector import DDBConnector
 from decimal import Decimal
 
 
@@ -8,7 +8,7 @@ class TestDDBConnectorIntegration(aiounittest.AsyncTestCase):
     def setUp(self):
         self.chats_table = "chats_test"
         self.users_table = "authorized_users"
-        self.connector = DDBConnectorSync(
+        self.connector = DDBConnector(
             chats_table=self.chats_table, users_table=self.users_table
         )
 
