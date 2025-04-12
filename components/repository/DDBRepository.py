@@ -2,7 +2,9 @@ from components.database.DDBConnector import DDBConnector
 from components.elasticsearch.ElasticClient import ElasticClient
 from components.repository.Repository import Repository
 from decimal import Decimal
-from config import config as appconfig
+from sanic import Sanic
+from constants.AppConstants import AppConstants
+app = Sanic(AppConstants.APP_NAME)
 import logging
 
 from models.ChatModel import ChatModel
@@ -14,8 +16,8 @@ logger = logging.getLogger("ChatGPT")
 class DDBRepository(Repository):
     def __init__(self, chats_table=None, users_table=None) -> None:
         if not chats_table and not users_table:
-            chats_table = appconfig.DDB_CHATS_TABLE
-            users_table = appconfig.DDB_USERS_TABLE
+            chats_table = app.config.DDB_CHATS_TABLE
+            users_table = app.config.DDB_USERS_TABLE
         self.ddb_connector = DDBConnector(
             chats_table=chats_table, users_table=users_table
         )

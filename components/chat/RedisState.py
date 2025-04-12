@@ -4,7 +4,9 @@ import redis
 import logging
 import json
 
-from config import config as appconfig
+from sanic import Sanic
+from constants.AppConstants import AppConstants
+app = Sanic(AppConstants.APP_NAME)
 from models.ChatModel import ChatModel
 
 logger = logging.getLogger("ChatGPT")
@@ -13,8 +15,8 @@ logger = logging.getLogger("ChatGPT")
 class RedisState:
     def __init__(self):
         self.r = aredis.Redis(
-            host=appconfig.REDIS_HOST,
-            port=int(appconfig.REDIS_PORT),
+            host=app.config.REDIS_HOST,
+            port=int(app.config.REDIS_PORT),
             decode_responses=True,
         )
 

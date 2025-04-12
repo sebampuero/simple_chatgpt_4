@@ -3,7 +3,6 @@ from components.repository.DDBRepository import DDBRepository
 from sanic import Sanic
 from constants.AppConstants import AppConstants
 
-
 class Login:
     def __init__(self, repo: Repository = None) -> None:
         self.app = Sanic.get_app(AppConstants.APP_NAME)

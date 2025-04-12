@@ -2,7 +2,9 @@ import logging
 import boto3
 import asyncio
 from boto3.dynamodb.conditions import Key
-from config import config
+from sanic import Sanic
+from constants.AppConstants import AppConstants
+app = Sanic(AppConstants.APP_NAME)
 from models.ChatModel import ChatModel
 from models.UserModel import UserModel
 
@@ -13,10 +15,10 @@ class DDBConnector:
         self.chats_table = chats_table
         self.users_table = users_table
         self.resource = boto3.resource('dynamodb',
-                          endpoint_url=config.AWS_DYNAMODB_ENDPOINT,
-                          region_name=config.AWS_REGION,
-                          aws_access_key_id=config.AWS_ACCESS_KEY_ID,
-                          aws_secret_access_key=config.AWS_SECRET_ACCESS_KEY)
+                          endpoint_url=app.config.AWS_DYNAMODB_ENDPOINT,
+                          region_name=app.config.AWS_REGION,
+                          aws_access_key_id=app.config.AWS_ACCESS_KEY_ID,
+                          aws_secret_access_key=app.config.AWS_SECRET_ACCESS_KEY)
 
     async def get_chats_by_email(self, email: str) -> dict:
         table = self.resource.Table(self.chats_table)

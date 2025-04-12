@@ -9,14 +9,17 @@ from components.login.JWTManager import (
     decode_google_jwt,
     validate_token,
 )
-from config import config as appconfig
+from sanic import Sanic
 from datetime import timedelta
 
 import logging
 import aiohttp
 
+from constants.AppConstants import AppConstants
+
 
 logger = logging.getLogger("ChatGPT")
+app = Sanic(AppConstants.APP_NAME)
 
 
 async def login_code(request: Request):
@@ -28,13 +31,13 @@ async def login_code(request: Request):
         return HTTPResponse(status=400)
     data = {
         "code": auth_code,
-        "client_id": appconfig.GOOGLE_OAUTH_CLIENT_ID,
-        "client_secret": appconfig.GOOGLE_OAUTH_CLIENT_SECRET,
+        "client_id": app.config.GOOGLE_OAUTH_CLIENT_ID,
+        "client_secret": app.config.GOOGLE_OAUTH_CLIENT_SECRET,
         "redirect_uri": "postmessage",
         "grant_type": "authorization_code",
     }
     async with aiohttp.ClientSession() as session:
-        async with session.post(appconfig.OAUTH_TOKEN_URL, data=data) as response:
+        async with session.post(app.config.OAUTH_TOKEN_URL, data=data) as response:
             tokens = await response.json()
     decoded_id_token = decode_google_jwt(tokens["id_token"])
     logger.debug(f"Authenticated: {decoded_id_token}")
@@ -44,16 +47,16 @@ async def login_code(request: Request):
     response.add_cookie(
         "access_token",
         at,
-        domain=f"{appconfig.DOMAIN}",
+        domain=f"{app.config.DOMAIN}",
         httponly=True,
-        max_age=appconfig.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        max_age=app.config.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     )
     response.add_cookie(
         "refresh_token",
         rt,
-        domain=f"{appconfig.DOMAIN}",
+        domain=f"{app.config.DOMAIN}",
         httponly=True,
-        max_age=appconfig.REFRESH_TOKEN_EXPIRE_MINUTES * 60,
+        max_age=app.config.REFRESH_TOKEN_EXPIRE_MINUTES * 60,
     )
     if await Login().check_user_is_authorized(decoded_id_token["email"]):
         return response
@@ -77,7 +80,7 @@ async def refresh_token(request: Request):
     new_access_token = generate_access_token(
         subject,
         expires_delta=timedelta(
-            minutes=float(appconfig.NEW_ACCESS_TOKEN_EXPIRE_MINUTES)
+            minutes=float(app.config.NEW_ACCESS_TOKEN_EXPIRE_MINUTES)
         ),
     )
 
@@ -85,9 +88,9 @@ async def refresh_token(request: Request):
     response.add_cookie(
         "access_token",
         new_access_token,
-        domain=f"{appconfig.DOMAIN}",
+        domain=f"{app.config.DOMAIN}",
         httponly=True,
-        max_age=appconfig.NEW_ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        max_age=app.config.NEW_ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     )
     return response
 

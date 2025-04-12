@@ -2,12 +2,14 @@ from elasticsearch import AsyncElasticsearch
 from elastic_transport import ObjectApiResponse
 from typing import Any
 import logging
-from config import config as appconfig
+from sanic import Sanic
+from constants.AppConstants import AppConstants
+app = Sanic(AppConstants.APP_NAME)
 
 logger = logging.getLogger("ChatGPT")
 
-HOST = appconfig.ELASTIC_SEARCH_HOST
-PORT = appconfig.ELASTIC_SEARCH_PORT
+HOST = app.config.ELASTIC_SEARCH_HOST
+PORT = app.config.ELASTIC_SEARCH_PORT
 
 
 class ElasticClient:

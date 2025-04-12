@@ -3,13 +3,15 @@ from sanic import Request
 from sanic.response import HTTPResponse
 from components.login.JWTManager import *
 from components.login.Login import Login
-from config import config as appconfig
+from sanic import Sanic
+from constants.AppConstants import AppConstants
 
 logger = logging.getLogger("ChatGPT")
+app = Sanic(AppConstants.APP_NAME)
 
 NO_AUTH_NEEDED = [
-    f"/{appconfig.SUB_DIRECTORY}/api/login-code",
-    f"/{appconfig.SUB_DIRECTORY}/api/refresh",
+    f"/{app.config.SUB_DIRECTORY}/api/login-code",
+    f"/{app.config.SUB_DIRECTORY}/api/refresh",
 ]
 
 
