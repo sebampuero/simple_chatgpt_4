@@ -83,13 +83,11 @@ async def chat(request: Request, ws: Websocket):
                 )
                 assistant_msg += response_content
             await ws.send(
-                json.dumps(
-                    WebSocketMessageModel(
-                        content=WebsocketConstants.END,
-                        timestamp=assistant_message_unique_id,
-                        type=WebsocketConstants.CONTENT,
-                    ).model_dump_json(by_alias=True)
-                )
+                WebSocketMessageModel(
+                    content=WebsocketConstants.END,
+                    timestamp=assistant_message_unique_id,
+                    type=WebsocketConstants.CONTENT,
+                ).model_dump_json(by_alias=True)
             )
             chat_state.append_message(
                 {
