@@ -29,7 +29,7 @@ async def chat(request: Request, ws: Websocket):
     chat_state = ChatState.get_instance()
 
     async def close_connection():
-        chat_state.remove_ws(socket_id)
+        await chat_state.remove_ws(socket_id)
         await ws.close()
     
     while True:
@@ -42,7 +42,7 @@ async def chat(request: Request, ws: Websocket):
             logger.error(
                 f"Unexpected exception, most probably {client_ip} closed the websocket connection"
             )
-            await DDBRepository().store_chat(chat_state.get_chat_state(socket_id))
+            await DDBRepository().store_chat(await chat_state.get_chat_state(socket_id))
             await close_connection()
             break
         if not input_raw or "email" not in input_raw:
@@ -53,7 +53,7 @@ async def chat(request: Request, ws: Websocket):
         except json.JSONDecodeError:
             logger.debug(f"Client IP {client_ip} sent unsupported command")
             continue
-        chat_state.append_message(
+        await chat_state.append_message(
             {
                 "role": "user",
                 "image": input_json["image"],
@@ -62,13 +62,13 @@ async def chat(request: Request, ws: Websocket):
             socket_id
         )
         try:
-            category = chat_state.get_language_category(socket_id)
-            llm = chat_state.get_language_model(socket_id)
+            category = await chat_state.get_language_category(socket_id)
+            llm = await chat_state.get_language_model(socket_id)
             category_instance = language_categories[category]
             category_instance.set_model(llm)
             logger.debug(f"Using model: {llm} and category {category}")
             response_generator = await category_instance.prompt(
-                chat_state.get_chat_state(socket_id).messages
+                await chat_state.get_chat_state(socket_id).messages
             )
             assistant_msg = ""
             async for response_content in category_instance.retrieve_response(
@@ -89,16 +89,16 @@ async def chat(request: Request, ws: Websocket):
                     type=WebsocketConstants.CONTENT,
                 ).model_dump_json(by_alias=True)
             )
-            chat_state.append_message(
+            await chat_state.append_message(
                 {
                     "role": "assistant",
                     "content": assistant_msg,
-                    "language_model": chat_state.get_language_model(socket_id),
+                    "language_model": await chat_state.get_language_model(socket_id),
                 },
                 socket_id,
             )
-            await DDBRepository().store_chat(chat_state.get_chat_state(socket_id))
+            await DDBRepository().store_chat(await chat_state.get_chat_state(socket_id))
         except Exception as e:
             logger.error(str(e), exc_info=True)
-            await DDBRepository().store_chat(chat_state.get_chat_state(socket_id))
+            await DDBRepository().store_chat(await chat_state.get_chat_state(socket_id))
             await ws.send(json.dumps({"type": WebsocketConstants.ERROR}))

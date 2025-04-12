@@ -14,7 +14,7 @@ async def load_new_chat_state(request: Request, socket_id: str):
     if email is None or email.strip() == "":
         return HTTPResponse(status=400)
     chat_state = ChatState.get_instance()
-    chat_state.load_new_chat_state(
+    await chat_state.load_new_chat_state(
         ChatModel(
             user_email=email, 
             messages=[]), 
@@ -64,7 +64,7 @@ async def load_new_chat(
         return HTTPResponse(status=404)
     if socket_id:
         chat_state = ChatState.get_instance()
-        chat_state.set_chat_state(
+        await chat_state.set_chat_state(
             ChatModel(
                 user_email=chat_data["user_email"], 
                 messages=chat_data["messages"], 
@@ -82,7 +82,7 @@ async def set_model(request: Request, socket_id: str):
     category = body.get("category")
     chat_state = ChatState.get_instance()
     if chat_state:
-        chat_state.set_language_model_category(model, category, socket_id)
+        await chat_state.set_language_model_category(model, category, socket_id)
         return HTTPResponse(status=200)
     return HTTPResponse(status=500)
 
