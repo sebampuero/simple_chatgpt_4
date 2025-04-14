@@ -36,9 +36,9 @@ async def chat(request: Request, ws: Websocket):
         await ws.close()
 
     async def handle_general_error():
+        await ws.send(json.dumps({"type": WebsocketConstants.ERROR}))
         await close_connection()
         await DDBRepository().store_chat(await chat_state.get_chat_state(socket_id))
-        await ws.send(json.dumps({"type": WebsocketConstants.ERROR}))
     
     while True:
         # this "unique" value is used to track message in frontend, so that frontend can append
