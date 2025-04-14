@@ -4,6 +4,8 @@ from typing import Any
 import logging
 from sanic import Sanic
 
+from src.models.ChatModel import ChatModel
+
 logger = logging.getLogger("ChatGPT")
 
 class ElasticClient:
@@ -48,14 +50,13 @@ class ElasticClient:
         self, chat_id: str, timestamp: int, messages: list, email_address: str
     ) -> ObjectApiResponse[Any]:
         doc_id = chat_id
-        body = {
-            "chat_id": chat_id,
-            "timestamp": timestamp,
-            "messages": messages,
-            "user_email": email_address,
-        }
-
-        response = await self.es.index(index=self.index, id=doc_id, body=body)
+        chat_model = ChatModel(
+            chat_id=chat_id,
+            timestamp=timestamp,
+            messages=messages,
+            user_email=email_address,
+        )
+        response = await self.es.index(index=self.index, id=doc_id, body=chat_model.model_dump())
         return response
 
     async def delete_document(self, doc_id: str):
