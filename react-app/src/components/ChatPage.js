@@ -374,10 +374,11 @@ const ChatPage = ({ email }) => {
     setOptionsVisible(!optionsVisible);
   }
 
-  const switchChat = (chatId, timestamp) => {
+  const switchChat = (chatId) => {
     console.log("Switching chat to " + chatId)
     currentChatId.current = chatId;
     retrieveMessagesForNewOpenedChat()
+    loadChats();
     setSidebarVisible(false);
     setOptionsVisible(false);
   };

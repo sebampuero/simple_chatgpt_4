@@ -30,7 +30,7 @@ const ChatSidebar = ({ chats, onChatClick, onDeleteChat, onLoadMoreClick, allCha
           <li key={chat.timestamp}>
             <div className="chat-row">
               <span className="chat-row-time">{formatDate(chat.timestamp)}</span>
-              <span className="chat-row-title" onClick={() => onChatClick(chat.chat_id, chat.timestamp)}>{chat.title}</span>
+              <span className="chat-row-title" onClick={() => onChatClick(chat.chat_id)}>{chat.title}</span>
               <button onClick={() => onDeleteChat(chat.chat_id, chat.timestamp)}><i className="fa-solid fa-trash"></i></button>
             </div>
           </li>

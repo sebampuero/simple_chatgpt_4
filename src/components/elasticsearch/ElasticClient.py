@@ -4,7 +4,7 @@ from typing import Any
 import logging
 from sanic import Sanic
 
-from src.models.ChatModel import ChatModel
+from models.ChatModel import ChatModel
 
 logger = logging.getLogger("ChatGPT")
 
