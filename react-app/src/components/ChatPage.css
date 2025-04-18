@@ -4,6 +4,7 @@
     display: grid;
     grid-template-rows: 1fr auto;
     overflow: hidden;
+    background-color: #e5ddd5;
   }
   #chat-messages {
     overflow-y: scroll;
@@ -34,7 +35,7 @@ div#content-container {
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: white;
+    background-color: #ebebeb;
     padding: 5px;
     border-top: 1px solid #ccc;
   }
