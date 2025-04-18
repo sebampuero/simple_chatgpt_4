@@ -15,14 +15,14 @@ bp = Blueprint("routes")
 bp.add_route(login_code, "/login-code", methods=["POST"])
 bp.add_route(
     load_new_chat,
-    "/chat/<id>/<socket_id>",
+    "/chat/<id>/<session_id>",
     methods=["GET"],
 )
 bp.add_route(delete_chat, "/chat/<id>/<timestamp>", methods=["DELETE"])
 bp.add_route(get_chats_for_user, "/user", methods=["GET"])
-bp.add_route(set_model, "/model/<socket_id>", methods=["POST"])
+bp.add_route(set_model, "/model/<session_id>", methods=["POST"])
 bp.add_route(search_for_chat, "/search_for_chat", methods=["POST"])
 bp.add_route(get_available_models, "/models", methods=["GET"])
 bp.add_route(refresh_token, "/refresh", methods=["POST"])
 bp.add_route(get_authorized_email, "/authorized-email", methods=["GET"])
-bp.add_route(load_new_chat_state, "/chat_state/<socket_id>", methods=["POST"])
+bp.add_route(load_new_chat_state, "/chat_state/<session_id>", methods=["POST"])

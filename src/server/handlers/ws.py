@@ -26,19 +26,16 @@ language_categories = {
 
 async def chat(request: Request, ws: Websocket):
     client_ip = request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
-    socket_id = str(id(ws))
-    logger.info(f"Client connected via WS: {client_ip} and socket_id {socket_id}")
-    await ws.send(json.dumps({"socket_id": socket_id, "type": WebsocketConstants.INIT}))
+    logger.info(f"Client connected via WS: {client_ip}")
     chat_state = ChatState.get_instance()
-
-    async def close_connection():
-        await chat_state.remove_ws(socket_id)
+    async def close_connection(session_id : str):
+        await chat_state.remove_ws(session_id)
         await ws.close()
 
-    async def handle_general_error():
+    async def handle_general_error(session_id: str):
         await ws.send(json.dumps({"type": WebsocketConstants.ERROR}))
-        await close_connection()
-        await DDBRepository().store_chat(await chat_state.get_chat_state(socket_id))
+        await close_connection(session_id)
+        await DDBRepository().store_chat(await chat_state.get_chat_state(session_id))
     
     while True:
         # this "unique" value is used to track message in frontend, so that frontend can append
@@ -49,20 +46,21 @@ async def chat(request: Request, ws: Websocket):
             if type(input_raw) != str:
                 raise UnsupportedDataTypeException("Unsupported data type, string was expected")
             input_json = json.loads(input_raw)
+            session_id = input_json["session_id"]
             await chat_state.append_message(
                 {
                     "role": "user",
                     "image": input_json["image"],
                     "content": input_json["msg"],
                 },
-                socket_id
+                session_id
             )
-            category = await chat_state.get_language_category(socket_id)
-            llm = await chat_state.get_language_model(socket_id)
+            category = await chat_state.get_language_category(session_id)
+            llm = await chat_state.get_language_model(session_id)
             category_instance = language_categories[category]
             category_instance.set_model(llm)
             logger.debug(f"Using model: {llm} and category {category}")
-            chat_state_obj = await chat_state.get_chat_state(socket_id)
+            chat_state_obj = await chat_state.get_chat_state(session_id)
             response_generator = await category_instance.prompt(
                 chat_state_obj.messages
             )
@@ -89,11 +87,11 @@ async def chat(request: Request, ws: Websocket):
                 {
                     "role": "assistant",
                     "content": assistant_msg,
-                    "language_model": await chat_state.get_language_model(socket_id),
+                    "language_model": await chat_state.get_language_model(session_id),
                 },
-                socket_id,
+                session_id,
             )
-            await DDBRepository().store_chat(await chat_state.get_chat_state(socket_id))
+            await DDBRepository().store_chat(await chat_state.get_chat_state(session_id))
         except UnsupportedDataTypeException:
             logger.error(f"Client IP {client_ip} sent unsupported data type")
             await ws.send(json.dumps({"type": WebsocketConstants.ERROR}))
@@ -103,13 +101,13 @@ async def chat(request: Request, ws: Websocket):
             continue
         except websockets.exceptions.ConnectionClosedError as e:
             logger.error(str(e), exc_info=True)
-            await handle_general_error()
+            await handle_general_error(session_id)
         except websockets.exceptions.ConnectionClosedOK as e:
             logger.info(f"Connection was closed by the client: {str(e)}. Trying to dump chat state to db")
-            await DDBRepository().store_chat(await chat_state.get_chat_state(socket_id))
+            await DDBRepository().store_chat(await chat_state.get_chat_state(session_id))
         except websockets.exceptions.ConnectionClosed as e:
             logger.info(f"Connection was closed by the client: {str(e)}. Trying to dump chat state to db")
-            await DDBRepository().store_chat(await chat_state.get_chat_state(socket_id))
+            await DDBRepository().store_chat(await chat_state.get_chat_state(session_id))
         except Exception as e:
             logger.error(str(e), exc_info=True)
-            await handle_general_error()
+            await handle_general_error(session_id)

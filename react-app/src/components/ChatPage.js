@@ -19,18 +19,21 @@ const ChatPage = ({ email }) => {
   const [allChatsLoaded, setAllChatsLoaded] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const currentSocketId = useRef("");
-  const currentChatId = useRef("");
+  const sessionId = useRef("");
+  const chatId = useRef("");
   const imageDataURL = useRef(null);
   const imgBase64Data = useRef("");
   const selectedModelRef = useRef(selectedModel);
   const categoryRef = useRef(selectedCategory);
   const lastEvalKey = useRef("");
   const isInitialMount = useRef(true);
+  const reconnectRetries = useRef(0);
 
   const PAGINATION_LIMIT = 10;
   const MAX_IMG_WIDTH = 650;
   const MAX_IMG_HEIGHT = 650;
+  const MAX_RETRIES = 5;
+  const RETRY_DELAY_SECONDS = 5;
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -57,7 +60,14 @@ const ChatPage = ({ email }) => {
     if (!socket){
       createSocket()
     }
-
+    try {
+      sessionId.current = crypto.randomUUID();
+    } catch(error){
+      console.log("Failed to retrieve randomUUID, using fallback.");
+      sessionId.current = "id" + Math.random().toString(16).slice(2)
+    }
+    loadNewChatState();
+    sendNewModel(selectedModelRef.current, categoryRef.current, sessionId.current)
     return () => {
       if (socket) {
         socket.close();
@@ -182,11 +192,22 @@ const ChatPage = ({ email }) => {
         alert("There was an error with the connection, try again later.");
       });
 
+      socket.addEventListener('open', () => {
+        console.log('Socket connected');
+        reconnectRetries.current = 0; 
+      });
       
       socket.addEventListener('close', (event) => {
-        console.log('WebSocket closed:', event);
-        setSocket(null);
-        alert("The connection to the server is closed, please reload the page.")
+        if (reconnectRetries.current < MAX_RETRIES) {
+          console.log(`Retrying connection... (Attempt ${reconnectRetries.current + 1})`);
+          setTimeout(() => {
+            createSocket();
+            reconnectRetries.current = reconnectRetries.current + 1;
+          }, RETRY_DELAY_SECONDS * 1000);
+        } else {
+          console.log('Max retries reached. Stopping reconnection attempts.');
+          alert("There was an error connecting to the server.")
+        }
       });
 
       setSocket(socket);
@@ -205,7 +226,7 @@ const ChatPage = ({ email }) => {
   };
 
   const loadNewChatState = () => {
-    fetchWithToken(`${process.env.PUBLIC_URL}/api/chat_state/${currentSocketId.current}`, {
+    fetchWithToken(`${process.env.PUBLIC_URL}/api/chat_state/${sessionId.current}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -222,7 +243,7 @@ const ChatPage = ({ email }) => {
   }
 
   const retrieveMessagesForNewOpenedChat = () => {
-    fetchWithToken(`${process.env.PUBLIC_URL}/api/chat/${currentChatId.current}/${currentSocketId.current}`, {
+    fetchWithToken(`${process.env.PUBLIC_URL}/api/chat/${chatId.current}/${sessionId.current}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json"
@@ -254,11 +275,7 @@ const ChatPage = ({ email }) => {
   }
   const processMessageType = (data) => {
     const msg = JSON.parse(data);
-    if (msg.type === "INIT"){
-      sendNewModel(selectedModelRef.current, categoryRef.current, msg.socket_id)
-      currentSocketId.current = msg.socket_id;
-      loadNewChatState();
-    }else if(msg.type === "CONTENT"){
+    if(msg.type === "CONTENT"){
       handleReceivedMessage(data)
     }else if(msg.type === "ERROR"){
       alert("There was an error, please reload the page.")
@@ -358,8 +375,9 @@ const ChatPage = ({ email }) => {
       const message = {
         msg: messageInput,
         email: email,
-        chat_id: currentChatId.current,
-        image: imgBase64Data.current
+        chat_id: chatId.current,
+        image: imgBase64Data.current,
+        session_id: sessionId.current
       };
       socket.send(JSON.stringify(message));
       setMessageInput('');
@@ -374,9 +392,9 @@ const ChatPage = ({ email }) => {
     setOptionsVisible(!optionsVisible);
   }
 
-  const switchChat = (chatId) => {
-    console.log("Switching chat to " + chatId)
-    currentChatId.current = chatId;
+  const switchChat = (newChatId) => {
+    console.log("Switching chat to " + newChatId)
+    chatId.current = newChatId;
     retrieveMessagesForNewOpenedChat()
     loadChats();
     setSidebarVisible(false);
@@ -385,7 +403,7 @@ const ChatPage = ({ email }) => {
 
   const newChat = () => {
     setChatMessages([]);
-    currentChatId.current = "";
+    chatId.current = "";
     imgBase64Data.current = "";
     imageDataURL.current = null;
     setSidebarVisible(false);
@@ -398,12 +416,12 @@ const ChatPage = ({ email }) => {
     setSidebarVisible(!sidebarVisible);
   };
 
-  const deleteChat = (chatId, timestamp) => {
-    fetchWithToken(`${process.env.PUBLIC_URL}/api/chat/${chatId}/${timestamp}`, {
+  const deleteChat = (toDeleteChatId, timestamp) => {
+    fetchWithToken(`${process.env.PUBLIC_URL}/api/chat/${toDeleteChatId}/${timestamp}`, {
       method: "DELETE"
     })
     .then((response) => { 
-      if(response.status === 204) setChats((prevChats) => prevChats.filter((chat) => chat.chat_id !== chatId));
+      if(response.status === 204) setChats((prevChats) => prevChats.filter((chat) => chat.chat_id !== toDeleteChatId));
       else throw new Error(response.status)
     })
     .catch((error) => {
@@ -411,7 +429,7 @@ const ChatPage = ({ email }) => {
       if (error.message === '401') window.location.reload()
       else alert("There was a problem deleting the chat.")
     });
-    if (chatId === currentChatId.current) {
+    if (toDeleteChatId === chatId.current) {
       newChat();
     }
   };
@@ -444,7 +462,7 @@ const ChatPage = ({ email }) => {
     setSelectedModel(model);
     selectedModelRef.current = model
     localStorage.setItem('model', model);
-    sendNewModel(model, categoryRef.current, currentSocketId.current);
+    sendNewModel(model, categoryRef.current, sessionId.current);
   };
 
   const handleLoadMore = () => {
