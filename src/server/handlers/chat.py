@@ -6,8 +6,8 @@ from components.chat.ChatState import ChatState
 from models.ChatModel import ChatModel
 import json
 
-async def load_new_chat_state(request: Request, socket_id: str):
-    if not socket_id:
+async def load_new_chat_state(request: Request, session_id: str):
+    if not session_id:
         return HTTPResponse(status=400)
     body = request.json
     email = body.get("email")
@@ -18,7 +18,7 @@ async def load_new_chat_state(request: Request, socket_id: str):
         ChatModel(
             user_email=email, 
             messages=[]), 
-        socket_id
+        session_id
     )
     return HTTPResponse(status=200)
 
@@ -56,14 +56,14 @@ async def search_for_chat(request: Request):
 
 
 async def load_new_chat(
-    request: Request, id: str, socket_id: str
+    request: Request, id: str, session_id: str
 ):
     if id is None or id.strip() == "":
         return HTTPResponse(status=400)
     chat_data = await DDBRepository().get_chat_by_id(id)
     if chat_data is None:
         return HTTPResponse(status=404)
-    if socket_id:
+    if session_id:
         chat_state = ChatState.get_instance()
         await chat_state.set_chat_state(
             ChatModel(
@@ -71,19 +71,19 @@ async def load_new_chat(
                 messages=chat_data["messages"], 
                 timestamp=chat_data["timestamp"], 
                 chat_id=id), 
-            socket_id
+            session_id
         )
         return sanicjson({"body": chat_data}, status=200)
     return sanicjson({"body": chat_data}, status=206)
 
 
-async def set_model(request: Request, socket_id: str):
+async def set_model(request: Request, session_id: str):
     body = request.json
     model = body.get("model")
     category = body.get("category")
     chat_state = ChatState.get_instance()
     if chat_state:
-        await chat_state.set_language_model_category(model, category, socket_id)
+        await chat_state.set_language_model_category(model, category, session_id)
         return HTTPResponse(status=200)
     return HTTPResponse(status=500)
 
