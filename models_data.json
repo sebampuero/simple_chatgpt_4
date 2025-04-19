@@ -14,7 +14,7 @@
     "GPT4": {
         "models": [
             {
-                "name": "gpt-4o",
+                "name": "gpt-4.1",
                 "handles_image": true
             },
             {
@@ -26,12 +26,8 @@
                 "handles_image": false
             },
             {
-                "name": "o1",
-                "handles_image": false
-            },
-            {
-                "name": "o3-mini",
-                "handles_image": false
+                "name": "o4-mini",
+                "handles_image": true
             }
         ]
     },

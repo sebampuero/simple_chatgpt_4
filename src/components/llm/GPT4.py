@@ -31,24 +31,12 @@ class GPT4(BaseModel):
         prompt_input = self._from_own_format_to_model_format(messages)
         try:
             aclient = AsyncOpenAI(api_key=self.app.config.OPENAI_KEY)
-            if self.model == "gpt-4o-mini-search-preview" or self.model == "gpt-4o-search-preview":
-                response = await aclient.chat.completions.create(
-                    model=self.model,
-                    messages=prompt_input,
-                    max_completion_tokens=self.max_tokens,
-                    stream=True,
-                )
-            else:
-                response = await aclient.chat.completions.create(
-                    model=self.model,
-                    messages=prompt_input,
-                    max_completion_tokens=self.max_tokens,
-                    temperature=1,
-                    top_p=1,
-                    frequency_penalty=0,
-                    presence_penalty=0,
-                    stream=True,
-                )
+            response = await aclient.chat.completions.create(
+                model=self.model,
+                messages=prompt_input,
+                max_completion_tokens=self.max_tokens,
+                stream=True,
+            )
             return response
         except openai.RateLimitError:
             logger.error("Rate limit exceeded", exc_info=True)
