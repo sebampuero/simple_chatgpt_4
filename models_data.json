@@ -64,6 +64,14 @@
             {
                 "name": "claude-3-opus-latest",
                 "handles_image": false
+            },
+            {
+                "name": "claude-4-opus-20250514",
+                "handles_image": false
+            },
+            {
+                "name": "claude-4-sonnet-20250514",
+                "handles_image": false
             }
         ]
     }

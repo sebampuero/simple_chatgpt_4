@@ -27,13 +27,11 @@ const ChatPage = ({ email }) => {
   const categoryRef = useRef(selectedCategory);
   const lastEvalKey = useRef("");
   const isInitialMount = useRef(true);
-  const reconnectRetries = useRef(0);
 
   const PAGINATION_LIMIT = 10;
   const MAX_IMG_WIDTH = 650;
   const MAX_IMG_HEIGHT = 650;
-  const MAX_RETRIES = 5;
-  const RETRY_DELAY_SECONDS = 5;
+  const RETRY_DELAY_SECONDS = 2;
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -130,7 +128,9 @@ const ChatPage = ({ email }) => {
         lastEvalKey.current = JSON.stringify(resp.lastEvalKey)
         responseChats.forEach(obj => {
           let userContent = obj.messages.find(msg => msg.role === 'user')?.content;
-          obj.title = userContent.substring(0,35) + "..."; // very basic and naive way to show main idea of a chat
+          if (userContent != undefined) {
+            obj.title = userContent.substring(0,35) + "..."; // very basic and naive way to show main idea of a chat
+          }
         })
         setChats(responseChats);
       })
@@ -194,20 +194,13 @@ const ChatPage = ({ email }) => {
 
       socket.addEventListener('open', () => {
         console.log('Socket connected');
-        reconnectRetries.current = 0; 
       });
       
       socket.addEventListener('close', (event) => {
-        if (reconnectRetries.current < MAX_RETRIES) {
-          console.log(`Retrying connection... (Attempt ${reconnectRetries.current + 1})`);
-          setTimeout(() => {
-            createSocket();
-            reconnectRetries.current = reconnectRetries.current + 1;
-          }, RETRY_DELAY_SECONDS * 1000);
-        } else {
-          console.log('Max retries reached. Stopping reconnection attempts.');
-          alert("There was an error connecting to the server.")
-        }
+        console.log("Disconnected, trying to reconnect...")
+        setTimeout(() => {
+          createSocket();
+        }, RETRY_DELAY_SECONDS * 1000);
       });
 
       setSocket(socket);
